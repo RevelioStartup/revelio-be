@@ -50,7 +50,7 @@ jobs:
       - name: Run tests and generate coverage
         run: |
           coverage run --source='.' manage.py test
-          coverage xml -o /github/workspace/coverage.xml
+          coverage xml -o ./coverage.xml
 
       - name: SonarCloud Scan
         uses: sonarsource/sonarcloud-github-action@master
