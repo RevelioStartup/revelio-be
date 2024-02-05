@@ -51,6 +51,10 @@ jobs:
         run: |
           coverage run --source='.' manage.py test
           coverage xml -o ./coverage.xml
+      - name: List Directories
+        run: |
+          echo "Directories in GitHub workflow:"
+          find "$GITHUB_WORKSPACE" -type d -print
 
       - name: SonarCloud Scan
         uses: sonarsource/sonarcloud-github-action@master
