@@ -52,7 +52,7 @@ jobs:
           coverage run --source='.' manage.py test
           coverage report > coverage-out.txt
           coverage xml -o ./coverage.xml
-          echo "Test coverage result: $(cat output.txt)" >> Readme.md
+          echo "Test coverage result: $(cat coverage-out.txt)" >> Readme.md
 
       - name: SonarCloud Scan
         uses: sonarsource/sonarcloud-github-action@master
