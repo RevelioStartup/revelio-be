@@ -1,0 +1,7 @@
+{
+  "dependencies": {
+    "global": "^4.4.0",
+    "vercel": "^33.4.1",
+    "yarn": "^1.22.21"
+  }
+}
