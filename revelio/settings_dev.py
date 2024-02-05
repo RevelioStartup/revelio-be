@@ -75,28 +75,13 @@ WSGI_APPLICATION = 'revelio.wsgi.application'
 # Database
 # Adapted from: https://medium.com/intelligentmachines/github-actions-end-to-end-ci-cd-pipeline-for-django-5d48d6f00abf
 
-if 'test' in sys.argv:
-    DATABASES = {
+
+DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': BASE_DIR / 'db.sqlite3',
         }
-    }
-
-else:
-    DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'HOST': 'aws-0-ap-southeast-1.pooler.supabase.com',
-        'NAME': 'postgres',
-        'USER': 'postgres.gkvuaueyujmheifpdqun',
-        'PORT': '5432',
-        'PASSWORD': 'projectstartupReveliopastiberhasil!!!!',
-        }
-    }
-
-
-
+}
 
 
 # Password validation

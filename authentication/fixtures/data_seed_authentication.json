@@ -1,0 +1,10 @@
+[
+    {
+        "model":"authentication.todo",
+        "pk":1,
+        "fields":{
+            "label":"hello world",
+            "description":"hanya percobaan untuk melakukan deployment :V"
+        }
+}
+]
