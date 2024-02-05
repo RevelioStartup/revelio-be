@@ -29,7 +29,7 @@ jobs:
       run: |
         python manage.py test
   
-  sonarcloud:
+  sonarqube:
     runs-on: ubuntu-latest
 
     steps:
@@ -55,9 +55,15 @@ jobs:
         run: |
           echo "Directories in GitHub workflow:"
           find "$GITHUB_WORKSPACE" -type d -print
+      - name: Install SonarQube Scanner
+        run: |
+          wget https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-4.6.2.2472-linux.zip
+          unzip sonar-scanner-cli-4.6.2.2472-linux.zip
+          sudo mv sonar-scanner-4.6.2.2472-linux /opt/sonar-scanner
+          echo "SONAR_SCANNER_HOME=/opt/sonar-scanner" >> $GITHUB_ENV
+          echo "/opt/sonar-scanner/bin" >> $GITHUB_PATH
 
-      - name: SonarCloud Scan
-        uses: sonarsource/sonarcloud-github-action@master
+      - name: Run SonarQube Scanner
+        run: sonar-scanner -D"sonar.projectKey=revelio" -D"sonar.sources=." -D"sonar.host.url=https://sonarqube.cs.ui.ac.id" -D"sonar.login=$SONAR_TOKEN"
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
