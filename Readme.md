@@ -1,3 +1,5 @@
+[![Build and Test](https://github.com/RevelioStartup/revelio-be/actions/workflows/django-build-test.yml/badge.svg)](https://github.com/RevelioStartup/revelio-be/actions/workflows/django-build-test.yml)
+
 ### Backend for Revelio App
 
 #### Note: 
