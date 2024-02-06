@@ -7,6 +7,10 @@ on:
     branches:
       - main
       - staging
+  workflow_run:
+    workflows: ["Build and Test"]
+    types:
+      - completed
 jobs:
   Deploy-Production:
     runs-on: ubuntu-latest
