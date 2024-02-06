@@ -61,6 +61,6 @@ jobs:
           echo "/opt/sonar-scanner/bin" >> $GITHUB_PATH
 
       - name: Run SonarQube Scanner
-        run: sonar-scanner -D"sonar.projectKey=revelio" -D"sonar.sources=." -D"sonar.exclusion=**/manage.py, **/node_modules/**, **/revelio/**, **/tests.py, **/apps.py, **/admin.py, **/__init__.py" -D"sonar.host.url=https://sonarqube.cs.ui.ac.id" -D"sonar.login=$SONAR_TOKEN"
+        run: sonar-scanner -D"sonar.projectKey=revelio" -D"sonar.sources=." -D"sonar.host.url=https://sonarqube.cs.ui.ac.id" -D"sonar.login=$SONAR_TOKEN"
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
