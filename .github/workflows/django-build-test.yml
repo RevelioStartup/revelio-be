@@ -51,10 +51,7 @@ jobs:
         run: |
           coverage run --source='.' manage.py test
           coverage xml -o ./coverage.xml
-      - name: List Directories
-        run: |
-          echo "Directories in GitHub workflow:"
-          find "$GITHUB_WORKSPACE" -type d -print
+
       - name: Install SonarQube Scanner
         run: |
           wget https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-4.6.2.2472-linux.zip
@@ -64,6 +61,6 @@ jobs:
           echo "/opt/sonar-scanner/bin" >> $GITHUB_PATH
 
       - name: Run SonarQube Scanner
-        run: sonar-scanner -D"sonar.projectKey=revelio" -D"sonar.sources=." -D"sonar.host.url=https://sonarqube.cs.ui.ac.id" -D"sonar.login=$SONAR_TOKEN"
+        run: sonar-scanner -D"sonar.projectKey=revelio" -D"sonar.sources=." -D"sonar.exclusion=**/manage.py, **/node_modules/**, **/revelio/**, **/tests.py, **/apps.py, **/admin.py, **/__init__.py" -D"sonar.host.url=https://sonarqube.cs.ui.ac.id" -D"sonar.login=$SONAR_TOKEN"
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
