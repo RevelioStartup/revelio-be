@@ -1,9 +1,7 @@
 [![Build and Test](https://github.com/RevelioStartup/revelio-be/actions/workflows/django-build-test.yml/badge.svg)](https://github.com/RevelioStartup/revelio-be/actions/workflows/django-build-test.yml)
+[![Deploy](https://github.com/RevelioStartup/revelio-be/actions/workflows/deploy.yml/badge.svg)](https://github.com/RevelioStartup/revelio-be/actions/workflows/deploy.yml)
 
 ### Backend for Revelio App
-
-#### Note: 
-- Test coverage for now can be seen at Action --> select the **latest** workflow runs --> select `sonarcloud` Jobs --> open section `Run tests and generate coverage`
 
 #### Note for developers: 
 - For development, please add `dev` on every command that **runs** `manage.py` so it will use the Development environment. For example: `python manage.py dev runserver`, `python manage.py dev makemigrations`, `python manage.py dev migrate`.
