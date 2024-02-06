@@ -1,4 +1,4 @@
-name: Django CI
+name: Build and Test
 
 on:
   push:
@@ -25,6 +25,16 @@ jobs:
       run: |
         python -m pip install --upgrade pip
         pip install -r requirements.txt
+    
+    - name: Set Up Environment Variables
+      run: |
+        echo "DB_HOST=${{ secrets.DB_HOST }}" >> .env
+        echo "DJANGO_SECRET_KEY=${{ secrets.DJANGO_SECRET_KEY }}" >> .env
+        echo "DB_NAME=${{ secrets.DB_NAME }}" >> .env
+        echo "DB_USER=${{ secrets.DB_USER }}" >> .env
+        echo "DB_PASS=${{ secrets.DB_PASS }}" >> .env
+        cp .env revelio/.env
+
     - name: Run Tests
       run: |
         python manage.py test
@@ -47,14 +57,20 @@ jobs:
           pip install -r requirements.txt
           pip install coverage
 
+      - name: Set Up Environment Variables
+        run: |
+          echo "DB_HOST=${{ secrets.DB_HOST }}" >> .env
+          echo "DJANGO_SECRET_KEY=${{ secrets.DJANGO_SECRET_KEY }}" >> .env
+          echo "DB_NAME=${{ secrets.DB_NAME }}" >> .env
+          echo "DB_USER=${{ secrets.DB_USER }}" >> .env
+          echo "DB_PASS=${{ secrets.DB_PASS }}" >> .env
+          cp .env revelio/.env
+
       - name: Run tests and generate coverage
         run: |
           coverage run --source='.' manage.py test
           coverage xml -o ./coverage.xml
-      - name: List Directories
-        run: |
-          echo "Directories in GitHub workflow:"
-          find "$GITHUB_WORKSPACE" -type d -print
+
       - name: Install SonarQube Scanner
         run: |
           wget https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-4.6.2.2472-linux.zip
