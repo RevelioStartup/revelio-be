@@ -27,5 +27,6 @@ jobs:
           echo "DB_NAME=${{ secrets.DB_NAME }}" >> .env
           echo "DB_USER=${{ secrets.DB_USER }}" >> .env
           echo "DB_PASS=${{ secrets.DB_PASS }}" >> .env
+          cp .env revelio/.env
       - name: Deploy Project Artifacts to Vercel
         run: vercel deploy --prod --token=${{ secrets.VERCEL_TOKEN }}
