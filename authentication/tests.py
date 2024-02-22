@@ -39,3 +39,16 @@ class RegisterTest(TestCase):
         self.assertEqual(response.status_code, 400)
         resp_msg = json.loads(response.content.decode('utf-8'))['msg']
         self.assertEqual(resp_msg,"Empty input! Make sure all the fields are filled.")
+    
+    def testUsernameIsAlreadyExist(self):
+        data = {
+                "username":"user1",
+                "password":"pass1",
+                "email":"email1@email.com"
+        }
+        response = self.client.post(reverse('authentication:register'), json.dumps(data), content_type='application/json')
+        self.assertEqual(response.status_code, 200)
+        response = self.client.post(reverse('authentication:register'), json.dumps(data), content_type='application/json')
+        self.assertEqual(response.status_code, 400)
+        resp_msg = json.loads(response.content.decode('utf-8'))['msg']
+        self.assertEqual(resp_msg,"Username and/or email already taken!")
