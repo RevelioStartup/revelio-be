@@ -5,6 +5,7 @@ import json
 
 REGISTER_LINK = reverse('authentication:register')
 LOGIN_LINK = reverse('authentication:login')
+LOGOUT_LINK = reverse('authentication:logout')
 
 class RegisterTest(TestCase):
 
@@ -68,4 +69,15 @@ class LoginTest(TestCase):
         data = {'username': 'testuser', 'password': 'testwrongpassword'}
         response = self.client.post(LOGIN_LINK, json.dumps(data), content_type='application/json')
         self.assertEqual(response.status_code, 400)
-        self.assertEqual(response.json()['msg'],"Wrong username/password!")    
+        self.assertEqual(response.json()['msg'],"Wrong username/password!")  
+
+class LogoutTest(TestCase):
+    def setUp(self):
+        self.client = Client()
+        self.user = AppUser.objects.create_user(email='email@email.com',username='testuser',password='test')
+        self.client.login(username = 'testuser', password = 'test')
+    
+    def logoutTest(self):
+        response = self.client.post(LOGOUT_LINK)
+        self.assertEqual(response.status_code, 200)
+        
