@@ -15,10 +15,17 @@ class RegisterView(View):
         email = data['email']
         if AppUser.objects.filter(username = username).exists() or AppUser.objects.filter(email = email).exists():
             return JsonResponse({'msg': 'Username and/or email already taken!'}, status=400)
-        if username == '' or password == '' or email == '':
-            return JsonResponse({'msg': 'Empty input! Make sure all the fields are filled.'}, status=400)
-        if re.match(r'^[\w\.-]+@[\w\.-]+\.\w+$', email) is None:
-            return JsonResponse({'msg': 'Email format is wrong.'}, status=400)
+        validate_msg = Validators.validateInput(username, email, password)
+        if validate_msg != 'valid':
+            return JsonResponse({'msg': validate_msg}, status=400)
         new_user = AppUser.objects.create_user(email=email,username=username,password=password)
         new_user.save()
         return JsonResponse({'msg': 'Success! User registered'}, status=200)
+
+class Validators():
+    def validateInput(username, email, password):
+        if username == '' or password == '' or email == '':
+            return 'Empty input! Make sure all the fields are filled.'
+        if re.match(r'^[\w\.-]+@[\w\.-]+\.\w+$', email) is None:
+            return 'Email format is wrong.'
+        return 'valid'
