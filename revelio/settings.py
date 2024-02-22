@@ -101,7 +101,7 @@ else:
     }
 
 
-
+AUTH_USER_MODEL = 'authentication.AppUser'
 
 
 # Password validation

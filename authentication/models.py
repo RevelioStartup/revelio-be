@@ -1,9 +1,5 @@
 from django.db import models
+from django.contrib.auth.models import AbstractUser
 
-# Create your models here.
-class Todo(models.Model):
-    label = models.CharField(max_length=255)
-    description = models.CharField(max_length=255)
-
-    def __str__(self):
-        return f"{self.label}"
+class AppUser(AbstractUser):
+    is_verified_user = models.BooleanField(default=False)
