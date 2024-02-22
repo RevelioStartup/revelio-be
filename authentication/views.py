@@ -22,6 +22,11 @@ class RegisterView(View):
         new_user.save()
         return JsonResponse({'msg': 'Success! User registered'}, status=200)
 
+@method_decorator(csrf_exempt, name='dispatch')
+class LoginView(View):
+    def post(self, request):
+        return 'None'
+
 class Validators():
     def validateInput(username, email, password):
         if username == '' or password == '' or email == '':
