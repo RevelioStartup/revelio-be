@@ -13,6 +13,8 @@ class RegisterView(View):
         username = data['username']
         password = data['password']
         email = data['email']
+        if username == '' or password == '' or email == '':
+            return JsonResponse({'msg': 'Empty input! Make sure all the fields are filled.'}, status=400)
         if re.match(r'^[\w\.-]+@[\w\.-]+\.\w+$', email) is None:
             return JsonResponse({'msg': 'Email format is wrong.'}, status=400)
         new_user = AppUser.objects.create_user(email=email,username=username,password=password)
