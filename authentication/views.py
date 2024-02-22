@@ -1,6 +1,7 @@
 import json
 from django.http import JsonResponse
 from authentication.models import *
+from django.contrib.auth import authenticate, login
 from django.views import View
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
@@ -25,7 +26,13 @@ class RegisterView(View):
 @method_decorator(csrf_exempt, name='dispatch')
 class LoginView(View):
     def post(self, request):
-        return 'None'
+        data = json.loads(request.body)
+        username = data['username']
+        password = data['password']
+        user = authenticate(request, username=username,password=password)
+        if user is not None:
+            login(request, user)
+            return JsonResponse({'msg': 'Success! User logged in'}, status=200)
 
 class Validators():
     def validateInput(username, email, password):
