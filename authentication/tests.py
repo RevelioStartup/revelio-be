@@ -77,7 +77,7 @@ class LogoutTest(TestCase):
         self.user = AppUser.objects.create_user(email='email@email.com',username='testuser',password='test')
         self.client.login(username = 'testuser', password = 'test')
     
-    def logoutTest(self):
+    def testLogout(self):
         response = self.client.post(LOGOUT_LINK)
         self.assertEqual(response.status_code, 200)
         
