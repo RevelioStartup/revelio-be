@@ -60,6 +60,6 @@ class LoginTest(TestCase):
         self.user = AppUser.objects.create_user(email='email@email.com',username='testuser',password='test')
 
     def testLoginSuccessful(self):
-        data = {'username': 'testuser', 'password': 'testpassword'}
-        response = self.client.post(LOGIN_LINK, data=data)
+        data = {'username': 'testuser', 'password': 'test'}
+        response = self.client.post(LOGIN_LINK, json.dumps(data), content_type='application/json')
         self.assertEqual(response.status_code, 200)    
