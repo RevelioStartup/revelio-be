@@ -33,6 +33,8 @@ class LoginView(View):
         if user is not None:
             login(request, user)
             return JsonResponse({'msg': 'Success! User logged in'}, status=200)
+        else:
+            return JsonResponse({'msg': 'Wrong username/password!'}, status=400)
 
 class Validators():
     def validateInput(username, email, password):
