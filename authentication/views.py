@@ -3,7 +3,13 @@ from django.contrib.auth import authenticate
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework.permissions import IsAuthenticated
 import re
+from django.utils.encoding import force_bytes, force_str
+from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
+from django.template.loader import render_to_string
+from .tokens import account_activation_token
+from django.core.mail import EmailMessage
 
 class RegisterView(APIView):
     
@@ -20,7 +26,10 @@ class RegisterView(APIView):
             return Response({'msg': validate_msg}, status=400)
         new_user = AppUser.objects.create_user(email=email,username=username,password=password)
         new_user.save()
-        return Response({'msg': 'Success! User registered'}, status=200)
+        user = authenticate(request, username=username,password=password)
+        refresh = RefreshToken.for_user(user)
+        return Response({'refresh': str(refresh),
+                         'access': str(refresh.access_token)})
 
     def validate_input(self, username, email, password):
         if username == '' or password == '' or email == '':
@@ -43,3 +52,13 @@ class LoginView(APIView):
                              'access': str(refresh.access_token)})
         else:
             return Response({'msg': 'Wrong username/password!'}, status=400)
+        
+class SendVerificationEmailView(APIView):
+
+    permission_classes = ([IsAuthenticated])
+
+    def get(self, request):
+        return 'None'
+    
+    def post(self, request):
+        return 'None'
