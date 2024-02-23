@@ -1,8 +1,13 @@
 from django.urls import path
-from authentication.views import *
+from authentication.views import RegisterView, LoginView, SendVerificationEmailView, SendRecoverPasswordEmailView
+from rest_framework_simplejwt.views import TokenRefreshView
 
 app_name = 'authentication'
 
 urlpatterns = [
-    path('try', returnTodoJson, name='returnTodoJson'),
+    path('register/', RegisterView.as_view(), name='register'),
+    path('login/', LoginView.as_view(), name='login'),
+    path('token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
+    path('verify/', SendVerificationEmailView.as_view(), name='verify_email'),
+    path('recover/', SendRecoverPasswordEmailView.as_view(), name='recover_password'),
 ]
