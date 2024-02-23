@@ -9,6 +9,7 @@ from .tokens import account_token
 REGISTER_LINK = reverse('authentication:register')
 LOGIN_LINK = reverse('authentication:login')
 EMAIL_VERIFICATION_LINK = reverse('authentication:verify_email')
+RECOVER_PASSWORD_LINK = reverse('authentication:recover_password')
 
 class RegisterTest(TestCase):
 
@@ -96,3 +97,36 @@ class SendVerificationEmailTest(TestCase):
     def test_invalid_verification_token(self):
         response = self.client.post((EMAIL_VERIFICATION_LINK), {'token': 'invalid token'})
         self.assertEqual(response.status_code, 400)
+
+class SendRecoverPasswordEmailTest(TestCase):
+    def setUp(self):
+        self.client = APIClient()
+        self.user = AppUser.objects.create_user(email='email@email.com',username='testuser',password='test')
+    
+    def test_sent_email_recover_password(self):
+        response = self.client.post((RECOVER_PASSWORD_LINK), {'email':'email@email.com'})
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(mail.outbox), 1) 
+        self.assertEqual(mail.outbox[0].to, ['email@email.com'])
+    
+    def test_sent_wrong_email_recover_password(self):
+        response = self.client.post((RECOVER_PASSWORD_LINK), {'email':'wrong@email.com'})
+        self.assertEqual(response.status_code, 400)
+    
+    def test_change_password(self):
+        token = account_token.make_token(self.user)
+        response = self.client.put((RECOVER_PASSWORD_LINK), 
+                                    {'email':'email@email.com', 'token': token, 'new_password':'newpass'})
+        self.assertEqual(response.status_code, 200)
+    
+    def test_change_password_wrong_email(self):
+        token = account_token.make_token(self.user)
+        response = self.client.put((RECOVER_PASSWORD_LINK), 
+                                    {'email':'wrong@email.com', 'token': token, 'new_password':'newpass'})
+        self.assertEqual(response.status_code, 400)
+    
+    def test_change_password_wrong_token(self):
+        response = self.client.put((RECOVER_PASSWORD_LINK), 
+                                    {'email':'email@email.com', 'token': 'wrong token', 'new_password':'newpass'})
+        self.assertEqual(response.status_code, 400)
+

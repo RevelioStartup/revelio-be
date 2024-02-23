@@ -86,3 +86,12 @@ class SendVerificationEmailView(APIView):
             return Response({'message': 'Email verified successfully!'}, status=200)
         else:
             return Response({'error': 'Invalid verification token!'}, status=400)
+
+class SendRecoverPasswordEmailView(APIView):
+    permission_classes =()
+
+    def post(self, request):
+        return 'None'
+    
+    def put(self, request):
+        return 'None'
