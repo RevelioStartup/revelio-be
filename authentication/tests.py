@@ -4,7 +4,7 @@ from django.urls import reverse
 import json
 from django.core import mail
 from rest_framework.test import APIClient
-from .tokens import account_activation_token
+from .tokens import account_token
 
 REGISTER_LINK = reverse('authentication:register')
 LOGIN_LINK = reverse('authentication:login')
@@ -87,7 +87,7 @@ class SendVerificationEmailTest(TestCase):
         self.assertEqual(mail.outbox[0].to, ['email@email.com'])
     
     def test_valid_verification_token(self):
-        token = account_activation_token.make_token(self.user)
+        token = account_token.make_token(self.user)
         response = self.client.post((EMAIL_VERIFICATION_LINK), {'token': token})
         self.assertEqual(response.status_code, 200)
         user = AppUser.objects.get(pk=self.user.pk)
