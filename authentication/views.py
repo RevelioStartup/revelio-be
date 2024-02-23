@@ -91,7 +91,35 @@ class SendRecoverPasswordEmailView(APIView):
     permission_classes =()
 
     def post(self, request):
-        return 'None'
+        email = request.data.get('email')
+        is_user_exist = AppUser.objects.filter(email=email).exists()
+        if is_user_exist:
+            user = AppUser.objects.get(email=email)
+            subject = "Revelio - Password Recovery Email"
+            message = render_to_string('change_password_email_msg.html', {
+                'token':account_token.make_token(user),
+            })
+            email = EmailMessage(
+                subject, message, to=[email]
+            )
+            email.content_subtype = 'html'
+            email.send()
+            return Response({'msg': 'Email delivered!'})
+        else:
+            return Response({"msg": "User with that email doesn't exist!"}, status=400)
     
     def put(self, request):
-        return 'None'
+        email = request.data.get('email')
+        token = request.data.get('token')
+        new_password = request.data.get('new_password')
+        is_user_exist = AppUser.objects.filter(email=email).exists()
+        if is_user_exist:
+            user = AppUser.objects.get(email=email)
+            if user is not None and account_token.check_token(user, token):
+                user.set_password(new_password)
+                user.save()
+                return Response({'msg': 'Password changes successfully!'}, status=200)
+            else:
+                return Response({'msg': 'Invalid verification token!'}, status=400)
+        else:
+            return Response({'msg': "User doesn't exist!"}, status=400)
