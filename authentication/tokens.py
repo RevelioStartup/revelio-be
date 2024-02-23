@@ -6,4 +6,4 @@ class TokenGenerator(PasswordResetTokenGenerator):
             text_type(user.pk) + text_type(timestamp) +
             text_type(user.is_verified_user)
         )
-account_activation_token = TokenGenerator()
+account_token = TokenGenerator()

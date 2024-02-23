@@ -8,7 +8,7 @@ import re
 from django.utils.encoding import force_bytes
 from django.utils.http import urlsafe_base64_encode
 from django.template.loader import render_to_string
-from .tokens import account_activation_token
+from .tokens import account_token
 from django.core.mail import EmailMessage
 
 class RegisterView(APIView):
@@ -66,7 +66,7 @@ class SendVerificationEmailView(APIView):
             message = render_to_string('verify_email_msg.html', {
                 'username': username,
                 'uid':urlsafe_base64_encode(force_bytes(user.pk)),
-                'token':account_activation_token.make_token(user),
+                'token':account_token.make_token(user),
             })
             email = EmailMessage(
                 subject, message, to=[email]
@@ -80,7 +80,7 @@ class SendVerificationEmailView(APIView):
         uid = user.pk
         token = request.data.get('token')
         user = AppUser.objects.get(pk=uid)
-        if user is not None and account_activation_token.check_token(user, token):
+        if user is not None and account_token.check_token(user, token):
             user.is_verified_user = True
             user.save()
             return Response({'message': 'Email verified successfully!'}, status=200)

@@ -63,12 +63,12 @@ class LoginTest(TestCase):
         self.client = APIClient()
         self.user = AppUser.objects.create_user(email='email@email.com',username='testuser',password='test')
 
-    def testLoginSuccessful(self):
+    def test_login_successful(self):
         data = {'username': 'testuser', 'password': 'test'}
         response = self.client.post(LOGIN_LINK, json.dumps(data), content_type='application/json')
         self.assertEqual(response.status_code, 200)
 
-    def testLoginFailed(self):
+    def test_login_failed(self):
         data = {'username': 'testuser', 'password': 'testwrongpassword'}
         response = self.client.post(LOGIN_LINK, json.dumps(data), content_type='application/json')
         self.assertEqual(response.status_code, 400)
