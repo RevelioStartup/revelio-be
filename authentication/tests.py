@@ -59,6 +59,15 @@ class RegisterTest(TestCase):
         self.assertEqual(response.status_code, 400)
         self.assertEqual(response.json()['msg'],"Username and/or email already taken!")
 
+    def test_missing_fields(self):
+        data = {
+                "username":"user1",
+                "password":"pass1",
+        }
+        response = self.client.post(REGISTER_LINK, json.dumps(data), content_type='application/json')
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.json()['msg'],"One or more fields are missing!")
+
 class LoginTest(TestCase):
     def setUp(self):
         self.client = APIClient()
@@ -74,6 +83,13 @@ class LoginTest(TestCase):
         response = self.client.post(LOGIN_LINK, json.dumps(data), content_type='application/json')
         self.assertEqual(response.status_code, 400)
         self.assertEqual(response.json()['msg'],"Wrong username/password!") 
+    
+    def test_missing_fields(self):
+        data = {
+                "username":"user1"
+        }
+        response = self.client.post(LOGIN_LINK, json.dumps(data), content_type='application/json')
+        self.assertEqual(response.status_code, 400)
 
 class SendVerificationEmailTest(TestCase):
     def setUp(self):
@@ -98,6 +114,10 @@ class SendVerificationEmailTest(TestCase):
         response = self.client.post((EMAIL_VERIFICATION_LINK), {'token': 'invalid token'})
         self.assertEqual(response.status_code, 400)
 
+    def test_missing_verification_token(self):
+        response = self.client.post((EMAIL_VERIFICATION_LINK), {})
+        self.assertEqual(response.status_code, 400)
+
 class SendRecoverPasswordEmailTest(TestCase):
     def setUp(self):
         self.client = APIClient()
@@ -113,6 +133,10 @@ class SendRecoverPasswordEmailTest(TestCase):
         response = self.client.post((RECOVER_PASSWORD_LINK), {'email':'wrong@email.com'})
         self.assertEqual(response.status_code, 400)
     
+    def test_sent_missing_email_recover_password(self):
+        response = self.client.post((RECOVER_PASSWORD_LINK), {})
+        self.assertEqual(response.status_code, 400)
+
     def test_change_password(self):
         token = account_token.make_token(self.user)
         response = self.client.put((RECOVER_PASSWORD_LINK), 
@@ -128,5 +152,10 @@ class SendRecoverPasswordEmailTest(TestCase):
     def test_change_password_wrong_token(self):
         response = self.client.put((RECOVER_PASSWORD_LINK), 
                                     {'email':'email@email.com', 'token': 'wrong token', 'new_password':'newpass'})
+        self.assertEqual(response.status_code, 400)
+
+    def test_change_password_missing_fields(self):
+        response = self.client.put((RECOVER_PASSWORD_LINK), 
+                                    {'email':'email@email.com', 'token': 'wrong token'})
         self.assertEqual(response.status_code, 400)
 
