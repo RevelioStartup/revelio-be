@@ -19,6 +19,8 @@ class RegisterView(APIView):
         username = request.data.get('username')
         password = request.data.get('password')
         email = request.data.get('email')
+        if username is None or password is None or email is None:
+            return Response({'msg': 'One or more fields are missing!'}, status= 400)
         if AppUser.objects.filter(username = username).exists() or AppUser.objects.filter(email = email).exists():
             return Response({'msg': 'Username and/or email already taken!'}, status=400)
         validate_msg = self.validate_input(username, email, password)
