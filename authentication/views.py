@@ -129,4 +129,11 @@ class SendRecoverPasswordEmailView(APIView):
 class UpdateProfileView(APIView):
     permission_classes = [IsAuthenticated]
     def put(self, request):
-        return 'None'
+        user = request.user
+        profile = user.profile
+        serializer = ProfileSerializer(instance=profile, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response({'msg': 'Profile updated successfully!'})
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
