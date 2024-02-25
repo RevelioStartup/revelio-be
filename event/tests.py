@@ -66,3 +66,18 @@ class EventTest(TestCase):
         response = self.client.post(EVENT_LIST_LINK, {})
         self.assertEqual(response.status_code, 400)
         self.assertEqual(Event.objects.count(), 1)
+        
+    def test_post_missing_event(self):
+        response = self.client.post(EVENT_LIST_LINK, {
+            "user": self.user,
+            # "name": "Revelio Onboarding",
+            "date": date.today(),
+            "budget": Decimal('20000000'),
+            "objective": "To onboard new employees",
+            "attendees": 100,
+            "theme": "Harry Potter",
+            "services": "Catering, Decorations, Music"
+        })
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(Event.objects.count(), 1)
+        self.assertEqual(response.data['name'], ['This field is required.'])
