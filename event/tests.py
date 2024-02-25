@@ -102,3 +102,9 @@ class EventTest(TestCase):
         response = self.client.delete(self.EVENT_DETAIL_LINK)
         self.assertEqual(response.status_code, 204)
         self.assertEqual(Event.objects.count(), 0)
+        
+    def test_delete_unauthenticated_event(self):
+        self.client.force_authenticate(user=None)
+        response = self.client.delete(self.EVENT_DETAIL_LINK)
+        self.assertEqual(response.status_code, 401)
+        self.assertEqual(Event.objects.count(), 1)
