@@ -21,6 +21,6 @@ urlpatterns = [
     path('', include('authentication.urls')),
     path('ai/', include('ai.urls')),
     path('admin/', admin.site.urls),
-    path('venue/', include('venue.urls')),
-    path('event/', include('event.urls')),
+    path('venues/', include('venue.urls')),
+    path('events/', include('event.urls')),
 ]

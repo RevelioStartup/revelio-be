@@ -12,6 +12,7 @@ from authentication.models import AppUser
 from .models import Venue, Photo
 from .serializers import VenueSerializer, PhotoSerializer
 
+
 class BaseTestCase(TestCase):
     def setUp(self):
         self.client = APIClient()
@@ -21,7 +22,7 @@ class BaseTestCase(TestCase):
             "name": "Test Venue",
             "address": "123 Test St",
             "price": 50,
-            "status": "Active",
+            "status": "PENDING",
             "contact_name": "John Doe",
             "contact_phone_number": "123-456-7890",
             "event": 1,
@@ -34,7 +35,7 @@ class BaseTestCase(TestCase):
             "name": "Venue 1",
             "address": "123 Test St",
             "price": 50,
-            "status": "Active",
+            "status": "PENDING",
             "contact_name": "John Doe",
             "contact_phone_number": "123-456-7890",
             "event": self.event_id,
@@ -45,7 +46,7 @@ class BaseTestCase(TestCase):
             "name": "Venue 2",
             "address": "456 Test St",
             "price": 60,
-            "status": "Inactive",
+            "status": "NONE",
             "contact_name": "Jane Doe",
             "contact_phone_number": "987-654-3210",
             "event": self.event_id,
@@ -94,7 +95,7 @@ class VenueAPITestCase(BaseTestCase):
 
     def test_update_venue(self):
         url = reverse('venue-retrieve-update-destroy', args=[self.venue.id])
-        updated_data = {"name": "Updated Venue", "address": "123 Test St", "price": 50, "status": "Active", "contact_name": "John Doe", "contact_phone_number": "123-456-7890", "event": 1,}
+        updated_data = {"name": "Updated Venue", "address": "123 Test St", "price": 50, "status": "PENDING", "contact_name": "John Doe", "contact_phone_number": "123-456-7890", "event": 1,}
         response = self.client.put(url, updated_data, format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data['name'], "Updated Venue")
@@ -219,3 +220,31 @@ class PhotoAPITestCase(BaseTestCase):
         url = reverse('photo-retrieve-update-destroy', args=[999])
         response = self.client.delete(url)
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+class VenueStatusUpdateAPITest(BaseTestCase):
+    def setUp(self):
+        self.client = APIClient()
+        self.user = AppUser.objects.create_user(email='email@email.com',username='testuser',password='test')
+        self.client.force_authenticate(user=self.user)
+        self.venue = Venue.objects.create(name='Test Venue', address='Test Address', price=100, status='PENDING',
+                                           contact_name='Test Contact', contact_phone_number='123456789', event=1)
+
+    def test_venue_status_update(self):
+        url = reverse('venue-status-update', kwargs={'pk': self.venue.pk})
+        data = {'status': 'CONFIRMED'}  
+        response = self.client.patch(url, data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data['status'], 'CONFIRMED')
+
+    def test_venue_status_update_invalid_venue_id(self):
+        url = reverse('venue-status-update', kwargs={'pk': 999})  
+        data = {'status': 'CONFIRMED'}
+        response = self.client.patch(url, data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+    def test_venue_status_update_invalid_status(self):
+        url = reverse('venue-status-update', kwargs={'pk': self.venue.pk})
+        data = {'status': 'INVALID_STATUS'}
+        response = self.client.patch(url, data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
