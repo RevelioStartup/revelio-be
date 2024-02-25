@@ -42,3 +42,7 @@ class EventTest(TestCase):
         data = self.serializer.data
         self.assertEqual(response.status_code, 200)
         self.assertEqual(set(data.keys()), set(response.data))
+        
+    def test_get_invalid_detail_event(self):
+        response = self.client.get(reverse('event:detail', kwargs={'id': 'invalid id'}))
+        self.assertEqual(response.status_code, 500)
