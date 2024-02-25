@@ -128,7 +128,7 @@ class SendRecoverPasswordEmailView(APIView):
         else:
             return Response({'msg': "User doesn't exist!"}, status=400)
 
-class UpdateProfileView(APIView):
+class ProfileView(APIView):
     permission_classes = [IsAuthenticated]
     def put(self, request):
         user = request.user
