@@ -34,22 +34,24 @@ class AutofillTest(TestCase):
         self.client = APIClient()
 
     def test_autofill_valid(self):
-        form = {
-
-        }
         data = {
-            'prompt' : create_autofill_prompt(form),
+            'form' : {
+                'name': 'Ulang tahun Ibu',
+                'date': '26/02/2024',
+                'budget': '300000',
+            },
         }
         response = self.client.post(AUTOFILL_LINK, json.dumps(data), content_type='application/json')
         self.assertEqual(response.status_code, 200)
         self.assertTrue(all(key in response.json().keys() for key in ['objective', 'theme', 'service']))
 
     def test_autofill_invalid(self):
-        form = {
-
-        }
         data = {
-            'prompt' : create_autofill_prompt(form),
+            'form' : {
+                'name': '',
+                'date': '26/02/2024',
+                'budget': '',
+            },
         }
         response = self.client.post(AUTOFILL_LINK, json.dumps(data), content_type='application/json')
         self.assertEqual(response.status_code, 400)
