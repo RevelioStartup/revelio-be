@@ -7,7 +7,7 @@ class Event(models.Model):
     budget = models.DecimalField(max_digits=20, decimal_places=2)
     objective = models.TextField()
     attendees = models.IntegerField()    
-    thmee = models.TextField()
+    theme = models.TextField()
     services = models.TextField()
     
     def __str__(self):
