@@ -122,3 +122,10 @@ class EventTest(TestCase):
         
         self.assertEqual(response.status_code, 404)
         self.assertEqual(Event.objects.count(), 1)
+        
+    def test_delete_forbidden_event(self):
+        new_user = AppUser.objects.create_user(
+            email = 'anonymous@gmail.com', username='anonymous', password='test')
+        self.client.force_authenticate(user=new_user)
+        response = self.client.delete(self.EVENT_DETAIL_LINK)
+        self.assertEqual(response.status_code, 403)

@@ -1,5 +1,6 @@
 # Create your views here.
 from rest_framework import status
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from django.shortcuts import get_object_or_404
@@ -24,9 +25,10 @@ class EventList(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class EventDetail(APIView):
+    permission_classes = [IsAuthenticated, IsOwner]
+    
     def get_instance(self, id):
         instance = get_object_or_404(Event, pk = id)
-        permission_classes = [IsOwner]
 
         return instance
         
