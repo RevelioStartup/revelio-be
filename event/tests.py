@@ -15,7 +15,11 @@ EVENT_DETAIL_LINK = reverse('event:detail')
 class EventTest(TestCase):
     def setUp(self):
         self.client = APIClient()
+        self.user = AppUser.objects.create_user(email='email@email.com',username='testuser',password='test')
+        self.client.force_authenticate(user=self.user)
+        
         self.event_attributes = {
+            "user": self.user,
             "name": "Revelio Onboarding",
             "date": date.today(),
             "budget": Decimal('20000000'),
@@ -26,8 +30,6 @@ class EventTest(TestCase):
         }
         self.model = Event.objects.create(**self.event_attributes)
         self.serializer = EventSerializer(instance = self.model)
-        self.user = AppUser.objects.create_user(email='email@email.com',username='testuser',password='test')
-        self.client.force_authenticate(user=self.user)
         
     def test_get_detail_event(self):
         response = self.client.get(EVENT_DETAIL_LINK)
