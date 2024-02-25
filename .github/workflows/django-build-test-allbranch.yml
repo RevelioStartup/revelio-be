@@ -36,6 +36,8 @@ jobs:
         echo "EMAIL_HOST_USER=${{ secrets.EMAIL_HOST_USER }}" >> .env
         echo "EMAIL_HOST_PASSWORD=${{ secrets.EMAIL_HOST_PASSWORD }}" >> .env
         echo "DEFAULT_FROM_EMAIL=${{ secrets.DEFAULT_FROM_EMAIL }}" >> .env
+        echo "OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }} >> .env"
+        echo "OPENAI_API_ORGANIZATION_ID=${{ secrets.OPENAI_API_ORGANIZATION_ID }}"
         cp .env revelio/.env
 
     - name: Run Tests
