@@ -56,3 +56,8 @@ class EventTest(TestCase):
         response = self.client.get(reverse('event:detail', kwargs={'id': new_uuid}))
         
         self.assertEqual(response.status_code, 404)
+        
+    def test_post_event(self):
+        response = self.client.post(EVENT_LIST_LINK, self.event_attributes)
+        self.assertEqual(response.status_code, 201)
+        self.assertEqual(Event.objects.count(), 2)

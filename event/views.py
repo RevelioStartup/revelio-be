@@ -13,6 +13,9 @@ class EventList(APIView):
         
         return Response(serializer.data)
 
+    def post(self, request):
+        raise NotImplementedError
+
 class EventDetail(APIView):
     def get_instance(self, id):
         instance = get_object_or_404(Event, pk = id)
