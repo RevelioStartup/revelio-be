@@ -61,3 +61,8 @@ class EventTest(TestCase):
         response = self.client.post(EVENT_LIST_LINK, self.event_attributes)
         self.assertEqual(response.status_code, 201)
         self.assertEqual(Event.objects.count(), 2)
+        
+    def test_post_invalid_event(self):
+        response = self.client.post(EVENT_LIST_LINK, {})
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(Event.objects.count(), 1)
