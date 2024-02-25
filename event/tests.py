@@ -108,3 +108,13 @@ class EventTest(TestCase):
         response = self.client.delete(self.EVENT_DETAIL_LINK)
         self.assertEqual(response.status_code, 401)
         self.assertEqual(Event.objects.count(), 1)
+    
+    def test_delete_not_found_event(self):
+        new_uuid = uuid.uuid4()
+        while new_uuid == self.model.id:
+            new_uuid = uuid.uuid4()
+        
+        response = self.client.delete(reverse('event:detail', kwargs={'id': new_uuid}))
+        
+        self.assertEqual(response.status_code, 404)
+        self.assertEqual(Event.objects.count(), 1)

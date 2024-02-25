@@ -5,6 +5,7 @@ from rest_framework.views import APIView
 from django.shortcuts import get_object_or_404
 from event.models import Event
 from event.serializers import EventSerializer
+from utils.permissions import IsOwner
 
 class EventList(APIView):        
     def get(self, request):
@@ -25,6 +26,7 @@ class EventList(APIView):
 class EventDetail(APIView):
     def get_instance(self, id):
         instance = get_object_or_404(Event, pk = id)
+        permission_classes = [IsOwner]
 
         return instance
         
