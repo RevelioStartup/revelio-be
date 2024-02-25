@@ -7,8 +7,8 @@ from event.models import Event
 from event.serializers import EventSerializer
 
 class EventList(APIView):        
-    def get(self, request, id):
-        return Response()     
+    def get(self, request):
+        raise NotImplementedError("This method is not implemented yet!")
 
 class EventDetail(APIView):
     def get_instance(self, id):

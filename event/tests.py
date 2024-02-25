@@ -31,6 +31,10 @@ class EventTest(TestCase):
         self.serializer = EventSerializer(instance = self.model)
         
         self.EVENT_DETAIL_LINK = reverse('event:detail', kwargs={'id': self.model.id})
+    
+    def test_get_list_event(self):
+        response = self.client.get(EVENT_LIST_LINK)
+        self.assertEqual(response.status_code, 200)
         
     def test_get_detail_event(self):
         response = self.client.get(self.EVENT_DETAIL_LINK)
