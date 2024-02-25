@@ -187,7 +187,7 @@ class ProfileUpdateTest(TestCase):
     def test_update_profile_picture(self):
         # Test uploading profile picture
         # Replace image_path with the path to a valid image file
-        image_path = 'assets\logo.jpg'
+        image_path = 'assets/logo.jpg'
         with open(image_path, 'rb') as f:
             image = SimpleUploadedFile('image.jpg', f.read(), content_type='image/jpeg')
         data = {'profile_picture': image}
@@ -216,7 +216,7 @@ class ProfileUpdateTest(TestCase):
         # Test uploading profile picture when unauthenticated
         self.client.logout()
         # Replace image_path with the path to a valid image file
-        image_path = 'assets\logo.jpg'
+        image_path = 'assets/logo.jpg'
         with open(image_path, 'rb') as f:
             image = SimpleUploadedFile('image.jpg', f.read(), content_type='image/jpeg')
         data = {'profile_picture': image}
