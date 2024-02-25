@@ -35,7 +35,9 @@ class AutofillTest(TestCase):
 
     def test_autofill_valid(self):
         form = {
-
+            'name': 'Ulang tahun Ibu',
+            'date': '26/02/2024',
+            'budget': '300000',
         }
         data = {
             'prompt' : create_autofill_prompt(form),
@@ -46,7 +48,9 @@ class AutofillTest(TestCase):
 
     def test_autofill_invalid(self):
         form = {
-
+            'name': '',
+            'date': '26/02/2024',
+            'budget': '',
         }
         data = {
             'prompt' : create_autofill_prompt(form),
