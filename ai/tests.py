@@ -11,7 +11,6 @@ AUTOFILL_LINK = reverse('ai:autofill')
 class AssistantTest(TestCase):
     def SetUp(self):
         self.client = APIClient()
-        self.empty_msg = 'Empty prompt! Make sure you put your prompt to the assistant.'
 
     def test_assitant_valid(self):
         data = {
@@ -19,12 +18,12 @@ class AssistantTest(TestCase):
         }
         response = self.client.post(ASSISTANT_LINK, json.dumps(data), content_type='application/json')
         self.assertEqual(response.status_code, 200)
-        self.assertTrue(len(response.json()['msg']) > self.empty_msg)
+        self.assertTrue(len(response.json()['msg']) > 0)
 
     def test_empty_input(self):
         data = {
-            'prompt' : '',
+            'prompt' : ', .',
         }
         response = self.client.post(ASSISTANT_LINK, json.dumps(data), content_type='application/json')
         self.assertEqual(response.status_code, 400)
-        self.assertEqual(response.json()['msg'], self.empty_msg)
+        self.assertEqual(response.json()['msg'], 'Make sure you are putting a correct prompt to the assistant.')
