@@ -139,6 +139,10 @@ class ProfileUpdateTest(TestCase):
         self.client.force_authenticate(user=self.user)
         self.profile = Profile.objects.create(user=self.user, bio='Old bio')
 
+    def tearDown(self):
+        # Clean up any resources created during the test
+        Profile.objects.filter(user=self.user).delete()
+
     def test_update_profile_with_valid_data(self):
         # Test updating profile with valid data
         data = {'bio': 'New bio'}
@@ -155,8 +159,7 @@ class ProfileUpdateTest(TestCase):
 
     def test_update_profile_picture(self):
         # Test uploading profile picture
-        # Replace image_path with the path to a valid image file
-        image_path = 'assets\logo.jpg'
+        image_path = 'assets/logo.jpg'  # Update to the actual path
         with open(image_path, 'rb') as f:
             image = SimpleUploadedFile('image.jpg', f.read(), content_type='image/jpeg')
         data = {'profile_picture': image}
@@ -166,13 +169,12 @@ class ProfileUpdateTest(TestCase):
         
     def test_update_profile_with_invalid_data(self):
         # Test updating profile with invalid data (uploading an image as bio)
-        image_path = 'assets/invalid_img.jpg'  # Path to an invalid image file
+        image_path = 'assets/invalid_img.jpg'  # Update to the actual invalid image path
         with open(image_path, 'rb') as f:
             image = SimpleUploadedFile(os.path.basename(image_path), f.read(), content_type='image/jpeg')
         data = {'bio': 'New bio', 'profile_picture': image}
         response = self.client.put(reverse('authentication:update_profile'), data)
         self.assertEqual(response.status_code, 400)  # Expect a bad request response
-
 
     def test_update_profile_unauthenticated(self):
         # Test updating profile when unauthenticated
@@ -184,8 +186,7 @@ class ProfileUpdateTest(TestCase):
     def test_update_profile_picture_unauthenticated(self):
         # Test uploading profile picture when unauthenticated
         self.client.logout()
-        # Replace image_path with the path to a valid image file
-        image_path = 'assets\logo.jpg'
+        image_path = 'assets/logo.jpg'  # Update to the actual path
         with open(image_path, 'rb') as f:
             image = SimpleUploadedFile('image.jpg', f.read(), content_type='image/jpeg')
         data = {'profile_picture': image}
