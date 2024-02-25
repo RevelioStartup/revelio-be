@@ -2,5 +2,5 @@ projectKey=revelio
 serverUrl=https://sonarqube.cs.ui.ac.id
 serverVersion=8.9.2.46101
 dashboardUrl=https://sonarqube.cs.ui.ac.id/dashboard?id=revelio
-ceTaskId=AY15YdOhk9qxTTGJICut
-ceTaskUrl=https://sonarqube.cs.ui.ac.id/api/ce/task?id=AY15YdOhk9qxTTGJICut
+ceTaskId=AY1-AZyxk9qxTTGJICzQ
+ceTaskUrl=https://sonarqube.cs.ui.ac.id/api/ce/task?id=AY1-AZyxk9qxTTGJICzQ
