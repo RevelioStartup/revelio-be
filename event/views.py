@@ -35,4 +35,7 @@ class EventDetail(APIView):
         return Response(serializer.data)
     
     def delete(self, request, id):
-        raise NotImplementedError()
+        instance = self.get_instance(id)
+        instance.delete()
+        
+        return Response(status=status.HTTP_204_NO_CONTENT)
