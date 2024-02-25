@@ -1,5 +1,6 @@
 from datetime import date
 from decimal import Decimal
+import uuid
 from django.test import TestCase
 from django.urls import reverse
 from rest_framework.test import APIClient
@@ -46,3 +47,12 @@ class EventTest(TestCase):
     def test_get_invalid_detail_event(self):
         response = self.client.get(reverse('event:detail', kwargs={'id': 'invalid id'}))
         self.assertEqual(response.status_code, 500)
+        
+    def test_get_not_found_event(self):
+        new_uuid = uuid.uuid4()
+        while new_uuid == self.model.id:
+            new_uuid = uuid.uuid4()
+        
+        response = self.client.get(reverse('event:detail', kwargs={'id': new_uuid}))
+        
+        self.assertEqual(response.status_code, 404)
