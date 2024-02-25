@@ -1,7 +1,7 @@
 from rest_framework.test import APIClient
 from django.test import TestCase
 from django.urls import reverse
-from prompts import create_autofill_prompt
+from .prompts import create_autofill_prompt
 import json
 
 # Create your tests here.
@@ -59,8 +59,8 @@ class AutofillTest(TestCase):
 
     def test_autofill_empty_input(self):
         data = {
-            'prompt' : ', .',
+            'form' : '',
         }
         response = self.client.post(AUTOFILL_LINK, json.dumps(data), content_type='application/json')
         self.assertEqual(response.status_code, 400)
-        self.assertEqual(response.json()['msg'], 'Make sure you are putting a correct prompt to the assistant.')
+        self.assertEqual(response.json()['msg'], 'Make sure you are putting a correct form data.')

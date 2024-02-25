@@ -1,11 +1,10 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework.permissions import IsAuthenticated
-from django.template.loader import render_to_string
-from authentication.models import AppUser
+from ai.prompts import create_autofill_prompt
 from dotenv import load_dotenv
 import re
 import os
+import json
 from openai import OpenAI
 
 # load_dotenv()
@@ -26,14 +25,13 @@ class AssistantView(APIView):
                 }, status=400)
 
         response = client.chat.completions.create(
-            model="gpt-4",
+            model="gpt-3.5-turbo",
             messages=[
                 {"role": "user", "content": prompt},
             ],
             temperature=1,
             max_tokens=256,
         )
-        print(response)
 
         return Response({'msg' : response.choices[0].message.content})
 
@@ -42,4 +40,23 @@ class AutoFillView(APIView):
     permission_classes = ()
 
     def post(self, request):
-        pass    
+        form = request.data.get('form')
+        try:
+            name, date, budget = form['name'], form['date'], form['budget']
+        except:
+            return Response({'msg' : 'Make sure you are putting a correct form data.'}, status=400) 
+
+        prompt = create_autofill_prompt(name, date, budget)
+        if not prompt:
+            return Response({'msg' : 'Make sure you fill the required fields.'}, status=400)
+
+        response = client.chat.completions.create(
+            model="gpt-3.5-turbo",
+            messages=[
+                {"role": "user", "content": prompt},
+            ],
+            temperature=1,
+            max_tokens=512,
+        )
+
+        return Response(json.loads(response.choices[0].message.content), status=200)  
