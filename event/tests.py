@@ -2,7 +2,7 @@ from datetime import date
 from decimal import Decimal
 import uuid
 from django.test import TestCase
-from django.urls import reverse
+from django.urls import NoReverseMatch, reverse
 from rest_framework.test import APIClient
 
 from authentication.models import AppUser
@@ -45,9 +45,9 @@ class EventTest(TestCase):
         self.assertEqual(set(data.keys()), set(response.data))
         
     def test_get_invalid_detail_event(self):
-        response = self.client.get(reverse('event:detail', kwargs={'id': 'invalid id'}))
-        self.assertEqual(response.status_code, 500)
-        
+        with self.assertRaises(NoReverseMatch):
+            self.client.get(reverse('event:detail', kwargs={'id': 'invalid id'}))
+                
     def test_get_not_found_event(self):
         new_uuid = uuid.uuid4()
         while new_uuid == self.model.id:
