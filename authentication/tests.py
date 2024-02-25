@@ -1,10 +1,12 @@
 from django.test import TestCase
-from authentication.models import AppUser
+from authentication.models import AppUser, Profile
 from django.urls import reverse
 import json
 from django.core import mail
 from rest_framework.test import APIClient
 from .tokens import account_token
+from django.core.files.uploadedfile import SimpleUploadedFile
+import os
 
 REGISTER_LINK = reverse('authentication:register')
 LOGIN_LINK = reverse('authentication:login')
@@ -68,6 +70,7 @@ class RegisterTest(TestCase):
         self.assertEqual(response.status_code, 400)
         self.assertEqual(response.json()['msg'],"One or more fields are missing!")
 
+
 class LoginTest(TestCase):
     def setUp(self):
         self.client = APIClient()
@@ -83,7 +86,7 @@ class LoginTest(TestCase):
         response = self.client.post(LOGIN_LINK, json.dumps(data), content_type='application/json')
         self.assertEqual(response.status_code, 400)
         self.assertEqual(response.json()['msg'],"Wrong username/password!") 
-    
+
     def test_missing_fields(self):
         data = {
                 "username":"user1"
@@ -113,10 +116,11 @@ class SendVerificationEmailTest(TestCase):
     def test_invalid_verification_token(self):
         response = self.client.post((EMAIL_VERIFICATION_LINK), {'token': 'invalid token'})
         self.assertEqual(response.status_code, 400)
-
+    
     def test_missing_verification_token(self):
         response = self.client.post((EMAIL_VERIFICATION_LINK), {})
         self.assertEqual(response.status_code, 400)
+
 
 class SendRecoverPasswordEmailTest(TestCase):
     def setUp(self):
@@ -132,11 +136,11 @@ class SendRecoverPasswordEmailTest(TestCase):
     def test_sent_wrong_email_recover_password(self):
         response = self.client.post((RECOVER_PASSWORD_LINK), {'email':'wrong@email.com'})
         self.assertEqual(response.status_code, 400)
-    
+
     def test_sent_missing_email_recover_password(self):
         response = self.client.post((RECOVER_PASSWORD_LINK), {})
         self.assertEqual(response.status_code, 400)
-
+    
     def test_change_password(self):
         token = account_token.make_token(self.user)
         response = self.client.put((RECOVER_PASSWORD_LINK), 
@@ -158,4 +162,64 @@ class SendRecoverPasswordEmailTest(TestCase):
         response = self.client.put((RECOVER_PASSWORD_LINK), 
                                     {'email':'email@email.com', 'token': 'wrong token'})
         self.assertEqual(response.status_code, 400)
+
+class ProfileUpdateTest(TestCase):
+    def setUp(self):
+        self.client = APIClient()
+        self.user = AppUser.objects.create_user(email='test@example.com', username='testuser', password='test')
+        self.client.force_authenticate(user=self.user)
+        self.profile = Profile.objects.create(user=self.user, bio='Old bio')
+
+    def test_update_profile_with_valid_data(self):
+        # Test updating profile with valid data
+        data = {'bio': 'New bio'}
+        response = self.client.put(reverse('authentication:profile'), data)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(Profile.objects.get(user=self.user).bio, 'New bio')
+
+    def test_update_profile_with_empty_data(self):
+        # Test updating profile with empty data
+        data = {'bio': ''}
+        response = self.client.put(reverse('authentication:profile'), data)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(Profile.objects.get(user=self.user).bio, '')  # Ensure bio is empty
+
+    def test_update_profile_picture(self):
+        # Test uploading profile picture
+        # Replace image_path with the path to a valid image file
+        image_path = 'assets/logo.jpg'
+        with open(image_path, 'rb') as f:
+            image = SimpleUploadedFile('image.jpg', f.read(), content_type='image/jpeg')
+        data = {'profile_picture': image}
+        response = self.client.put(reverse('authentication:profile'), data)
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(Profile.objects.get(user=self.user).profile_picture)  # Ensure profile picture is uploaded
+        
+    def test_update_profile_with_invalid_data(self):
+        # Test updating profile with invalid data (uploading an image as bio)
+        image_path = 'assets/invalid_img.jpg'  # Path to an invalid image file
+        with open(image_path, 'rb') as f:
+            image = SimpleUploadedFile(os.path.basename(image_path), f.read(), content_type='image/jpeg')
+        data = {'bio': 'New bio', 'profile_picture': image}
+        response = self.client.put(reverse('authentication:profile'), data)
+        self.assertEqual(response.status_code, 400)  # Expect a bad request response
+
+
+    def test_update_profile_unauthenticated(self):
+        # Test updating profile when unauthenticated
+        self.client.logout()
+        data = {'bio': 'New bio'}
+        response = self.client.put(reverse('authentication:profile'), data)
+        self.assertEqual(response.status_code, 401)  # Expect unauthorized response
+
+    def test_update_profile_picture_unauthenticated(self):
+        # Test uploading profile picture when unauthenticated
+        self.client.logout()
+        # Replace image_path with the path to a valid image file
+        image_path = 'assets/logo.jpg'
+        with open(image_path, 'rb') as f:
+            image = SimpleUploadedFile('image.jpg', f.read(), content_type='image/jpeg')
+        data = {'profile_picture': image}
+        response = self.client.put(reverse('authentication:profile'), data)
+        self.assertEqual(response.status_code, 401)  # Expect unauthorized response
 
