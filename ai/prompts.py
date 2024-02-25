@@ -8,7 +8,7 @@ name = Class meet
 date = 26/02/2024
 budget = 1000000
 
-based on this, respond with a JSON string. do not give anything other than the JSON string. For service, always respond as a list. for example
+based on this, respond with a JSON string. do not give anything other than the JSON string. the JSON has to contain objective, theme, and service. For service, always respond as a list. for example
 {"objective" : "Meningkatkan keakraban pertemanan antar kelas", "theme" : "fun sports", "service" :  ["stand makanan", "sound system", "MC"]}
 
 now, respond to this input
