@@ -222,3 +222,4 @@ class ProfileUpdateTest(TestCase):
         data = {'profile_picture': image}
         response = self.client.put(reverse('authentication:profile'), data)
         self.assertEqual(response.status_code, 401)  # Expect unauthorized response
+
