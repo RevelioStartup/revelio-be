@@ -109,6 +109,10 @@ class EventTest(TestCase):
         self.assertEqual(response.status_code, 401)
         self.assertEqual(Event.objects.count(), 1)
     
+    def test_delete_invalid_event(self):
+        with self.assertRaises(NoReverseMatch):
+            self.client.delete(reverse('event:detail', kwargs={'id': 'invalid id'}))
+            
     def test_delete_not_found_event(self):
         new_uuid = uuid.uuid4()
         while new_uuid == self.model.id:
