@@ -16,6 +16,8 @@ class EventTest(TestCase):
     def setUp(self):
         self.client = APIClient()
         self.user = AppUser.objects.create_user(email='email@email.com',username='testuser',password='test')
+        self.another_user = AppUser.objects.create_user(email = 'anonymous@gmail.com', username='anonymous', password='test')
+        
         self.client.force_authenticate(user=self.user)
         
         self.event_attributes = {
@@ -66,6 +68,11 @@ class EventTest(TestCase):
         response = self.client.get(reverse('event:detail', kwargs={'id': new_uuid}))
         
         self.assertEqual(response.status_code, 404)
+    
+    def test_get_forbidden_event(self):
+        self.client.force_authenticate(user=self.another_user)
+        response = self.client.get(self.EVENT_DETAIL_LINK)
+        self.assertEqual(response.status_code, 403)
         
     def test_post_event(self):
         response = self.client.post(EVENT_LIST_LINK, self.event_attributes)
@@ -124,8 +131,6 @@ class EventTest(TestCase):
         self.assertEqual(Event.objects.count(), 1)
         
     def test_delete_forbidden_event(self):
-        new_user = AppUser.objects.create_user(
-            email = 'anonymous@gmail.com', username='anonymous', password='test')
-        self.client.force_authenticate(user=new_user)
+        self.client.force_authenticate(user=self.another_user)
         response = self.client.delete(self.EVENT_DETAIL_LINK)
         self.assertEqual(response.status_code, 403)
