@@ -33,3 +33,6 @@ class EventDetail(APIView):
         serializer = EventSerializer(instance)
         
         return Response(serializer.data)
+    
+    def delete(self, request, id):
+        raise NotImplementedError()

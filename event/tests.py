@@ -97,3 +97,8 @@ class EventTest(TestCase):
         response = self.client.post(EVENT_LIST_LINK, self.event_attributes)
         self.assertEqual(response.status_code, 401)
         self.assertEqual(Event.objects.count(), 1)
+        
+    def test_delete_event(self):
+        response = self.client.delete(self.EVENT_DETAIL_LINK)
+        self.assertEqual(response.status_code, 204)
+        self.assertEqual(Event.objects.count(), 0)
