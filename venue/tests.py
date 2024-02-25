@@ -1,3 +1,4 @@
+from django.db import IntegrityError
 from django.test import TestCase
 
 # Create your tests here.
@@ -28,6 +29,11 @@ class VenueModelTestCase(TestCase):
 
     def test_venue_model(self):
         self.assertEqual(str(self.venue), "Test Venue")
+
+    def test_venue_does_not_exist(self):
+        non_existent_venue = Venue.objects.filter(name="Non Existent Venue").first()
+        self.assertIsNone(non_existent_venue)
+
 
 class VenueAPITestCase(TestCase):
     def setUp(self):
@@ -78,6 +84,36 @@ class VenueAPITestCase(TestCase):
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
         self.assertFalse(Venue.objects.filter(id=self.venue.id).exists())
 
+    def test_get_venue_list_no_venues(self):
+        Venue.objects.all().delete()
+        url = reverse('venue-list-create')
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data, [])
+
+    def test_create_venue_missing_data(self):
+        url = reverse('venue-list-create')
+        incomplete_data = {"name": "Incomplete Venue"}
+        response = self.client.post(url, incomplete_data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_get_venue_detail_does_not_exist(self):
+        url = reverse('venue-retrieve-update-destroy', args=[999])
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+    def test_update_venue_does_not_exist(self):
+        url = reverse('venue-retrieve-update-destroy', args=[999])
+        updated_data = {"name": "Updated Venue"}
+        response = self.client.put(url, updated_data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+    def test_delete_venue_does_not_exist(self):
+        url = reverse('venue-retrieve-update-destroy', args=[999])
+        response = self.client.delete(url)
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+
 class VenueEventListViewTest(TestCase):
     def setUp(self):
         self.client = APIClient()
@@ -116,6 +152,13 @@ class VenueEventListViewTest(TestCase):
         
         expected_data = VenueSerializer([self.venue1, self.venue2], many=True).data
         self.assertEqual(response.data, expected_data)
+    
+    def test_get_venues_for_event_no_venues(self):
+        Venue.objects.all().delete()
+        url = reverse('venue-event-list', kwargs={'event_id': self.event_id})
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data, [])
 
 class PhotoModelTestCase(TestCase):
     def setUp(self):
@@ -139,6 +182,21 @@ class PhotoModelTestCase(TestCase):
     def test_photo_model(self):
         self.assertEqual(self.photo.venue, self.venue)
         self.assertEqual(str(self.photo), "https://example.com/path/to/your/image.jpg")
+
+    def test_photo_model_no_venue(self):
+        with self.assertRaises(IntegrityError):
+            Photo.objects.create(
+                venue=None,
+                image="https://example.com/path/to/your/image.jpg"
+            )
+
+    def test_photo_model_no_image(self):
+        with self.assertRaises(IntegrityError):
+            Photo.objects.create(
+                venue=self.venue,
+                image=None
+            )
+
 
 class PhotoAPITestCase(TestCase):
     def setUp(self):
@@ -185,3 +243,25 @@ class PhotoAPITestCase(TestCase):
         response = self.client.delete(url)
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
         self.assertFalse(Photo.objects.filter(id=self.photo.id).exists())
+
+    def test_create_photo_missing_data(self):
+        url = reverse('photo-create')
+        incomplete_data = {"venue": self.venue.id}
+        response = self.client.post(url, incomplete_data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_get_photo_detail_does_not_exist(self):
+        url = reverse('photo-retrieve-update-destroy', args=[999])
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+    def test_update_photo_does_not_exist(self):
+        url = reverse('photo-retrieve-update-destroy', args=[999])
+        updated_data = {"venue": self.venue.id, "image": "https://example.com/path/to/your/updated/image.jpg"}
+        response = self.client.put(url, updated_data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+    def test_delete_photo_does_not_exist(self):
+        url = reverse('photo-retrieve-update-destroy', args=[999])
+        response = self.client.delete(url)
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
