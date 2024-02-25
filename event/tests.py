@@ -9,7 +9,8 @@ from event.models import Event
 from event.serializers import EventSerializer
 
 # Create your tests here.
-EVENT_LINK = reverse('event:event_view')
+EVENT_LIST_LINK = reverse('event:list')
+EVENT_DETAIL_LINK = reverse('event:detail')
 
 class EventTest(TestCase):
     def setUp(self):
@@ -28,8 +29,8 @@ class EventTest(TestCase):
         self.user = AppUser.objects.create_user(email='email@email.com',username='testuser',password='test')
         self.client.force_authenticate(user=self.user)
         
-    def test_get_event(self):
-        response = self.client.get(EVENT_LINK)
+    def test_get_detail_event(self):
+        response = self.client.get(EVENT_DETAIL_LINK)
         data = self.serializer.data
         self.assertEqual(response.status_code, 200)
         self.assertEqual(set(data.keys()), set(response.data))
