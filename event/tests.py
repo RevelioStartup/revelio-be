@@ -35,6 +35,9 @@ class EventTest(TestCase):
     def test_get_list_event(self):
         try:
             response = self.client.get(EVENT_LIST_LINK)
+            data = self.serializer.data
+            self.assertEqual(response.status_code, 200)
+            self.assertEqual(len(response.data), 1)         
         except NotImplementedError as e:
             self.assertEqual(str(e), "This method is not implemented yet!")
         
