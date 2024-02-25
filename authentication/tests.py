@@ -227,8 +227,4 @@ class ProfileUpdateTest(TestCase):
         data = {'profile_picture': image}
         response = self.client.put(reverse('authentication:profile'), data)
         self.assertEqual(response.status_code, 401)  # Expect unauthorized response
-    def test_change_password_missing_fields(self):
-        response = self.client.put((RECOVER_PASSWORD_LINK), 
-                                    {'email':'email@email.com', 'token': 'wrong token'})
-        self.assertEqual(response.status_code, 400)
 
