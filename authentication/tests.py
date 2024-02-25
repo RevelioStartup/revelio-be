@@ -17,7 +17,7 @@ class RegisterTest(TestCase):
 
     def setUp(self):
         self.client = APIClient()
-
+ 
     def test_register_valid(self):
         data = {
                 "username":"user1",
