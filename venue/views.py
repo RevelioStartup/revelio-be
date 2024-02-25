@@ -30,7 +30,6 @@ class PhotoRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = PhotoSerializer
 
 class VenueStatusUpdateAPIView(APIView):
-    permission_classes = [IsAuthenticated]
     def patch(self, request, pk):
         try:
             venue = Venue.objects.get(pk=pk)
