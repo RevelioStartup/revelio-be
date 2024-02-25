@@ -78,6 +78,45 @@ class VenueAPITestCase(TestCase):
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
         self.assertFalse(Venue.objects.filter(id=self.venue.id).exists())
 
+class VenueEventListViewTest(TestCase):
+    def setUp(self):
+        self.client = APIClient()
+        self.user = AppUser.objects.create_user(email='email@email.com',username='testuser',password='test')
+        self.client.force_authenticate(user=self.user)
+
+        self.event_id = 1
+
+        self.venue1_data = {
+            "name": "Venue 1",
+            "address": "123 Test St",
+            "price": 50,
+            "status": "Active",
+            "contact_name": "John Doe",
+            "contact_phone_number": "123-456-7890",
+            "event": self.event_id,
+        }
+        self.venue1 = Venue.objects.create(**self.venue1_data)
+
+        self.venue2_data = {
+            "name": "Venue 2",
+            "address": "456 Test St",
+            "price": 60,
+            "status": "Inactive",
+            "contact_name": "Jane Doe",
+            "contact_phone_number": "987-654-3210",
+            "event": self.event_id,
+        }
+        self.venue2 = Venue.objects.create(**self.venue2_data)
+
+    def test_get_venues_for_event(self):
+        url = reverse('venue-event-list', kwargs={'event_id': self.event_id})
+
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        
+        expected_data = VenueSerializer([self.venue1, self.venue2], many=True).data
+        self.assertEqual(response.data, expected_data)
+
 class PhotoModelTestCase(TestCase):
     def setUp(self):
         self.client = APIClient()
