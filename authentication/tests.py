@@ -141,11 +141,6 @@ class SendRecoverPasswordEmailTest(TestCase):
         response = self.client.post((RECOVER_PASSWORD_LINK), {})
         self.assertEqual(response.status_code, 400)
     
-    
-    def test_sent_missing_email_recover_password(self):
-        response = self.client.post((RECOVER_PASSWORD_LINK), {})
-        self.assertEqual(response.status_code, 400)
-
     def test_change_password(self):
         token = account_token.make_token(self.user)
         response = self.client.put((RECOVER_PASSWORD_LINK), 
