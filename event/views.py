@@ -1,5 +1,6 @@
 # Create your views here.
 from rest_framework import status
+from rest_framework.generics import RetrieveDestroyAPIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -24,22 +25,8 @@ class EventList(APIView):
         
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-class EventDetail(APIView):
+class EventDetail(RetrieveDestroyAPIView):
+    queryset = Event.objects.all()
+    serializer_class = EventSerializer
+    lookup_field = 'id'
     permission_classes = [IsAuthenticated, IsOwner]
-    
-    def get_instance(self, id):
-        instance = get_object_or_404(Event, pk = id)
-
-        return instance
-        
-    def get(self, request, id):
-        instance = self.get_instance(id)
-        serializer = EventSerializer(instance)
-        
-        return Response(serializer.data)
-    
-    def delete(self, request, id):
-        instance = self.get_instance(id)
-        instance.delete()
-        
-        return Response(status=status.HTTP_204_NO_CONTENT)
