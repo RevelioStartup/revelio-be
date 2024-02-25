@@ -37,12 +37,22 @@ class EventTest(TestCase):
         response = self.client.get(EVENT_LIST_LINK)
         self.assertEqual(response.status_code, 200)
         self.assertEqual(len(response.data), 1)         
+    
+    def test_get_list_event_unauthenticated(self):
+        self.client.force_authenticate(user=None)
+        response = self.client.get(EVENT_LIST_LINK)
+        self.assertEqual(response.status_code, 401)
         
     def test_get_detail_event(self):
         response = self.client.get(self.EVENT_DETAIL_LINK)
         data = self.serializer.data
         self.assertEqual(response.status_code, 200)
         self.assertEqual(set(data.keys()), set(response.data))
+    
+    def test_get_detail_event_unauthenticated(self):
+        self.client.force_authenticate(user=None)
+        response = self.client.get(self.EVENT_DETAIL_LINK)
+        self.assertEqual(response.status_code, 401)
         
     def test_get_invalid_detail_event(self):
         with self.assertRaises(NoReverseMatch):
@@ -81,3 +91,9 @@ class EventTest(TestCase):
         self.assertEqual(response.status_code, 400)
         self.assertEqual(Event.objects.count(), 1)
         self.assertEqual(response.data['name'], ['This field is required.'])
+    
+    def test_post_unauthenticated_event(self):
+        self.client.force_authenticate(user=None)
+        response = self.client.post(EVENT_LIST_LINK, self.event_attributes)
+        self.assertEqual(response.status_code, 401)
+        self.assertEqual(Event.objects.count(), 1)
