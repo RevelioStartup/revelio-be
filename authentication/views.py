@@ -1,4 +1,4 @@
-from authentication.models import AppUser
+from authentication.models import AppUser, Profile
 from django.contrib.auth import authenticate
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -10,6 +10,8 @@ from django.utils.http import urlsafe_base64_encode
 from django.template.loader import render_to_string
 from .tokens import account_token
 from django.core.mail import EmailMessage
+from .serializers import ProfileSerializer
+from rest_framework import status
 
 class RegisterView(APIView):
     
@@ -125,3 +127,15 @@ class SendRecoverPasswordEmailView(APIView):
                 return Response({'msg': 'Invalid verification token!'}, status=400)
         else:
             return Response({'msg': "User doesn't exist!"}, status=400)
+
+class ProfileView(APIView):
+    permission_classes = [IsAuthenticated]
+    def put(self, request):
+        user = request.user
+        profile = user.profile
+        serializer = ProfileSerializer(instance=profile, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response({'msg': 'Profile updated successfully!'})
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
