@@ -61,7 +61,7 @@ class EventTest(TestCase):
             self.client.get(reverse('event:detail', kwargs={'id': 'invalid id'}))
                 
     def test_get_not_found_event(self):
-        new_uuid = uuid.uuid4()
+        new_uuid = self.model.id
         while new_uuid == self.model.id:
             new_uuid = uuid.uuid4()
         
@@ -121,7 +121,7 @@ class EventTest(TestCase):
             self.client.delete(reverse('event:detail', kwargs={'id': 'invalid id'}))
             
     def test_delete_not_found_event(self):
-        new_uuid = uuid.uuid4()
+        new_uuid = self.model.id
         while new_uuid == self.model.id:
             new_uuid = uuid.uuid4()
         

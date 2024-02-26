@@ -14,6 +14,3 @@ class Event(models.Model):
     attendees = models.IntegerField()    
     theme = models.TextField()
     services = models.TextField()
-    
-    def __str__(self):
-        return self.name
