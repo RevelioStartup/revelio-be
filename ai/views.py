@@ -41,10 +41,10 @@ class AutoFillView(APIView):
 
     def post(self, request):
         form = request.data.get('form')
-        try:
+        if 'name' in form and 'date' in form and 'budget' in form:
             name, date, budget = form['name'], form['date'], form['budget']
-        except:
-            return Response({'msg' : 'Make sure you are putting a correct form data.'}, status=400) 
+        else:
+            return Response({'msg': 'Make sure you are putting a correct form data.'}, status=400)
 
         prompt = create_autofill_prompt(name, date, budget)
         if not prompt:
