@@ -47,6 +47,8 @@ INSTALLED_APPS = [
     'venue',
     'rest_framework',
     'rest_framework_simplejwt',
+    'event',
+    'ai',
 ]
 
 MIDDLEWARE = [
