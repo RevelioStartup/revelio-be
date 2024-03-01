@@ -85,7 +85,7 @@ TEMPLATES = [
 WSGI_APPLICATION = 'revelio.wsgi.application'
 
 CORS_ALLOWED_ORIGINS = [
-    "https://revelio-two.vercel.app/",
+    "https://revelio-two.vercel.app",
 ]
 
 
