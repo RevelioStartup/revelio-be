@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'corsheaders',
     'authentication',
     'venue',
     'rest_framework',
@@ -56,6 +57,7 @@ MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
@@ -81,6 +83,11 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'revelio.wsgi.application'
+
+CORS_ALLOWED_ORIGINS = [
+    "https://revelio-two.vercel.app",
+    "https://revelio-reveliostartup-gmailcom-revelios-projects.vercel.app",
+]
 
 
 # Database
@@ -153,6 +160,8 @@ EMAIL_HOST_PASSWORD = env('EMAIL_HOST_PASSWORD')
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 DEFAULT_FROM_EMAIL = env('DEFAULT_FROM_EMAIL')
+
+PASSWORD_RESET_TIMEOUT = 300
 
 # Internationalization
 # https://docs.djangoproject.com/en/5.0/topics/i18n/
