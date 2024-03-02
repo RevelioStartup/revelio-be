@@ -2,8 +2,6 @@ from django.db import models
 
 # Create your models here.
 
-from django.core.files.storage import default_storage
-
 class Venue(models.Model):
     name = models.CharField(max_length=255)
     address = models.CharField(max_length=255)
@@ -24,7 +22,7 @@ class Venue(models.Model):
 
 class Photo(models.Model):
     venue = models.ForeignKey(Venue, related_name='photos', on_delete=models.CASCADE)
-    image = models.ImageField(storage = default_storage, upload_to='photos/')
+    image = models.URLField()
 
     def __str__(self):
-        return self.image.url
+        return self.image

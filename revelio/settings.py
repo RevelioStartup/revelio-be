@@ -189,27 +189,3 @@ STATIC_ROOT = BASE_DIR / "staticfiles_build" / "static"
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
-
-from google.oauth2 import service_account
-import os
-
-GS_CREDENTIALS = service_account.Credentials.from_service_account_file(
-    os.path.join(BASE_DIR, 'dotted-lexicon-415505-86934bc0f37c.json')
-)
-
-STORAGES = {
-    "default": {
-        "BACKEND": "storages.backends.gcloud.GoogleCloudStorage",
-        "OPTIONS": {
-            "credentials": GS_CREDENTIALS,
-            "bucket_name": "bucket-revelio-1",
-        },
-    },
-    "staticfiles": {
-        "BACKEND": "storages.backends.gcloud.GoogleCloudStorage",
-        "OPTIONS": {
-            "credentials": GS_CREDENTIALS,
-            "bucket_name": "bucket-revelio-1",
-        },
-    }
-}
