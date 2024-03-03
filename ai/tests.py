@@ -53,6 +53,16 @@ class HistoryTest(TestCase):
         self.model = RecommendationHistory.objects.create(**self.recommendation_attributes)
         self.serializer = RecommendationHistorySerializer(instance = self.model)
 
+    def test_get_list_recommendation_history(self):
+        response = self.client.get(HISTORY_LINK)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.data), 1)         
+    
+    def test_get_list_recommendation_history_unauthenticated(self):
+        self.client.force_authenticate(user=None)
+        response = self.client.get(HISTORY_LINK)
+        self.assertEqual(response.status_code, 401)
+
 class AutofillTest(TestCase):
     def setUp(self):
         self.client = APIClient()
