@@ -1,7 +1,9 @@
 from dotenv import load_dotenv
 from rest_framework.views import APIView
 from rest_framework.response import Response
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.generics import RetrieveDestroyAPIView
+from utils.permissions import IsOwner
 from ai.models import RecommendationHistory
 from ai.prompts import create_autofill_prompt
 import re
@@ -58,7 +60,10 @@ class HistoryView(APIView):
         return Response(serializer.data)
 
 class HistoryDetailView(RetrieveDestroyAPIView):
-    pass
+    queryset = RecommendationHistory.objects.all()
+    serializer_class = RecommendationHistorySerializer
+    lookup_field = 'id'
+    permission_classes = [IsAuthenticated, IsOwner]
 
 class AutoFillView(APIView):
     
