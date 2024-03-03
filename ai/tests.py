@@ -1,3 +1,4 @@
+from datetime import date
 from rest_framework.test import APIClient
 from django.test import TestCase
 from django.urls import reverse
@@ -63,6 +64,35 @@ class HistoryTest(TestCase):
         response = self.client.get(HISTORY_LINK)
         self.assertEqual(response.status_code, 401)
 
+class HistoryDetailTest():
+    def setUp(self):
+        self.client = APIClient()
+        self.user = AppUser.objects.create_user(email='email@email.com',username='testuser',password='test')
+        self.another_user = AppUser.objects.create_user(email = 'anonymous@gmail.com', username='anonymous', password='test')
+        
+        self.client.force_authenticate(user=self.user)
+        
+        self.recommendation_attributes = {
+            "user": self.user,
+            "date": date.today,
+            "prompt": "Berikan rekomendasi tempat untuk acara ulang tahun di Braga, Bandung.",
+            "output": "Berikut adalah 5 tempat makan favorit di Bandung."
+        }
+        self.model = RecommendationHistory.objects.create(**self.recommendation_attributes)
+        self.serializer = RecommendationHistorySerializer(instance = self.model)
+        self.HISTORY_DETAIL_LINK = reverse('ai:history-detail', kwargs={'id': self.model.id})
+
+    def test_get_detail_event(self):
+        response = self.client.get(self.HISTORY_DETAIL_LINK)
+        data = self.serializer.data
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(set(data.keys()), set(response.data))
+    
+    def test_get_detail_event_unauthenticated(self):
+        self.client.force_authenticate(user=None)
+        response = self.client.get(self.HISTORY_DETAIL_LINK)
+        self.assertEqual(response.status_code, 401)
+        
 class AutofillTest(TestCase):
     def setUp(self):
         self.client = APIClient()
