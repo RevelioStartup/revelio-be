@@ -1,7 +1,6 @@
 from rest_framework.test import APIClient
 from django.test import TestCase
 from django.urls import reverse
-from .prompts import create_autofill_prompt
 import json
 
 # Create your tests here.

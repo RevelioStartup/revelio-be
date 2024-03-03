@@ -1,13 +1,14 @@
+from dotenv import load_dotenv
 from rest_framework.views import APIView
 from rest_framework.response import Response
+from rest_framework.generics import RetrieveDestroyAPIView
 from ai.prompts import create_autofill_prompt
-from dotenv import load_dotenv
 import re
 import os
 import json
 from openai import OpenAI
 
-# load_dotenv()
+load_dotenv()
 client = OpenAI(api_key=os.getenv('OPENAI_API_KEY'), organization=os.getenv('OPENAI_API_ORGANIZATION_ID'))
 
 class AssistantView(APIView):
@@ -34,6 +35,14 @@ class AssistantView(APIView):
         )
 
         return Response({'msg' : response.choices[0].message.content})
+
+class HistoryView(APIView):
+
+    def get(self, request):
+        pass
+
+class HistoryDetailView(RetrieveDestroyAPIView):
+    pass
 
 class AutoFillView(APIView):
     
