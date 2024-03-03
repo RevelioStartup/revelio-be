@@ -1,7 +1,7 @@
 from rest_framework.test import APIClient
 from django.test import TestCase
 from django.urls import reverse
-from datetime import date
+from django.utils import timezone
 from ai.models import RecommendationHistory
 from ai.serializers import RecommendationHistorySerializer
 from authentication.models import AppUser
@@ -74,7 +74,7 @@ class HistoryDetailTest():
         
         self.recommendation_attributes = {
             "user": self.user,
-            "date": date.today,
+            "date": timezone.now,
             "prompt": "Berikan rekomendasi tempat untuk acara ulang tahun di Braga, Bandung.",
             "output": "Berikut adalah 5 tempat makan favorit di Bandung."
         }
