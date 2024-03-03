@@ -1,17 +1,25 @@
 from rest_framework.test import APIClient
 from django.test import TestCase
 from django.urls import reverse
-from .prompts import create_autofill_prompt
+from django.utils import timezone
+from ai.models import RecommendationHistory
+from ai.serializers import RecommendationHistorySerializer
+from authentication.models import AppUser
 import json
 
 # Create your tests here.
 
 ASSISTANT_LINK = reverse('ai:assistant')
 AUTOFILL_LINK = reverse('ai:autofill')
+HISTORY_LINK = reverse('ai:history')
 
 class AssistantTest(TestCase):
-    def SetUp(self):
+    def setUp(self):
         self.client = APIClient()
+        self.user = AppUser.objects.create_user(email='email@email.com',username='testuser',password='test')
+        self.another_user = AppUser.objects.create_user(email = 'anonymous@gmail.com', username='anonymous', password='test')
+        
+        self.client.force_authenticate(user=self.user)
 
     def test_assitant_valid(self):
         data = {
@@ -29,8 +37,64 @@ class AssistantTest(TestCase):
         self.assertEqual(response.status_code, 400)
         self.assertEqual(response.json()['msg'], 'Make sure you are putting a correct prompt to the assistant.')
 
+class HistoryTest(TestCase):
+
+    def setUp(self):
+        self.client = APIClient()
+        self.user = AppUser.objects.create_user(email='email@email.com',username='testuser',password='test')
+        self.another_user = AppUser.objects.create_user(email = 'anonymous@gmail.com', username='anonymous', password='test')
+        
+        self.client.force_authenticate(user=self.user)
+        
+        self.recommendation_attributes = {
+            "user": self.user,
+            "prompt": "Berikan rekomendasi tempat untuk acara ulang tahun di Braga, Bandung.",
+            "output": "Berikut adalah 5 tempat makan favorit di Bandung."
+        }
+        self.model = RecommendationHistory.objects.create(**self.recommendation_attributes)
+        self.serializer = RecommendationHistorySerializer(instance = self.model)
+
+    def test_get_list_recommendation_history(self):
+        response = self.client.get(HISTORY_LINK)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.data), 1)         
+    
+    def test_get_list_recommendation_history_unauthenticated(self):
+        self.client.force_authenticate(user=None)
+        response = self.client.get(HISTORY_LINK)
+        self.assertEqual(response.status_code, 401)
+
+class HistoryDetailTest():
+    def setUp(self):
+        self.client = APIClient()
+        self.user = AppUser.objects.create_user(email='email@email.com',username='testuser',password='test')
+        self.another_user = AppUser.objects.create_user(email = 'anonymous@gmail.com', username='anonymous', password='test')
+        
+        self.client.force_authenticate(user=self.user)
+        
+        self.recommendation_attributes = {
+            "user": self.user,
+            "date": timezone.now,
+            "prompt": "Berikan rekomendasi tempat untuk acara ulang tahun di Braga, Bandung.",
+            "output": "Berikut adalah 5 tempat makan favorit di Bandung."
+        }
+        self.model = RecommendationHistory.objects.create(**self.recommendation_attributes)
+        self.serializer = RecommendationHistorySerializer(instance = self.model)
+        self.HISTORY_DETAIL_LINK = reverse('ai:history-detail', kwargs={'id': self.model.id})
+
+    def test_get_detail_event(self):
+        response = self.client.get(self.HISTORY_DETAIL_LINK)
+        data = self.serializer.data
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(set(data.keys()), set(response.data))
+    
+    def test_get_detail_event_unauthenticated(self):
+        self.client.force_authenticate(user=None)
+        response = self.client.get(self.HISTORY_DETAIL_LINK)
+        self.assertEqual(response.status_code, 401)
+
 class AutofillTest(TestCase):
-    def SetUp(self):
+    def setUp(self):
         self.client = APIClient()
 
     def test_autofill_valid(self):

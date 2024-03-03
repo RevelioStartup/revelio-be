@@ -1,11 +1,11 @@
 from rest_framework import serializers
 
-from ai.models import AIRecommendation
+from ai.models import RecommendationHistory
 
 
-class RecommendationSerializer(serializers.ModelSerializer):
+class RecommendationHistorySerializer(serializers.ModelSerializer):
     user = serializers.HiddenField(default=serializers.CurrentUserDefault())
 
     class Meta:
-        model = AIRecommendation
+        model = RecommendationHistory
         fields = '__all__'
