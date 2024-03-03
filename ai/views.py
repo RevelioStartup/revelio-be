@@ -2,11 +2,14 @@ from dotenv import load_dotenv
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.generics import RetrieveDestroyAPIView
+from ai.models import RecommendationHistory
 from ai.prompts import create_autofill_prompt
 import re
 import os
 import json
 from openai import OpenAI
+
+from ai.serializers import RecommendationHistorySerializer
 
 load_dotenv()
 client = OpenAI(api_key=os.getenv('OPENAI_API_KEY'), organization=os.getenv('OPENAI_API_ORGANIZATION_ID'))
@@ -34,12 +37,25 @@ class AssistantView(APIView):
             max_tokens=256,
         )
 
+        data = {
+            'prompt' : prompt,
+            'output' : response.choices[0].message.content
+        }
+
+        serializer = RecommendationHistorySerializer(data=data, context={'request': request})
+        
+        if serializer.is_valid():
+            serializer.save()
+
         return Response({'msg' : response.choices[0].message.content})
 
 class HistoryView(APIView):
 
     def get(self, request):
-        pass
+        history = RecommendationHistory.objects.select_related('user').filter(user = request.user)
+        serializer = RecommendationHistorySerializer(history, many=True)
+        
+        return Response(serializer.data)
 
 class HistoryDetailView(RetrieveDestroyAPIView):
     pass
