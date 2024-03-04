@@ -130,9 +130,31 @@ class SendRecoverPasswordEmailView(APIView):
 
 class ProfileView(APIView):
     permission_classes = [IsAuthenticated]
+    serializer_class = ProfileSerializer
+
+    def get_object(self):
+        return self.request.user.profile
+
+    def get(self, request, *args, **kwargs):
+        user = request.user
+        profile = self.get_object()
+        user_data = {
+            'id': user.id,
+            'username': user.username,
+            'email': user.email,
+        }
+        profile_data = self.serializer_class(profile).data
+        return Response({'user': user_data, 'profile': profile_data})
+
     def put(self, request):
         user = request.user
-        profile = user.profile
+        # Check if the user has a profile
+        if hasattr(user, 'profile'):
+            profile = user.profile
+        else:
+            # If not, create a new profile for the user
+            profile = Profile.objects.create(user=user)
+
         serializer = ProfileSerializer(instance=profile, data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save()

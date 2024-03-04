@@ -170,9 +170,86 @@ class ProfileUpdateTest(TestCase):
         self.client.force_authenticate(user=self.user)
         self.profile = Profile.objects.create(user=self.user, bio='Old bio')
 
+    def test_get_profile(self):
+        # Authenticate the user
+        self.client.force_authenticate(user=self.user)
+        
+        # Make a GET request to the profile endpoint
+        url = reverse('authentication:profile')
+        response = self.client.get(url)
+        
+        # Check that the response status code is 200 OK
+        self.assertEqual(response.status_code, 200)
+        
+        # Check that the response contains the user data
+        self.assertEqual(response.data['user']['id'], self.user.id)
+        self.assertEqual(response.data['user']['username'], self.user.username)
+        self.assertEqual(response.data['user']['email'], self.user.email)
+        
+        # Check that the response contains the profile data
+        profile_data = response.data['profile']
+        self.assertEqual(profile_data['bio'], self.profile.bio)
+        self.assertEqual(profile_data['profile_picture'], self.profile.profile_picture.url if self.profile.profile_picture else None)
+
+        # Additional debugging information
+        if not self.profile.profile_picture:
+            print("Profile picture is None")
+        else:
+            print("Profile picture URL:", self.profile.profile_picture.url)
+        print("Response profile picture:", profile_data['profile_picture'])
+        
+    def test_get_profile_no_profile(self):
+        # Delete existing profile to simulate the case where user does not have a profile
+        self.profile.delete()
+
+        # Test getting profile when user does not have an existing profile
+        response = self.client.get(reverse('authentication:profile'))
+        self.assertEqual(response.status_code, 200)  # Expect successful response
+
+        # Check if 'profile' key exists in response data
+        self.assertIn('profile', response.data)
+        
+        # If 'profile' key exists, check if its value is None
+        if response.data['profile']:
+            self.assertIsNone(response.data['profile']['profile_picture'])
+
+    def test_get_profile_with_existing_profile(self):
+        # Check if the profile already exists for the user
+        if hasattr(self.user, 'profile'):
+            self.profile = self.user.profile
+        else:
+            # If not, create a new profile for the user
+            self.profile = Profile.objects.create(user=self.user, bio='Test bio')
+
+        # Make a GET request to the profile endpoint
+        url = reverse('authentication:profile')
+        response = self.client.get(url)
+
+        # Check that the response status code is 200 OK
+        self.assertEqual(response.status_code, 200)
+
+        # Check that the response contains the expected user data
+        expected_user_data = {
+            'id': self.user.id,
+            'username': self.user.username,
+            'email': self.user.email,
+        }
+        self.assertEqual(response.data['user'], expected_user_data)
+
+        # Check that the response contains the expected profile data
+        expected_profile_data = {
+            'bio': self.profile.bio,
+            'profile_picture': self.profile.profile_picture.url if self.profile.profile_picture else None,
+            # Add other fields as needed
+        }
+        self.assertEqual(response.data['profile'], expected_profile_data)
+
+
+
+
     def test_update_profile_with_valid_data(self):
         # Test updating profile with valid data
-        data = {'bio': 'New bio'}
+        data = {'bio': 'New bio'}   
         response = self.client.put(reverse('authentication:profile'), data)
         self.assertEqual(response.status_code, 200)
         self.assertEqual(Profile.objects.get(user=self.user).bio, 'New bio')
