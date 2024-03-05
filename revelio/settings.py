@@ -225,7 +225,10 @@ STORAGES = {
         },
     },
     "staticfiles": {
-        "BACKEND": "django.core.files.storage.FileSystemStorage",
-        "LOCATION": STATIC_ROOT,
+        "BACKEND": "storages.backends.gcloud.GoogleCloudStorage",
+        "OPTIONS": {
+            "credentials": GS_CREDENTIALS,
+            "bucket_name": os.getenv('GOOGLE_STORAGE_BUCKET'),
+        },
     }
 }
