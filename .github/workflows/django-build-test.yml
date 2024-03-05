@@ -40,6 +40,7 @@ jobs:
         echo "OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }}" >> .env
         echo "OPENAI_API_ORGANIZATION_ID=${{ secrets.OPENAI_API_ORGANIZATION_ID }}" >> .env
         cp .env revelio/.env
+        echo "GCP_PRIVATE_KEY=${{ secrets.GCP_PRIVATE_KEY }}" >> .env
 
     - name: Run Tests
       run: |
@@ -93,6 +94,7 @@ jobs:
           echo "OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }}" >> .env
           echo "OPENAI_API_ORGANIZATION_ID=${{ secrets.OPENAI_API_ORGANIZATION_ID }}" >> .env
           cp .env revelio/.env
+          echo "GCP_PRIVATE_KEY=${{ secrets.GCP_PRIVATE_KEY }}" >> .env
 
       - name: Run tests and generate coverage
         run: |
