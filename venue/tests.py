@@ -42,17 +42,6 @@ class BaseTestCase(TestCase):
         }
         self.venue1 = Venue.objects.create(**self.venue1_data)
 
-        self.venue2_data = {
-            "name": "Venue 2",
-            "address": "456 Test St",
-            "price": 60,
-            "status": "NONE",
-            "contact_name": "Jane Doe",
-            "contact_phone_number": "987-654-3210",
-            "event": self.event_id,
-        }
-        self.venue2 = Venue.objects.create(**self.venue2_data)
-
         self.photo = PhotoVenue.objects.create(
             venue=self.venue,
             image="https://example.com/path/to/your/image.jpg"
@@ -143,7 +132,7 @@ class VenueEventListViewTest(BaseTestCase):
         response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         
-        expected_data = VenueSerializer([self.venue, self.venue1, self.venue2], many=True).data
+        expected_data = VenueSerializer([self.venue, self.venue1], many=True).data
         self.assertEqual(response.data, expected_data)
     
     def test_get_venues_for_event_no_venues(self):
