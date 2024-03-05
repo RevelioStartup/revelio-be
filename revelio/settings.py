@@ -87,6 +87,7 @@ WSGI_APPLICATION = 'revelio.wsgi.application'
 CORS_ALLOWED_ORIGINS = [
     "https://revelio-two.vercel.app",
     "https://revelio-reveliostartup-gmailcom-revelios-projects.vercel.app",
+    "http://localhost:3001"
 ]
 
 
