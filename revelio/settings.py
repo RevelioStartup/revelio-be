@@ -193,9 +193,26 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 from google.oauth2 import service_account
 import os
 
-GS_CREDENTIALS = service_account.Credentials.from_service_account_file(
-    os.path.join(BASE_DIR, 'dotted-lexicon-415505-86934bc0f37c.json')
-)
+# GS_CREDENTIALS = service_account.Credentials.from_service_account_file(
+#     os.path.join(BASE_DIR, 'dotted-lexicon-415505-86934bc0f37c.json')
+# )
+
+gcs_credentials_info = {
+    "type": "service_account",
+    "project_id": env("GCP_PROJECT_ID"),
+    "private_key_id": env("GCP_PRIVATE_KEY_ID"),
+    "private_key": env("GCP_PRIVATE_KEY"),
+    "client_email": env("GCP_CLIENT_EMAIL"),
+    "client_id": env("GCP_CLIENT_ID"),
+    "auth_uri": env("GCP_AUTH_URI"),
+    "token_uri": env("GCP_TOKEN_URI"),
+    "auth_provider_x509_cert_url": env("GCP_AUTH_PROVIDER_X509_CERT_URL"),
+    "client_x509_cert_url": env("GCP_CLIENT_X509_CERT_URL"),
+    "universe_domain": env("GCP_UNIVERSE_DOMAIN")
+}
+
+# Create GCS credentials from the JSON object
+GS_CREDENTIALS = service_account.Credentials.from_service_account_info(gcs_credentials_info)
 
 STORAGES = {
     "default": {
