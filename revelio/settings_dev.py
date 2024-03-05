@@ -167,3 +167,33 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+import os
+from pathlib import Path
+from google.oauth2 import service_account
+
+from dotenv import load_dotenv
+load_dotenv()
+
+# Google Cloud Storage Credentials
+GS_CREDENTIALS = service_account.Credentials.from_service_account_file(
+    os.path.join(BASE_DIR, os.getenv('GOOGLE_CREDENTIALS_FILE'))
+)
+
+# Storages configuration
+STORAGES = {
+    "default": {
+        "BACKEND": "storages.backends.gcloud.GoogleCloudStorage",
+        "OPTIONS": {
+            "credentials": GS_CREDENTIALS,
+            "bucket_name": os.getenv('GOOGLE_STORAGE_BUCKET'),
+        },
+    },
+    "staticfiles": {
+        "BACKEND": "storages.backends.gcloud.GoogleCloudStorage",
+        "OPTIONS": {
+            "credentials": GS_CREDENTIALS,
+            "bucket_name": os.getenv('GOOGLE_STORAGE_BUCKET'),
+        },
+    }
+}
