@@ -207,3 +207,52 @@ class PhotoAPITestCase(BaseTestCase):
         url = reverse('photo-retrieve-update-destroy', args=[999])
         response = self.client.delete(url)
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+class VendorStatusUpdateAPITest(TestCase):
+    def setUp(self):
+        self.client = APIClient()
+        self.user = AppUser.objects.create_user(email='email@email.com', username='testuser', password='test')
+        self.client.force_authenticate(user=self.user)
+        self.vendor = Vendor.objects.create(name='Test Vendor', address='Test Address', price=100, status='PENDING',
+                                            contact_name='Test Contact', contact_phone_number='123456789', event=1)
+
+    def test_vendor_status_update(self):
+        url = reverse('vendor-status-update', kwargs={'pk': self.vendor.pk}) 
+        data = {'status': 'CONFIRMED'}
+        response = self.client.patch(url, data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data['status'], 'CONFIRMED')
+
+    def test_vendor_status_update_invalid_vendor_id(self):
+        url = reverse('vendor-status-update', kwargs={'pk': 999}) 
+        data = {'status': 'CONFIRMED'}
+        response = self.client.patch(url, data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+    def test_vendor_status_update_invalid_status(self):
+        url = reverse('vendor-status-update', kwargs={'pk': self.vendor.pk})  
+        data = {'status': 'INVALID_STATUS'}
+        response = self.client.patch(url, data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+    
+    # test remaining status
+    def test_vendor_status_update_to_none(self):
+        self._test_status_update('NONE')
+
+    def test_vendor_status_update_to_pending(self):
+        self._test_status_update('PENDING')
+
+    def test_vendor_status_update_to_waitlist(self):
+        self._test_status_update('WAITLIST')
+
+    def test_vendor_status_update_to_cancelled(self):
+        self._test_status_update('CANCELLED')
+
+    def _test_status_update(self, new_status):
+        url = reverse('vendor-status-update', kwargs={'pk': self.vendor.pk})
+        data = {'status': new_status}
+        response = self.client.patch(url, data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.vendor.refresh_from_db()
+        self.assertEqual(self.vendor.status, new_status)
+        self.assertEqual(response.data['status'], new_status)
