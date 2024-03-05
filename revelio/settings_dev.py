@@ -172,10 +172,6 @@ import os
 from pathlib import Path
 from google.oauth2 import service_account
 
-# Create environment variable
-env = environ.Env()
-environ.Env.read_env()
-
 private_key = env("GCP_PRIVATE_KEY").replace("\\n", "\n")
 
 gcs_credentials_info = {
