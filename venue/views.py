@@ -2,8 +2,8 @@ from rest_framework import status
 from rest_framework import generics
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from .models import Venue, Photo
-from .serializers import VenueSerializer, PhotoSerializer, VenueStatusSerializer
+from .models import Venue, PhotoVenue
+from .serializers import VenueSerializer, PhotoVenueSerializer, VenueStatusSerializer
 from rest_framework.permissions import IsAuthenticated
 
 class VenueListCreateView(generics.ListCreateAPIView):
@@ -22,12 +22,12 @@ class VenueEventListView(APIView):
         return Response(serializer.data)
 
 class PhotoCreateView(generics.CreateAPIView):
-    queryset = Photo.objects.all()
-    serializer_class = PhotoSerializer
+    queryset = PhotoVenue.objects.all()
+    serializer_class = PhotoVenueSerializer
 
 class PhotoRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
-    queryset = Photo.objects.all()
-    serializer_class = PhotoSerializer
+    queryset = PhotoVenue.objects.all()
+    serializer_class = PhotoVenueSerializer
 
 class VenueStatusUpdateAPIView(APIView):
     def patch(self, request, pk):

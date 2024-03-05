@@ -2,19 +2,11 @@ from django.db import models
 
 # Create your models here.
 
-from django.db import models
-
-class Venue(models.Model):
+class Vendor(models.Model):
     name = models.CharField(max_length=255)
     address = models.CharField(max_length=255)
     price = models.IntegerField()
-    status = models.CharField(max_length=16, default='NONE', choices=[
-            ('NONE', 'NONE'),
-            ('PENDING', 'PENDING'),
-            ('WAITLIST', 'WAITLIST'),
-            ('CONFIRMED', 'CONFIRMED'),
-            ('CANCELLED', 'CANCELLED'),
-        ])
+    status = models.CharField(max_length=16)
     contact_name = models.CharField(max_length=255)
     contact_phone_number = models.CharField(max_length=15)
     event = models.IntegerField()
@@ -22,8 +14,8 @@ class Venue(models.Model):
     def __str__(self):
         return self.name
 
-class PhotoVenue(models.Model):
-    venue = models.ForeignKey(Venue, related_name='photos', on_delete=models.CASCADE)
+class PhotoVendor(models.Model):
+    vendor = models.ForeignKey(Vendor, related_name='photos', on_delete=models.CASCADE)
     image = models.URLField()
 
     def __str__(self):

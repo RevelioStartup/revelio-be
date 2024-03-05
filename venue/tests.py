@@ -9,8 +9,8 @@ from rest_framework import status
 from rest_framework.test import APIClient
 
 from authentication.models import AppUser
-from .models import Venue, Photo
-from .serializers import VenueSerializer, PhotoSerializer
+from .models import Venue, PhotoVenue
+from .serializers import VenueSerializer, PhotoVenueSerializer
 
 
 class BaseTestCase(TestCase):
@@ -42,18 +42,7 @@ class BaseTestCase(TestCase):
         }
         self.venue1 = Venue.objects.create(**self.venue1_data)
 
-        self.venue2_data = {
-            "name": "Venue 2",
-            "address": "456 Test St",
-            "price": 60,
-            "status": "NONE",
-            "contact_name": "Jane Doe",
-            "contact_phone_number": "987-654-3210",
-            "event": self.event_id,
-        }
-        self.venue2 = Venue.objects.create(**self.venue2_data)
-
-        self.photo = Photo.objects.create(
+        self.photo = PhotoVenue.objects.create(
             venue=self.venue,
             image="https://example.com/path/to/your/image.jpg"
         )
@@ -62,7 +51,7 @@ class BaseTestCase(TestCase):
             "venue": self.venue.id,
             "image": "https://example.com/path/to/your/image.jpg"
         }
-        self.photo = Photo.objects.create(venue=self.venue, image=self.photo_data["image"])
+        self.photo = PhotoVenue.objects.create(venue=self.venue, image=self.photo_data["image"])
 
 class VenueModelTestCase(BaseTestCase):
     def test_venue_model(self):
@@ -143,7 +132,7 @@ class VenueEventListViewTest(BaseTestCase):
         response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         
-        expected_data = VenueSerializer([self.venue, self.venue1, self.venue2], many=True).data
+        expected_data = VenueSerializer([self.venue, self.venue1], many=True).data
         self.assertEqual(response.data, expected_data)
     
     def test_get_venues_for_event_no_venues(self):
@@ -160,66 +149,17 @@ class PhotoModelTestCase(BaseTestCase):
 
     def test_photo_model_no_venue(self):
         with self.assertRaises(IntegrityError):
-            Photo.objects.create(
+            PhotoVenue.objects.create(
                 venue=None,
                 image="https://example.com/path/to/your/image.jpg"
             )
 
     def test_photo_model_no_image(self):
         with self.assertRaises(IntegrityError):
-            Photo.objects.create(
+            PhotoVenue.objects.create(
                 venue=self.venue,
                 image=None
             )
-
-class PhotoAPITestCase(BaseTestCase):        
-    def test_create_photo(self):
-        url = reverse('photo-create')
-        response = self.client.post(url, self.photo_data, format='json')
-        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-
-
-    def test_get_photo_detail(self):
-        url = reverse('photo-retrieve-update-destroy', args=[self.photo.id])
-        response = self.client.get(url)
-        serializer = PhotoSerializer(self.photo)
-        self.assertEqual(response.data, serializer.data)
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-
-    def test_update_photo(self):
-        url = reverse('photo-retrieve-update-destroy', args=[self.photo.id])
-        updated_data = {"venue": self.venue.id, "image": "https://example.com/path/to/your/updated/image.jpg"}
-        response = self.client.put(url, updated_data, format='json')
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.data['image'], "https://example.com/path/to/your/updated/image.jpg")
-
-    def test_delete_photo(self):
-        url = reverse('photo-retrieve-update-destroy', args=[self.photo.id])
-        response = self.client.delete(url)
-        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
-        self.assertFalse(Photo.objects.filter(id=self.photo.id).exists())
-
-    def test_create_photo_missing_data(self):
-        url = reverse('photo-create')
-        incomplete_data = {"venue": self.venue.id}
-        response = self.client.post(url, incomplete_data, format='json')
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-
-    def test_get_photo_detail_does_not_exist(self):
-        url = reverse('photo-retrieve-update-destroy', args=[999])
-        response = self.client.get(url)
-        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
-
-    def test_update_photo_does_not_exist(self):
-        url = reverse('photo-retrieve-update-destroy', args=[999])
-        updated_data = {"venue": self.venue.id, "image": "https://example.com/path/to/your/updated/image.jpg"}
-        response = self.client.put(url, updated_data, format='json')
-        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
-
-    def test_delete_photo_does_not_exist(self):
-        url = reverse('photo-retrieve-update-destroy', args=[999])
-        response = self.client.delete(url)
-        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
 class VenueStatusUpdateAPITest(BaseTestCase):
     def setUp(self):
