@@ -197,11 +197,13 @@ import os
 #     os.path.join(BASE_DIR, 'dotted-lexicon-415505-86934bc0f37c.json')
 # )
 
+private_key = env("GCP_PRIVATE_KEY").replace("\\n", "\n")
+
 gcs_credentials_info = {
     "type": "service_account",
     "project_id": env("GCP_PROJECT_ID"),
     "private_key_id": env("GCP_PRIVATE_KEY_ID"),
-    "private_key": env("GCP_PRIVATE_KEY"),
+    "private_key": private_key,
     "client_email": env("GCP_CLIENT_EMAIL"),
     "client_id": env("GCP_CLIENT_ID"),
     "auth_uri": env("GCP_AUTH_URI"),

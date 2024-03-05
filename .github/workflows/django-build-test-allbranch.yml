@@ -40,7 +40,7 @@ jobs:
           "client_x509_cert_url": "'${{ secrets.CLIENT_X509_CERT_URL }}'",
           "universe_domain": "'${{ secrets.UNIVERSE_DOMAIN }}'"
         }' > dotted-lexicon-415505-86934bc0f37c.json
-        
+
     - name: Set Up Environment Variables
       run: |
         echo "DB_HOST=${{ secrets.DB_HOST }}" >> .env
@@ -54,10 +54,6 @@ jobs:
         echo "DEFAULT_FROM_EMAIL=${{ secrets.DEFAULT_FROM_EMAIL }}" >> .env
         echo "OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }}" >> .env
         echo "OPENAI_API_ORGANIZATION_ID=${{ secrets.OPENAI_API_ORGANIZATION_ID }}" >> .env
-        cp .env revelio/.env
-        echo "GOOGLE_STORAGE_BUCKET=${{ secrets.GOOGLE_STORAGE_BUCKET }}" >> .env
-        cp .env revelio/.env
-        echo "GOOGLE_CREDENTIALS_FILE=${{ secrets.GOOGLE_CREDENTIALS_FILE }}" >> .env
         cp .env revelio/.env
 
     - name: Run Tests
