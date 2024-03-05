@@ -9,9 +9,8 @@ from rest_framework import status
 from rest_framework.test import APIClient
 
 from authentication.models import AppUser
-from .models import Vendor, Photo
-from .serializers import VendorSerializer, PhotoSerializer
-
+from .models import Vendor, PhotoVendor
+from .serializers import VendorSerializer, PhotoVendorSerializer
 
 class BaseTestCase(TestCase):
     def setUp(self):
@@ -53,7 +52,7 @@ class BaseTestCase(TestCase):
         }
         self.vendor2 = Vendor.objects.create(**self.vendor2_data)
 
-        self.photo = Photo.objects.create(
+        self.photo = PhotoVendor.objects.create(
             vendor=self.vendor,
             image="https://example.com/path/to/your/image.jpg"
         )
@@ -62,7 +61,7 @@ class BaseTestCase(TestCase):
             "vendor": self.vendor.id,
             "image": "https://example.com/path/to/your/image.jpg"
         }
-        self.photo = Photo.objects.create(vendor=self.vendor, image=self.photo_data["image"])
+        self.photo = PhotoVendor.objects.create(vendor=self.vendor, image=self.photo_data["image"])
 
 class VendorModelTestCase(BaseTestCase):
     def test_vendor_model(self):
@@ -160,14 +159,14 @@ class PhotoModelTestCase(BaseTestCase):
 
     def test_photo_model_no_vendor(self):
         with self.assertRaises(IntegrityError):
-            Photo.objects.create(
+            PhotoVendor.objects.create(
                 vendor=None,
                 image="https://example.com/path/to/your/image.jpg"
             )
 
     def test_photo_model_no_image(self):
         with self.assertRaises(IntegrityError):
-            Photo.objects.create(
+            PhotoVendor.objects.create(
                 vendor=self.vendor,
                 image=None
             )
@@ -178,11 +177,10 @@ class PhotoAPITestCase(BaseTestCase):
         response = self.client.post(url, self.photo_data, format='json')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
-
     def test_get_photo_detail(self):
         url = reverse('photo-retrieve-update-destroy', args=[self.photo.id])
         response = self.client.get(url)
-        serializer = PhotoSerializer(self.photo)
+        serializer = PhotoVendorSerializer(self.photo)
         self.assertEqual(response.data, serializer.data)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
@@ -197,7 +195,7 @@ class PhotoAPITestCase(BaseTestCase):
         url = reverse('photo-retrieve-update-destroy', args=[self.photo.id])
         response = self.client.delete(url)
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
-        self.assertFalse(Photo.objects.filter(id=self.photo.id).exists())
+        self.assertFalse(PhotoVendor.objects.filter(id=self.photo.id).exists())
 
     def test_create_photo_missing_data(self):
         url = reverse('photo-create')

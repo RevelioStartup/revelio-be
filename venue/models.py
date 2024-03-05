@@ -22,7 +22,7 @@ class Venue(models.Model):
     def __str__(self):
         return self.name
 
-class Photo(models.Model):
+class PhotoVenue(models.Model):
     venue = models.ForeignKey(Venue, related_name='photos', on_delete=models.CASCADE)
     image = models.URLField()
 
