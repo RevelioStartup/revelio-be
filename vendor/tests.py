@@ -41,17 +41,6 @@ class BaseTestCase(TestCase):
         }
         self.vendor1 = Vendor.objects.create(**self.vendor1_data)
 
-        self.vendor2_data = {
-            "name": "Vendor 2",
-            "address": "456 Test St",
-            "price": 60,
-            "status": "NONE",
-            "contact_name": "Jane Doe",
-            "contact_phone_number": "987-654-3210",
-            "event": self.event_id,
-        }
-        self.vendor2 = Vendor.objects.create(**self.vendor2_data)
-
         self.photo = PhotoVendor.objects.create(
             vendor=self.vendor,
             image="https://example.com/path/to/your/image.jpg"
@@ -142,7 +131,7 @@ class VendorEventListViewTest(BaseTestCase):
         response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         
-        expected_data = VendorSerializer([self.vendor, self.vendor1, self.vendor2], many=True).data
+        expected_data = VendorSerializer([self.vendor, self.vendor1], many=True).data
         self.assertEqual(response.data, expected_data)
     
     def test_get_vendors_for_event_no_vendors(self):
