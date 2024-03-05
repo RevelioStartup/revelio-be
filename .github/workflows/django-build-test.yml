@@ -40,6 +40,15 @@ jobs:
         echo "OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }}" >> .env
         echo "OPENAI_API_ORGANIZATION_ID=${{ secrets.OPENAI_API_ORGANIZATION_ID }}" >> .env
         echo "GCP_PRIVATE_KEY=${{ secrets.GCP_PRIVATE_KEY }}" >> .env
+        echo "GCP_PROJECT_ID=${{ secrets.GCP_PROJECT_ID }}" >> .env
+        echo "GCP_PRIVATE_KEY_ID=${{ secrets.GCP_PRIVATE_KEY_ID }}" >> .env
+        echo "GCP_CLIENT_EMAIL=${{ secrets.GCP_CLIENT_EMAIL }}" >> .env
+        echo "GCP_CLIENT_ID=${{ secrets.GCP_CLIENT_ID }}" >> .env
+        echo "GCP_AUTH_URI=${{ secrets.GCP_AUTH_URI }}" >> .env
+        echo "GCP_TOKEN_URI=${{ secrets.GCP_TOKEN_URI }}" >> .env
+        echo "GCP_AUTH_PROVIDER_X509_CERT_URL=${{ secrets.GCP_AUTH_PROVIDER_X509_CERT_URL }}" >> .env
+        echo "GCP_CLIENT_X509_CERT_URL=${{ secrets.GCP_CLIENT_X509_CERT_URL }}" >> .env
+        echo "GCP_UNIVERSE_DOMAIN=${{ secrets.GCP_UNIVERSE_DOMAIN }}" >> .env
         cp .env revelio/.env
 
     - name: Run Tests
@@ -94,6 +103,15 @@ jobs:
           echo "OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }}" >> .env
           echo "OPENAI_API_ORGANIZATION_ID=${{ secrets.OPENAI_API_ORGANIZATION_ID }}" >> .env
           echo "GCP_PRIVATE_KEY=${{ secrets.GCP_PRIVATE_KEY }}" >> .env
+          echo "GCP_PROJECT_ID=${{ secrets.GCP_PROJECT_ID }}" >> .env
+          echo "GCP_PRIVATE_KEY_ID=${{ secrets.GCP_PRIVATE_KEY_ID }}" >> .env
+          echo "GCP_CLIENT_EMAIL=${{ secrets.GCP_CLIENT_EMAIL }}" >> .env
+          echo "GCP_CLIENT_ID=${{ secrets.GCP_CLIENT_ID }}" >> .env
+          echo "GCP_AUTH_URI=${{ secrets.GCP_AUTH_URI }}" >> .env
+          echo "GCP_TOKEN_URI=${{ secrets.GCP_TOKEN_URI }}" >> .env
+          echo "GCP_AUTH_PROVIDER_X509_CERT_URL=${{ secrets.GCP_AUTH_PROVIDER_X509_CERT_URL }}" >> .env
+          echo "GCP_CLIENT_X509_CERT_URL=${{ secrets.GCP_CLIENT_X509_CERT_URL }}" >> .env
+          echo "GCP_UNIVERSE_DOMAIN=${{ secrets.GCP_UNIVERSE_DOMAIN }}" >> .env
           cp .env revelio/.env
 
       - name: Run tests and generate coverage
