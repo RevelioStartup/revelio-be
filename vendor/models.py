@@ -6,7 +6,13 @@ class Vendor(models.Model):
     name = models.CharField(max_length=255)
     address = models.CharField(max_length=255)
     price = models.IntegerField()
-    status = models.CharField(max_length=16)
+    status = models.CharField(max_length=16, default='NONE', choices=[
+            ('NONE', 'NONE'),
+            ('PENDING', 'PENDING'),
+            ('WAITLIST', 'WAITLIST'),
+            ('CONFIRMED', 'CONFIRMED'),
+            ('CANCELLED', 'CANCELLED'),
+        ])
     contact_name = models.CharField(max_length=255)
     contact_phone_number = models.CharField(max_length=15)
     event = models.IntegerField()

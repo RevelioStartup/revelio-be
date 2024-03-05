@@ -3,7 +3,7 @@ from rest_framework import generics
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from .models import Vendor, PhotoVendor
-from .serializers import VendorSerializer, PhotoVendorSerializer
+from .serializers import VendorSerializer, PhotoVendorSerializer, VendorStatusSerializer
 from rest_framework.permissions import IsAuthenticated
 
 class VendorListCreateView(generics.ListCreateAPIView):
@@ -28,3 +28,16 @@ class PhotoCreateView(generics.CreateAPIView):
 class PhotoRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
     queryset = PhotoVendor.objects.all()
     serializer_class = PhotoVendorSerializer
+
+class VendorStatusUpdateAPIView(APIView):
+    def patch(self, request, pk):
+        try:
+            vendor = Vendor.objects.get(pk=pk)
+        except Vendor.DoesNotExist:
+            return Response({'message': 'Vendor not found'}, status=status.HTTP_404_NOT_FOUND)
+        
+        serializer = VendorStatusSerializer(vendor, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

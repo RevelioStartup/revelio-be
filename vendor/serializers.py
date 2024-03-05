@@ -12,3 +12,8 @@ class VendorSerializer(serializers.ModelSerializer):
     class Meta:
         model = Vendor
         fields = '__all__'
+
+class VendorStatusSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Vendor
+        fields = ['status']
