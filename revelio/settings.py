@@ -224,11 +224,11 @@ STORAGES = {
             "bucket_name": "bucket-revelio-1",
         },
     },
-    "staticfiles": {
-        "BACKEND": "storages.backends.gcloud.GoogleCloudStorage",
-        "OPTIONS": {
-            "credentials": GS_CREDENTIALS,
-            "bucket_name": "bucket-revelio-1",
-        },
-    }
+    # "staticfiles": {
+    #     "BACKEND": "storages.backends.gcloud.GoogleCloudStorage",
+    #     "OPTIONS": {
+    #         "credentials": GS_CREDENTIALS,
+    #         "bucket_name": "bucket-revelio-1",
+    #     },
+    # }
 }
