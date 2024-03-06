@@ -2,9 +2,9 @@ name: Build and Test
 
 on:
   push:
-    branches: [ "main", "staging", "PBI-Venue" ]
+    branches: [ "main", "staging" ]
   pull_request:
-    branches: [ "main", "staging", "PBI-Venue" ]
+    branches: [ "main", "staging" ]
 
 jobs:
   build:
