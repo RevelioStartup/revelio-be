@@ -10,7 +10,7 @@ from rest_framework import status
 from rest_framework.test import APIClient
 
 from authentication.models import AppUser
-from .models import Venue, Photo
+from .models import Venue, PhotoVenue
 from .serializers import VenueSerializer
 from django.core.files.uploadedfile import SimpleUploadedFile
 
@@ -72,7 +72,7 @@ class BaseTestCasePhoto(TestCase):
         self.event_id = 1
 
         with open('empathymap.jpg', 'rb') as img:
-            self.photo = Photo.objects.create(
+            self.photo = PhotoVenue.objects.create(
                 venue=self.venue,
                 image=SimpleUploadedFile(img.name, img.read())
             )
@@ -83,7 +83,7 @@ class BaseTestCasePhoto(TestCase):
                 "venue": self.venue,
                 "image": SimpleUploadedFile(img.name, img_content)
             }
-            self.photo = Photo.objects.create(**self.photo_data)
+            self.photo = PhotoVenue.objects.create(**self.photo_data)
 
 
 class VenueModelTestCase(BaseTestCaseVenue):
@@ -178,20 +178,20 @@ class PhotoModelTestCase(BaseTestCasePhoto):
 
     def test_photo_model_no_venue(self):
         with self.assertRaises(IntegrityError):
-            Photo.objects.create(
+            PhotoVenue.objects.create(
                 venue=None,
                 image=SimpleUploadedFile(name='empathymap.jpg', content=open('empathymap.jpg', 'rb').read())
             )
 
     def test_photo_model_no_image(self):
         with self.assertRaises(ValidationError):
-            photo = Photo(venue=self.venue)
+            photo = PhotoVenue(venue=self.venue)
             photo.full_clean()
 
 
 class PhotoAPITestCase(BaseTestCasePhoto):        
     def test_create_photo(self):
-        url = reverse('photo-create')
+        url = reverse('photo-venue-create')
         self.photo_data['venue'] = self.venue.id
         with open('empathymap.jpg', 'rb') as img:
             self.photo_data['image'] = SimpleUploadedFile(img.name, img.read())
@@ -199,13 +199,13 @@ class PhotoAPITestCase(BaseTestCasePhoto):
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
     def test_get_photo_detail(self):
-        url = reverse('photo-retrieve-update-destroy', args=[self.photo.id])
+        url = reverse('photo-venue-retrieve-update-destroy', args=[self.photo.id])
         response = self.client.get(url)
         self.assertTrue(self.photo.image.url.startswith('https://storage.googleapis.com/bucket-revelio-1'))
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     def test_update_photo(self):
-        url = reverse('photo-retrieve-update-destroy', args=[self.photo.id])
+        url = reverse('photo-venue-retrieve-update-destroy', args=[self.photo.id])
         with open('empathymap.jpg', 'rb') as img:
             updated_data = {"venue": self.venue.id, "image": SimpleUploadedFile(img.name, img.read())}
             response = self.client.put(url, updated_data, format='multipart')
@@ -213,25 +213,25 @@ class PhotoAPITestCase(BaseTestCasePhoto):
         self.assertTrue(self.photo.image.url.startswith('https://storage.googleapis.com/bucket-revelio-1'))
 
     def test_create_photo_missing_data(self):
-        url = reverse('photo-create')
+        url = reverse('photo-venue-create')
         incomplete_data = {"venue": self.venue.id}
         response = self.client.post(url, incomplete_data, format='multipart')
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_get_photo_detail_does_not_exist(self):
-        url = reverse('photo-retrieve-update-destroy', args=[999])
+        url = reverse('photo-venue-retrieve-update-destroy', args=[999])
         response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_update_photo_does_not_exist(self):
-        url = reverse('photo-retrieve-update-destroy', args=[999])
+        url = reverse('photo-venue-retrieve-update-destroy', args=[999])
         with open('empathymap.jpg', 'rb') as img:
             updated_data = {"venue": self.venue.id, "image": SimpleUploadedFile(img.name, img.read())}
             response = self.client.put(url, updated_data, format='multipart')
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_delete_photo_does_not_exist(self):
-        url = reverse('photo-retrieve-update-destroy', args=[999])
+        url = reverse('photo-venue-retrieve-update-destroy', args=[999])
         response = self.client.delete(url)
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 

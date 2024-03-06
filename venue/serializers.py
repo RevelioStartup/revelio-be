@@ -1,13 +1,13 @@
 from rest_framework import serializers
-from .models import Venue, Photo
+from .models import Venue, PhotoVenue
 
-class PhotoSerializer(serializers.ModelSerializer):
+class PhotoVenueSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Photo
+        model = PhotoVenue
         fields = '__all__'
 
 class VenueSerializer(serializers.ModelSerializer):
-    photos = PhotoSerializer(many=True, read_only=True)
+    photos = PhotoVenueSerializer(many=True, read_only=True)
 
     class Meta:
         model = Venue
