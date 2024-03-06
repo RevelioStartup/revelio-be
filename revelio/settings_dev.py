@@ -189,10 +189,8 @@ gcs_credentials_info = {
     "universe_domain": env("GCP_UNIVERSE_DOMAIN")
 }
 
-# Create GCS credentials from the JSON object
 GS_CREDENTIALS = service_account.Credentials.from_service_account_info(gcs_credentials_info)
 
-# Storages configuration
 STORAGES = {
     "default": {
         "BACKEND": "storages.backends.gcloud.GoogleCloudStorage",
