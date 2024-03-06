@@ -72,22 +72,6 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
           pip install coverage
-
-    - name: Set Up GCS Credentials
-      run: |
-        echo '{
-          "type": "service_account",
-          "project_id": "'${{ secrets.GCP_PROJECT_ID }}'",
-          "private_key_id": "'${{ secrets.GCP_PRIVATE_KEY_ID }}'",
-          "private_key": "'${{ secrets.GCP_PRIVATE_KEY }}'",
-          "client_email": "'${{ secrets.GCP_CLIENT_EMAIL }}'",
-          "client_id": "'${{ secrets.GCP_CLIENT_ID }}'",
-          "auth_uri": "'${{ secrets.GCP_AUTH_URI }}'",
-          "token_uri": "'${{ secrets.GCP_TOKEN_URI }}'",
-          "auth_provider_x509_cert_url": "'${{ secrets.GCP_AUTH_PROVIDER_X509_CERT_URL }}'",
-          "client_x509_cert_url": "'${{ secrets.GCP_CLIENT_X509_CERT_URL }}'",
-          "universe_domain": "'${{ secrets.GCP_UNIVERSE_DOMAIN }}'"
-        }' > dotted-lexicon-415505-86934bc0f37c.json
         
       - name: Set Up Environment Variables
         run: |
