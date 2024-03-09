@@ -186,6 +186,7 @@ USE_TZ = True
 # ]
 STATIC_URL = 'https://storage.googleapis.com/bucket-revelio-1/'
 GS_BUCKET_NAME = 'bucket-revelio-1'
+DEFAULT_FILE_STORAGE = 'storages.backends.gcloud.GoogleCloudStorage'
 
 STATIC_ROOT = BASE_DIR / "staticfiles_build" / "static"
 

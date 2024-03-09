@@ -163,6 +163,7 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.0/howto/static-files/
 
 # STATIC_URL = 'static/'
+DEFAULT_FILE_STORAGE = 'storages.backends.gcloud.GoogleCloudStorage'
 STATIC_URL = 'https://storage.googleapis.com/bucket-revelio-1/'
 GS_BUCKET_NAME = 'bucket-revelio-1'
 
