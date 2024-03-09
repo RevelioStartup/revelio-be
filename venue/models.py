@@ -1,4 +1,5 @@
 from django.db import models
+from event.models import Event
 
 # Create your models here.
 
@@ -17,7 +18,7 @@ class Venue(models.Model):
         ])
     contact_name = models.CharField(max_length=255)
     contact_phone_number = models.CharField(max_length=15)
-    event = models.IntegerField()
+    event = models.ForeignKey(Event, related_name='venues', on_delete=models.CASCADE)
 
     def __str__(self):
         return self.name
