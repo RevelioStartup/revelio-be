@@ -13,3 +13,4 @@ class RecommendationHistory(models.Model):
     output = models.TextField()
     list = models.TextField()
     keyword = models.TextField()
+    type = models.TextField()
