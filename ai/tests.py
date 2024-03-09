@@ -49,7 +49,9 @@ class HistoryTest(TestCase):
         self.recommendation_attributes = {
             "user": self.user,
             "prompt": "Berikan rekomendasi tempat untuk acara ulang tahun di Braga, Bandung.",
-            "output": "Berikut adalah 5 tempat makan favorit di Bandung."
+            "output": "Berikut adalah 5 tempat makan favorit di Bandung.",
+            "list": "Tempat makan 1; Tempat makan 2; Tempat makan 3",
+            "keyword": "Keyword 1; Keyword 2"
         }
         self.model = RecommendationHistory.objects.create(**self.recommendation_attributes)
         self.serializer = RecommendationHistorySerializer(instance = self.model)
@@ -76,7 +78,9 @@ class HistoryDetailTest():
             "user": self.user,
             "date": date.today,
             "prompt": "Berikan rekomendasi tempat untuk acara ulang tahun di Braga, Bandung.",
-            "output": "Berikut adalah 5 tempat makan favorit di Bandung."
+            "output": "Berikut adalah 5 tempat makan favorit di Bandung.",
+            "list": "Tempat makan 1; Tempat makan 2; Tempat makan 3",
+            "keyword": "Keyword 1; Keyword 2"
         }
         self.model = RecommendationHistory.objects.create(**self.recommendation_attributes)
         self.serializer = RecommendationHistorySerializer(instance = self.model)
