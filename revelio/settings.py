@@ -214,3 +214,20 @@ gcs_credentials_info = {
 }
 
 GS_CREDENTIALS = service_account.Credentials.from_service_account_info(gcs_credentials_info)
+
+STORAGES = {
+    "default": {
+        "BACKEND": "storages.backends.gcloud.GoogleCloudStorage",
+        "OPTIONS": {
+            "credentials": GS_CREDENTIALS,
+            "bucket_name": os.getenv('GOOGLE_STORAGE_BUCKET'),
+        },
+    },
+    "staticfiles": {
+        "BACKEND": "storages.backends.gcloud.GoogleCloudStorage",
+        "OPTIONS": {
+            "credentials": GS_CREDENTIALS,
+            "bucket_name": os.getenv('GOOGLE_STORAGE_BUCKET'),
+        },
+    }
+}
