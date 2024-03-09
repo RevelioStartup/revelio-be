@@ -14,6 +14,12 @@ class VenueRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
     queryset = Venue.objects.all()
     serializer_class = VenueSerializer
 
+    def delete(self, request, *args, **kwargs):
+        venue = self.get_object()
+        venue_pk = venue.pk
+        venue.delete()
+        return Response({'pk': venue_pk}, status=status.HTTP_204_NO_CONTENT)
+
 class VenueEventListView(APIView):
     def get(self, request, *args, **kwargs):
         event_id = kwargs.get('event_id')
