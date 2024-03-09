@@ -35,6 +35,12 @@ class PhotoRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
     queryset = PhotoVenue.objects.all()
     serializer_class = PhotoVenueSerializer
 
+    def delete(self, request, *args, **kwargs):
+        photo = self.get_object()
+        photo_pk = photo.pk
+        photo.delete()
+        return Response({'pk': photo_pk}, status=status.HTTP_204_NO_CONTENT)
+
 class VenueStatusUpdateAPIView(APIView):
     def patch(self, request, pk):
         try:
