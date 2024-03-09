@@ -12,6 +12,34 @@ from .tokens import account_token
 from django.core.mail import EmailMessage
 from .serializers import ProfileSerializer
 from rest_framework import status
+import asyncio
+
+async def send_verification_email(user):
+    username = user.username
+    email = user.email
+    subject = "Revelio - Verify Email"
+    message = render_to_string('verify_email_msg.html', {
+        'username': username,
+        'uid':urlsafe_base64_encode(force_bytes(user.pk)),
+        'token':account_token.make_token(user),
+    })
+    email = EmailMessage(
+        subject, message, to=[email]
+    )
+    email.content_subtype = 'html'
+    email.send()
+
+async def send_recover_account_email(user):
+    email = user.email
+    subject = "Revelio - Password Recovery Email"
+    message = render_to_string('change_password_email_msg.html', {
+        'token':account_token.make_token(user),
+    })
+    email = EmailMessage(
+        subject, message, to=[email]
+    )
+    email.content_subtype = 'html'
+    email.send()
 
 class RegisterView(APIView):
     
@@ -64,19 +92,7 @@ class SendVerificationEmailView(APIView):
     def get(self, request):
         if request.user.is_verified_user != True:
             user = request.user
-            username = request.user.username
-            email = request.user.email
-            subject = "Revelio - Verify Email"
-            message = render_to_string('verify_email_msg.html', {
-                'username': username,
-                'uid':urlsafe_base64_encode(force_bytes(user.pk)),
-                'token':account_token.make_token(user),
-            })
-            email = EmailMessage(
-                subject, message, to=[email]
-            )
-            email.content_subtype = 'html'
-            email.send()
+            asyncio.run(send_verification_email(user))
             return Response({'msg': 'Email delivered!'})
     
     def post(self, request):
@@ -99,15 +115,7 @@ class SendRecoverPasswordEmailView(APIView):
         is_user_exist = AppUser.objects.filter(email=email).exists()
         if is_user_exist:
             user = AppUser.objects.get(email=email)
-            subject = "Revelio - Password Recovery Email"
-            message = render_to_string('change_password_email_msg.html', {
-                'token':account_token.make_token(user),
-            })
-            email = EmailMessage(
-                subject, message, to=[email]
-            )
-            email.content_subtype = 'html'
-            email.send()
+            asyncio.run(send_recover_account_email(user))
             return Response({'msg': 'Email delivered!'})
         else:
             return Response({"msg": "User with that email doesn't exist!"}, status=400)
