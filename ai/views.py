@@ -83,13 +83,21 @@ class HistoryView(APIView):
     def get(self, request):
         history = RecommendationHistory.objects.select_related('user').filter(user = request.user)
         serializer = RecommendationHistorySerializer(history, many=True)
+        for item in serializer.data:
+            item['list'] = [i.strip().strip('"') for i in item['list'][1:-1].split(',') if i.strip().strip('"')]
+            item['keyword'] = [i.strip().strip('"') for i in item['keyword'][1:-1].split(',') if i.strip().strip('"')]
         return Response(serializer.data)
 
 class HistoryDetailView(RetrieveDestroyAPIView):
-    queryset = RecommendationHistory.objects.all()
-    serializer_class = RecommendationHistorySerializer
-    lookup_field = 'id'
     permission_classes = [IsAuthenticated, IsOwner]
+
+    def get(self, request, id):
+        history = RecommendationHistory.objects.get(pk=id)
+        serializer = RecommendationHistorySerializer(history)
+        data = serializer.data
+        data['list'] = [i.strip().strip('"') for i in data['list'][1:-1].split(',') if i.strip().strip('"')]
+        data['keyword'] = [i.strip().strip('"') for i in data['keyword'][1:-1].split(',') if i.strip().strip('"')]
+        return Response(data)
 
 class AutoFillView(APIView):
     
