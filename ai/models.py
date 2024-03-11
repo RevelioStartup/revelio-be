@@ -11,3 +11,6 @@ class RecommendationHistory(models.Model):
     date = models.DateField(default = date.today)
     prompt = models.TextField()
     output = models.TextField()
+    list = models.TextField()
+    keyword = models.TextField()
+    type = models.TextField()
