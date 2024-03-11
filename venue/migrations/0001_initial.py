@@ -22,7 +22,7 @@ class Migration(migrations.Migration):
                 ('status', models.CharField(max_length=255)),
                 ('contact_name', models.CharField(max_length=255)),
                 ('contact_phone_number', models.CharField(max_length=15)),
-                ('event', models.IntegerField()),
+                ('event', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='venues', to='event.event')),
             ],
         ),
         migrations.CreateModel(

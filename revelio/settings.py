@@ -181,9 +181,12 @@ USE_TZ = True
 
 STATIC_URL = 'static/'
 
-STATICFILES_DIRS = [
-    BASE_DIR / "static",
-]
+# STATICFILES_DIRS = [
+#     BASE_DIR / "static",
+# ]
+# STATIC_URL = 'https://storage.googleapis.com/bucket-revelio-1/'
+GS_BUCKET_NAME = 'bucket-revelio-1'
+
 STATIC_ROOT = BASE_DIR / "staticfiles_build" / "static"
 
 # Default primary key field type
@@ -212,19 +215,5 @@ gcs_credentials_info = {
 
 GS_CREDENTIALS = service_account.Credentials.from_service_account_info(gcs_credentials_info)
 
-STORAGES = {
-    "default": {
-        "BACKEND": "storages.backends.gcloud.GoogleCloudStorage",
-        "OPTIONS": {
-            "credentials": GS_CREDENTIALS,
-            "bucket_name": "bucket-revelio-1",
-        },
-    },
-    "staticfiles": {
-        "BACKEND": "storages.backends.gcloud.GoogleCloudStorage",
-        "OPTIONS": {
-            "credentials": GS_CREDENTIALS,
-            "bucket_name": os.getenv('GOOGLE_STORAGE_BUCKET'),
-        },
-    }
-}
+DEFAULT_FILE_STORAGE = 'storages.backends.gcloud.GoogleCloudStorage'
+GS_BUCKET_NAME = 'bucket-revelio-1'

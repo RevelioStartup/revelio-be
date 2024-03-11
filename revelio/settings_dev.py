@@ -163,6 +163,9 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.0/howto/static-files/
 
 STATIC_URL = 'static/'
+# STATIC_URL = 'https://storage.googleapis.com/bucket-revelio-1/static/'
+GS_BUCKET_NAME = 'bucket-revelio-1'
+STATIC_ROOT = BASE_DIR / "staticfiles_build" / "static"
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
@@ -191,19 +194,5 @@ gcs_credentials_info = {
 
 GS_CREDENTIALS = service_account.Credentials.from_service_account_info(gcs_credentials_info)
 
-STORAGES = {
-    "default": {
-        "BACKEND": "storages.backends.gcloud.GoogleCloudStorage",
-        "OPTIONS": {
-            "credentials": GS_CREDENTIALS,
-            "bucket_name": os.getenv('GOOGLE_STORAGE_BUCKET'),
-        },
-    },
-    "staticfiles": {
-        "BACKEND": "storages.backends.gcloud.GoogleCloudStorage",
-        "OPTIONS": {
-            "credentials": GS_CREDENTIALS,
-            "bucket_name": os.getenv('GOOGLE_STORAGE_BUCKET'),
-        },
-    }
-}
+DEFAULT_FILE_STORAGE = 'storages.backends.gcloud.GoogleCloudStorage'
+GS_BUCKET_NAME = 'bucket-revelio-1'
