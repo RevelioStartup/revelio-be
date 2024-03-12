@@ -33,6 +33,14 @@ class AssistantTest(TestCase):
         response = self.client.post(ASSISTANT_LINK, json.dumps(data), content_type='application/json')
         self.assertEqual(response.status_code, 200)
     
+    def test_assitant_specific_no_event(self):
+        data = {
+            'prompt' : 'Berikan rekomendasi tempat untuk acara ulang tahun di Braga, Bandung.',
+            'type': 'specific'
+        }
+        response = self.client.post(ASSISTANT_LINK, json.dumps(data), content_type='application/json')
+        self.assertEqual(response.status_code, 200)
+    
     def test_assitant_valid_general(self):
         data = {
             'prompt' : 'Di mana letak Braga dari ITB bandung?',
