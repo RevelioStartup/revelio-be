@@ -162,49 +162,49 @@ class PhotoModelTestCase(BaseTestCase):
 
 class PhotoAPITestCase(BaseTestCase):        
     def test_create_photo(self):
-        url = reverse('photo-create')
+        url = reverse('photo-vendor-create')
         response = self.client.post(url, self.photo_data, format='json')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
     def test_get_photo_detail(self):
-        url = reverse('photo-retrieve-update-destroy', args=[self.photo.id])
+        url = reverse('photo-vendor-retrieve-update-destroy', args=[self.photo.id])
         response = self.client.get(url)
         serializer = PhotoVendorSerializer(self.photo)
         self.assertEqual(response.data, serializer.data)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     def test_update_photo(self):
-        url = reverse('photo-retrieve-update-destroy', args=[self.photo.id])
+        url = reverse('photo-vendor-retrieve-update-destroy', args=[self.photo.id])
         updated_data = {"vendor": self.vendor.id, "image": "https://example.com/path/to/your/updated/image.jpg"}
         response = self.client.put(url, updated_data, format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data['image'], "https://example.com/path/to/your/updated/image.jpg")
 
     def test_delete_photo(self):
-        url = reverse('photo-retrieve-update-destroy', args=[self.photo.id])
+        url = reverse('photo-vendor-retrieve-update-destroy', args=[self.photo.id])
         response = self.client.delete(url)
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
         self.assertFalse(PhotoVendor.objects.filter(id=self.photo.id).exists())
 
     def test_create_photo_missing_data(self):
-        url = reverse('photo-create')
+        url = reverse('photo-vendor-create')
         incomplete_data = {"vendor": self.vendor.id}
         response = self.client.post(url, incomplete_data, format='json')
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_get_photo_detail_does_not_exist(self):
-        url = reverse('photo-retrieve-update-destroy', args=[999])
+        url = reverse('photo-vendor-retrieve-update-destroy', args=[999])
         response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_update_photo_does_not_exist(self):
-        url = reverse('photo-retrieve-update-destroy', args=[999])
+        url = reverse('photo-vendor-retrieve-update-destroy', args=[999])
         updated_data = {"vendor": self.vendor.id, "image": "https://example.com/path/to/your/updated/image.jpg"}
         response = self.client.put(url, updated_data, format='json')
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_delete_photo_does_not_exist(self):
-        url = reverse('photo-retrieve-update-destroy', args=[999])
+        url = reverse('photo-vendor-retrieve-update-destroy', args=[999])
         response = self.client.delete(url)
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
