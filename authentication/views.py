@@ -41,6 +41,15 @@ async def send_recover_account_email(user):
     email.content_subtype = 'html'
     email.send()
 
+
+def validate_input(username, email, password):
+    if username.strip() == '' or password.strip() == '' or email.strip() == '':
+        return 'Empty input! Make sure all the fields are filled.'
+    if re.match(r'^[\w\.-]+@[\w\.-]+\.\w+$', email) is None:
+        return 'Email format is wrong.'
+    return 'valid'
+
+
 class RegisterView(APIView):
     
     permission_classes = ()
@@ -53,7 +62,7 @@ class RegisterView(APIView):
             return Response({'msg': 'One or more fields are missing!'}, status= 400)
         if AppUser.objects.filter(username = username).exists() or AppUser.objects.filter(email = email).exists():
             return Response({'msg': 'Username and/or email already taken!'}, status=400)
-        validate_msg = self.validate_input(username, email, password)
+        validate_msg = validate_input(username, email, password)
         if validate_msg != 'valid':
             return Response({'msg': validate_msg}, status=400)
         new_user = AppUser.objects.create_user(email=email,username=username,password=password)
@@ -63,12 +72,6 @@ class RegisterView(APIView):
         return Response({'refresh': str(refresh),
                          'access': str(refresh.access_token)})
 
-    def validate_input(self, username, email, password):
-        if username == '' or password == '' or email == '':
-            return 'Empty input! Make sure all the fields are filled.'
-        if re.match(r'^[\w\.-]+@[\w\.-]+\.\w+$', email) is None:
-            return 'Email format is wrong.'
-        return 'valid'
 
 class LoginView(APIView):
 
