@@ -23,7 +23,7 @@ class AssistantView(APIView):
     def post(self, request):
         prompt = request.data.get('prompt')
         event = request.data.get('event')
-        type = request.data.get('type')
+        tipe = request.data.get('type')
         cleaned_prompt = re.sub(r'[^a-zA-Z0-9\s]', '', prompt)
         
         if len(cleaned_prompt.strip()) == 0:
@@ -32,7 +32,7 @@ class AssistantView(APIView):
                     'msg': 'Make sure you are putting a correct prompt to the assistant.'
                 }, status=400)
 
-        if type == 'specific':
+        if tipe == 'specific':
             full_prompt = create_assistant_prompt(prompt, event)
         else:
             full_prompt = prompt
@@ -47,14 +47,14 @@ class AssistantView(APIView):
         ).choices[0].message.content
         
         data = {}
-        if type == 'specific':
+        if tipe == 'specific':
             response = json.loads(response)
             data = {
                 'prompt': prompt,
                 'output': response['output'] if 'output' in response else '',
                 'list': response['list'] if 'list' in response else [],
                 'keyword': response['keyword'] if 'keyword' in response else [],
-                'type': type
+                'type': tipe
             }
         else :
             data = {
@@ -62,7 +62,7 @@ class AssistantView(APIView):
                 'output': response,
                 'list': [],
                 'keyword': [],
-                'type': type
+                'type': tipe
             }
 
         str_data = data.copy()
@@ -72,8 +72,6 @@ class AssistantView(APIView):
         
         if serializer.is_valid():
             serializer.save()
-        else:
-            print(serializer.errors)
 
         return Response(data, status=200)
 
