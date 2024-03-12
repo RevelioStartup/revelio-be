@@ -6,7 +6,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('venue', '0002_alter_photo_image'),
+        ('venue', '0001_initial'),
     ]
 
     operations = [
