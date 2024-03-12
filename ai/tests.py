@@ -25,6 +25,22 @@ class AssistantTest(TestCase):
         data = {
             'prompt' : 'Berikan rekomendasi tempat untuk acara ulang tahun di Braga, Bandung.',
             'type': 'specific',
+             "event": {
+                "name": "Revelio Onboarding",
+                "theme": "Sports"
+            }
+        }
+        response = self.client.post(ASSISTANT_LINK, json.dumps(data), content_type='application/json')
+        self.assertEqual(response.status_code, 200)
+    
+    def test_assitant_valid_general(self):
+        data = {
+            'prompt' : 'Di mana letak Braga dari ITB bandung?',
+            'type': 'general',
+                    "event": {
+                "name": "Revelio Onboarding",
+                "theme": "Sports"
+            }
         }
         response = self.client.post(ASSISTANT_LINK, json.dumps(data), content_type='application/json')
         self.assertEqual(response.status_code, 200)
@@ -50,8 +66,8 @@ class HistoryTest(TestCase):
             "user": self.user,
             "prompt": "Berikan rekomendasi tempat untuk acara ulang tahun di Braga, Bandung.",
             "output": "Berikut adalah 5 tempat makan favorit di Bandung.",
-            "list": "Tempat makan 1; Tempat makan 2; Tempat makan 3",
-            "keyword": "Keyword 1; Keyword 2",
+            "list": "[\"Tempat makan 1\", \"Tempat makan 2\", \"Tempat makan 3\"]",
+            "keyword": "[\"Keyword 1\", \"Keyword 2\"]",
             "type": "specific"
         }
         self.model = RecommendationHistory.objects.create(**self.recommendation_attributes)
@@ -67,7 +83,7 @@ class HistoryTest(TestCase):
         response = self.client.get(HISTORY_LINK)
         self.assertEqual(response.status_code, 401)
 
-class HistoryDetailTest():
+class HistoryDetailTest(TestCase):
     def setUp(self):
         self.client = APIClient()
         self.user = AppUser.objects.create_user(email='email@email.com',username='testuser',password='test')
@@ -77,11 +93,10 @@ class HistoryDetailTest():
         
         self.recommendation_attributes = {
             "user": self.user,
-            "date": date.today,
             "prompt": "Berikan rekomendasi tempat untuk acara ulang tahun di Braga, Bandung.",
             "output": "Berikut adalah 5 tempat makan favorit di Bandung.",
-            "list": "Tempat makan 1; Tempat makan 2; Tempat makan 3",
-            "keyword": "Keyword 1; Keyword 2",
+            "list": "[\"Tempat makan 1\", \"Tempat makan 2\", \"Tempat makan 3\"]",
+            "keyword": "[\"Keyword 1\", \"Keyword 2\"]",
             "type": "specific"
         }
         self.model = RecommendationHistory.objects.create(**self.recommendation_attributes)
