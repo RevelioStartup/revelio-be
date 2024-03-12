@@ -12,12 +12,12 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 
 from pathlib import Path
 import sys
-import environ
 from datetime import timedelta
+from dotenv import load_dotenv
+import os
 
-# Create environment variable
-env = environ.Env()
-environ.Env.read_env()
+load_dotenv()
+
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -27,10 +27,10 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = env('DJANGO_SECRET_KEY')
+SECRET_KEY = os.getenv('DJANGO_SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
 ALLOWED_HOSTS = ['*']
 
@@ -88,6 +88,7 @@ WSGI_APPLICATION = 'revelio.wsgi.application'
 CORS_ALLOWED_ORIGINS = [
     "https://revelio-two.vercel.app",
     "https://revelio-reveliostartup-gmailcom-revelios-projects.vercel.app",
+    "http://localhost:3001"
 ]
 
 
@@ -106,11 +107,11 @@ else:
     DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'HOST': env('DB_HOST'),
-        'NAME': env('DB_NAME'),
-        'USER': env('DB_USER'),
+        'HOST': os.getenv('DB_HOST'),
+        'NAME': os.getenv('DB_NAME'),
+        'USER': os.getenv('DB_USER'),
         'PORT': '5432',
-        'PASSWORD': env('DB_PASS'),
+        'PASSWORD': os.getenv('DB_PASS'),
         }
     }
 
@@ -155,12 +156,12 @@ SIMPLE_JWT = {
 
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 
-EMAIL_HOST = env('EMAIL_HOST')
-EMAIL_HOST_USER = env('EMAIL_HOST_USER')
-EMAIL_HOST_PASSWORD = env('EMAIL_HOST_PASSWORD')
+EMAIL_HOST = os.getenv('EMAIL_HOST')
+EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER')
+EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD')
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
-DEFAULT_FROM_EMAIL = env('DEFAULT_FROM_EMAIL')
+DEFAULT_FROM_EMAIL = os.getenv('DEFAULT_FROM_EMAIL')
 
 PASSWORD_RESET_TIMEOUT = 300
 
@@ -197,20 +198,20 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 from google.oauth2 import service_account
 import os
 
-private_key = env("GCP_PRIVATE_KEY").replace("\\n", "\n")
+private_key = os.getenv("GCP_PRIVATE_KEY").replace("\\n", "\n")
 
 gcs_credentials_info = {
     "type": "service_account",
-    "project_id": env("GCP_PROJECT_ID"),
-    "private_key_id": env("GCP_PRIVATE_KEY_ID"),
+    "project_id": os.getenv("GCP_PROJECT_ID"),
+    "private_key_id": os.getenv("GCP_PRIVATE_KEY_ID"),
     "private_key": private_key,
-    "client_email": env("GCP_CLIENT_EMAIL"),
-    "client_id": env("GCP_CLIENT_ID"),
-    "auth_uri": env("GCP_AUTH_URI"),
-    "token_uri": env("GCP_TOKEN_URI"),
-    "auth_provider_x509_cert_url": env("GCP_AUTH_PROVIDER_X509_CERT_URL"),
-    "client_x509_cert_url": env("GCP_CLIENT_X509_CERT_URL"),
-    "universe_domain": env("GCP_UNIVERSE_DOMAIN")
+    "client_email": os.getenv("GCP_CLIENT_EMAIL"),
+    "client_id": os.getenv("GCP_CLIENT_ID"),
+    "auth_uri": os.getenv("GCP_AUTH_URI"),
+    "token_uri": os.getenv("GCP_TOKEN_URI"),
+    "auth_provider_x509_cert_url": os.getenv("GCP_AUTH_PROVIDER_X509_CERT_URL"),
+    "client_x509_cert_url": os.getenv("GCP_CLIENT_X509_CERT_URL"),
+    "universe_domain": os.getenv("GCP_UNIVERSE_DOMAIN")
 }
 
 GS_CREDENTIALS = service_account.Credentials.from_service_account_info(gcs_credentials_info)

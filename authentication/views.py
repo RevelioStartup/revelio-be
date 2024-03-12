@@ -12,6 +12,44 @@ from .tokens import account_token
 from django.core.mail import EmailMessage
 from .serializers import ProfileSerializer
 from rest_framework import status
+import asyncio
+
+async def send_verification_email(user):
+    username = user.username
+    email = user.email
+    subject = "Revelio - Verify Email"
+    message = render_to_string('verify_email_msg.html', {
+        'username': username,
+        'uid':urlsafe_base64_encode(force_bytes(user.pk)),
+        'token':account_token.make_token(user),
+    })
+    email = EmailMessage(
+        subject, message, to=[email]
+    )
+    email.content_subtype = 'html'
+    email.send()
+
+async def send_recover_account_email(user):
+    email = user.email
+    subject = "Revelio - Password Recovery Email"
+    message = render_to_string('change_password_email_msg.html', {
+        'token':account_token.make_token(user),
+    })
+    email = EmailMessage(
+        subject, message, to=[email]
+    )
+    email.content_subtype = 'html'
+    email.send()
+
+
+def validate_input(username, email, password):
+    if username.strip() == '' or password.strip() == '' or email.strip() == '':
+        return 'Empty input! Make sure all the fields are filled.'
+    if re.match(r'^[\w\.-]+@[\w\.-]+\.\w+$', email) is None:
+        return 'Email format is wrong.'
+    return 'valid'
+
+from rest_framework.parsers import MultiPartParser, FormParser
 
 class RegisterView(APIView):
     
@@ -25,22 +63,17 @@ class RegisterView(APIView):
             return Response({'msg': 'One or more fields are missing!'}, status= 400)
         if AppUser.objects.filter(username = username).exists() or AppUser.objects.filter(email = email).exists():
             return Response({'msg': 'Username and/or email already taken!'}, status=400)
-        validate_msg = self.validate_input(username, email, password)
+        validate_msg = validate_input(username, email, password)
         if validate_msg != 'valid':
             return Response({'msg': validate_msg}, status=400)
         new_user = AppUser.objects.create_user(email=email,username=username,password=password)
         new_user.save()
+        Profile.objects.create(user=new_user)
         user = authenticate(request, username=username,password=password)
         refresh = RefreshToken.for_user(user)
         return Response({'refresh': str(refresh),
                          'access': str(refresh.access_token)})
 
-    def validate_input(self, username, email, password):
-        if username == '' or password == '' or email == '':
-            return 'Empty input! Make sure all the fields are filled.'
-        if re.match(r'^[\w\.-]+@[\w\.-]+\.\w+$', email) is None:
-            return 'Email format is wrong.'
-        return 'valid'
 
 class LoginView(APIView):
 
@@ -64,19 +97,7 @@ class SendVerificationEmailView(APIView):
     def get(self, request):
         if request.user.is_verified_user != True:
             user = request.user
-            username = request.user.username
-            email = request.user.email
-            subject = "Revelio - Verify Email"
-            message = render_to_string('verify_email_msg.html', {
-                'username': username,
-                'uid':urlsafe_base64_encode(force_bytes(user.pk)),
-                'token':account_token.make_token(user),
-            })
-            email = EmailMessage(
-                subject, message, to=[email]
-            )
-            email.content_subtype = 'html'
-            email.send()
+            asyncio.run(send_verification_email(user))
             return Response({'msg': 'Email delivered!'})
     
     def post(self, request):
@@ -99,15 +120,7 @@ class SendRecoverPasswordEmailView(APIView):
         is_user_exist = AppUser.objects.filter(email=email).exists()
         if is_user_exist:
             user = AppUser.objects.get(email=email)
-            subject = "Revelio - Password Recovery Email"
-            message = render_to_string('change_password_email_msg.html', {
-                'token':account_token.make_token(user),
-            })
-            email = EmailMessage(
-                subject, message, to=[email]
-            )
-            email.content_subtype = 'html'
-            email.send()
+            asyncio.run(send_recover_account_email(user))
             return Response({'msg': 'Email delivered!'})
         else:
             return Response({"msg": "User with that email doesn't exist!"}, status=400)
@@ -130,12 +143,28 @@ class SendRecoverPasswordEmailView(APIView):
 
 class ProfileView(APIView):
     permission_classes = [IsAuthenticated]
+    serializer_class = ProfileSerializer
+    parser_classes = [MultiPartParser, FormParser]
+
+    def get_object(self):
+        profile, created = Profile.objects.get_or_create(user=self.request.user)
+        return profile
+
+    def get(self, request, *args, **kwargs):
+        profile = self.get_object()
+        user_data = {
+            'id': request.user.id,
+            'username': request.user.username,
+            'email': request.user.email,
+        }
+        profile_data = self.serializer_class(profile).data
+        return Response({'user': user_data, 'profile': profile_data})
+
     def put(self, request):
-        user = request.user
-        profile = user.profile
-        serializer = ProfileSerializer(instance=profile, data=request.data, partial=True)
+        profile = self.get_object()
+        serializer = ProfileSerializer(profile, data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save()
-            return Response({'msg': 'Profile updated successfully!'})
+            return Response(serializer.data)
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
