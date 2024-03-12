@@ -22,14 +22,14 @@ class Migration(migrations.Migration):
                 ('status', models.CharField(max_length=16)),
                 ('contact_name', models.CharField(max_length=255)),
                 ('contact_phone_number', models.CharField(max_length=15)),
-                ('event', models.IntegerField()),
+                ('event', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='vendors', to='event.event')),
             ],
         ),
         migrations.CreateModel(
-            name='Photo',
+            name='PhotoVendor',
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('image', models.URLField()),
+                ('image', models.ImageField(upload_to='photos/'),),
                 ('vendor', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='photos', to='vendor.vendor')),
             ],
         ),

@@ -13,6 +13,12 @@ class VendorListCreateView(generics.ListCreateAPIView):
 class VendorRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
     queryset = Vendor.objects.all()
     serializer_class = VendorSerializer
+    
+    def delete(self, request, *args, **kwargs):
+        photo = self.get_object()
+        photo_pk = photo.pk
+        photo.delete()
+        return Response({'pk': photo_pk}, status=status.HTTP_204_NO_CONTENT)
 
 class VendorEventListView(APIView):
     def get(self, request, *args, **kwargs):
@@ -28,6 +34,12 @@ class PhotoCreateView(generics.CreateAPIView):
 class PhotoRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
     queryset = PhotoVendor.objects.all()
     serializer_class = PhotoVendorSerializer
+
+    def delete(self, request, *args, **kwargs):
+        photo = self.get_object()
+        photo_pk = photo.pk
+        photo.delete()
+        return Response({'pk': photo_pk}, status=status.HTTP_204_NO_CONTENT)
 
 class VendorStatusUpdateAPIView(APIView):
     def patch(self, request, pk):
