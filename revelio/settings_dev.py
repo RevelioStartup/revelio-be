@@ -85,7 +85,9 @@ WSGI_APPLICATION = 'revelio.wsgi.application'
 
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
+    "http://localhost:3001",
     "https://revelio-two.vercel.app",
+
 ]
 
 # Database

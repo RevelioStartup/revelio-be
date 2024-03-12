@@ -49,6 +49,7 @@ def validate_input(username, email, password):
         return 'Email format is wrong.'
     return 'valid'
 
+from rest_framework.parsers import MultiPartParser, FormParser
 
 class RegisterView(APIView):
     
@@ -67,6 +68,7 @@ class RegisterView(APIView):
             return Response({'msg': validate_msg}, status=400)
         new_user = AppUser.objects.create_user(email=email,username=username,password=password)
         new_user.save()
+        Profile.objects.create(user=new_user)
         user = authenticate(request, username=username,password=password)
         refresh = RefreshToken.for_user(user)
         return Response({'refresh': str(refresh),
@@ -141,12 +143,28 @@ class SendRecoverPasswordEmailView(APIView):
 
 class ProfileView(APIView):
     permission_classes = [IsAuthenticated]
+    serializer_class = ProfileSerializer
+    parser_classes = [MultiPartParser, FormParser]
+
+    def get_object(self):
+        profile, created = Profile.objects.get_or_create(user=self.request.user)
+        return profile
+
+    def get(self, request, *args, **kwargs):
+        profile = self.get_object()
+        user_data = {
+            'id': request.user.id,
+            'username': request.user.username,
+            'email': request.user.email,
+        }
+        profile_data = self.serializer_class(profile).data
+        return Response({'user': user_data, 'profile': profile_data})
+
     def put(self, request):
-        user = request.user
-        profile = user.profile
-        serializer = ProfileSerializer(instance=profile, data=request.data, partial=True)
+        profile = self.get_object()
+        serializer = ProfileSerializer(profile, data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save()
-            return Response({'msg': 'Profile updated successfully!'})
+            return Response(serializer.data)
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
