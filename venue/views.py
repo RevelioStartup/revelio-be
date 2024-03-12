@@ -2,8 +2,8 @@ from rest_framework import status
 from rest_framework import generics
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from .models import Venue, Photo
-from .serializers import VenueSerializer, PhotoSerializer, VenueStatusSerializer
+from .models import Venue, PhotoVenue
+from .serializers import VenueSerializer, PhotoVenueSerializer, VenueStatusSerializer
 from rest_framework.permissions import IsAuthenticated
 
 class VenueListCreateView(generics.ListCreateAPIView):
@@ -14,6 +14,12 @@ class VenueRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
     queryset = Venue.objects.all()
     serializer_class = VenueSerializer
 
+    def delete(self, request, *args, **kwargs):
+        venue = self.get_object()
+        venue_pk = venue.pk
+        venue.delete()
+        return Response({'pk': venue_pk}, status=status.HTTP_204_NO_CONTENT)
+
 class VenueEventListView(APIView):
     def get(self, request, *args, **kwargs):
         event_id = kwargs.get('event_id')
@@ -22,12 +28,18 @@ class VenueEventListView(APIView):
         return Response(serializer.data)
 
 class PhotoCreateView(generics.CreateAPIView):
-    queryset = Photo.objects.all()
-    serializer_class = PhotoSerializer
+    queryset = PhotoVenue.objects.all()
+    serializer_class = PhotoVenueSerializer
 
 class PhotoRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
-    queryset = Photo.objects.all()
-    serializer_class = PhotoSerializer
+    queryset = PhotoVenue.objects.all()
+    serializer_class = PhotoVenueSerializer
+
+    def delete(self, request, *args, **kwargs):
+        photo = self.get_object()
+        photo_pk = photo.pk
+        photo.delete()
+        return Response({'pk': photo_pk}, status=status.HTTP_204_NO_CONTENT)
 
 class VenueStatusUpdateAPIView(APIView):
     def patch(self, request, pk):

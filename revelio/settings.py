@@ -51,6 +51,7 @@ INSTALLED_APPS = [
     'rest_framework_simplejwt',
     'event',
     'ai',
+    'vendor',
 ]
 
 MIDDLEWARE = [
@@ -181,12 +182,39 @@ USE_TZ = True
 
 STATIC_URL = 'static/'
 
-STATICFILES_DIRS = [
-    BASE_DIR / "static",
-]
+# STATICFILES_DIRS = [
+#     BASE_DIR / "static",
+# ]
+# STATIC_URL = 'https://storage.googleapis.com/bucket-revelio-1/'
+GS_BUCKET_NAME = 'bucket-revelio-1'
+
 STATIC_ROOT = BASE_DIR / "staticfiles_build" / "static"
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+from google.oauth2 import service_account
+import os
+
+private_key = env("GCP_PRIVATE_KEY").replace("\\n", "\n")
+
+gcs_credentials_info = {
+    "type": "service_account",
+    "project_id": env("GCP_PROJECT_ID"),
+    "private_key_id": env("GCP_PRIVATE_KEY_ID"),
+    "private_key": private_key,
+    "client_email": env("GCP_CLIENT_EMAIL"),
+    "client_id": env("GCP_CLIENT_ID"),
+    "auth_uri": env("GCP_AUTH_URI"),
+    "token_uri": env("GCP_TOKEN_URI"),
+    "auth_provider_x509_cert_url": env("GCP_AUTH_PROVIDER_X509_CERT_URL"),
+    "client_x509_cert_url": env("GCP_CLIENT_X509_CERT_URL"),
+    "universe_domain": env("GCP_UNIVERSE_DOMAIN")
+}
+
+GS_CREDENTIALS = service_account.Credentials.from_service_account_info(gcs_credentials_info)
+
+DEFAULT_FILE_STORAGE = 'storages.backends.gcloud.GoogleCloudStorage'
+GS_BUCKET_NAME = 'bucket-revelio-1'
