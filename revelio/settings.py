@@ -182,10 +182,6 @@ USE_TZ = True
 
 STATIC_URL = 'static/'
 
-# STATICFILES_DIRS = [
-#     BASE_DIR / "static",
-# ]
-# STATIC_URL = 'https://storage.googleapis.com/bucket-revelio-1/'
 GS_BUCKET_NAME = 'bucket-revelio-1'
 
 STATIC_ROOT = BASE_DIR / "staticfiles_build" / "static"
