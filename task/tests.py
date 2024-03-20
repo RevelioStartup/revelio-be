@@ -1,16 +1,13 @@
 from datetime import date
 from decimal import Decimal
-import json
 from uuid import UUID
 from django.test import TestCase
-from collections import OrderedDict
 from django.test import TestCase
 from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APIClient
 from authentication.models import AppUser
 from .models import Task, Event
-from .serializers import TaskSerializer
 
 class BaseTestCase(TestCase):
     def setUp(self):
