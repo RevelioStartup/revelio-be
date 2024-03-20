@@ -17,7 +17,7 @@ class BaseTestCase(TestCase):
         self.client = APIClient()
         self.user = AppUser.objects.create_user(email='email@email.com', username='testuser', password='test')
         self.client.force_authenticate(user=self.user)
-        
+
         self.event_data = {
             "id": UUID("9fdfb487-5101-4824-8c3b-0775732aacda"),
             "user": self.user,
@@ -56,12 +56,12 @@ class TaskAPITestCase(BaseTestCase):
             "status": "On Progress",
             "event": self.event_id,
         }
-        url = reverse('task-list-create')
+        url = reverse('task-create')
         response = self.client.post(url, new_data, format='json')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
     def test_create_task_missing_data(self):
-        url = reverse('task-list-create')
+        url = reverse('task-create')
         incomplete_data = {"title": "Incomplete Vendor"}
         response = self.client.post(url, incomplete_data, format='json')
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
