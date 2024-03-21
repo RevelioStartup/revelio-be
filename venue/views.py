@@ -4,7 +4,6 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from .models import Venue, PhotoVenue
 from .serializers import VenueSerializer, PhotoVenueSerializer, VenueStatusSerializer
-from rest_framework.permissions import IsAuthenticated
 
 class VenueListCreateView(generics.ListCreateAPIView):
     queryset = Venue.objects.all()
