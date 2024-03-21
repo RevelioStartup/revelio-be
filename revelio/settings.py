@@ -52,6 +52,7 @@ INSTALLED_APPS = [
     'event',
     'ai',
     'vendor',
+    'task',
 ]
 
 MIDDLEWARE = [
