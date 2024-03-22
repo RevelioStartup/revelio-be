@@ -191,6 +191,11 @@ class SendRecoverPasswordEmailTest(TestCase):
                                     {'email':'email@email.com', 'token': 'wrong token'})
         self.assertEqual(response.status_code, 400)
 
+    def test_change_password_missing_token(self):
+        response = self.client.put((RECOVER_PASSWORD_LINK), 
+                                    {'email':'email@email.com', 'new_password': 'new_pass'})
+        self.assertEqual(response.status_code, 400)
+
 class CreateShortTokenTest(TestCase):
     def setUp(self):
         self.user = AppUser.objects.create_user(email='email@email.com',username='testuser',password='test')

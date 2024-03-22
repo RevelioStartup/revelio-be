@@ -13,7 +13,8 @@ from django.core.mail import EmailMessage
 from .serializers import ProfileSerializer
 from rest_framework import status
 import asyncio
-import random, string
+import secrets, string
+from django.core.exceptions import ObjectDoesNotExist
 
 async def send_verification_email(user, token):
     username = user.username
@@ -56,7 +57,7 @@ def create_shortened_token(user):
     letters = string.ascii_letters + string.digits
     is_short_exist = UserToken.objects.filter(shortened_token = short_token).exists()
     while is_short_exist:
-        short_token = ''.join(random.choice(letters) for _ in range(8))
+        short_token = ''.join(secrets.choice(letters) for _ in range(8))
         is_short_exist = UserToken.objects.filter(shortened_token = short_token).exists()
     UserToken.objects.create(user=user, token = long_token, shortened_token = short_token)
     return short_token
@@ -128,9 +129,11 @@ class SendVerificationEmailView(APIView):
                     user.save()
                     return Response({'message': 'Email verified successfully!'}, status=200)
                 else:
-                    raise Exception("Expired Token")
-            except:
+                    return Response({'msg': 'Expired token!'}, status=400)
+            except ObjectDoesNotExist:
                 return Response({'error': 'Invalid verification token!'}, status=400)
+            except AttributeError:
+                return Response({'error': 'Missing verification token!'}, status=400)
 
 class SendRecoverPasswordEmailView(APIView):
     permission_classes =()
@@ -163,8 +166,10 @@ class SendRecoverPasswordEmailView(APIView):
                     return Response({'msg': 'Password changes successfully!'}, status=200)
                 else:
                     return Response({'msg': 'Expired token!'}, status=400)
-            except:
+            except ObjectDoesNotExist:
                 return Response({'msg': 'Invalid verification token!'}, status=400)
+            except AttributeError:
+                return Response({'msg': 'Missing verification token!'}, status=400)
         else:
             return Response({'msg': "User doesn't exist!"}, status=400)
 
