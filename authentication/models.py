@@ -11,3 +11,8 @@ class Profile(models.Model):
     user = models.OneToOneField(AppUser, on_delete=models.CASCADE)
     bio = models.TextField(blank=True)
     profile_picture = models.ImageField(storage = default_storage, upload_to='profile_pictures/', blank=True)
+
+class UserToken(models.Model):
+    user = models.OneToOneField(AppUser, on_delete=models.CASCADE)
+    token = models.TextField(unique = True)
+    shortened_token = models.TextField(unique=True)

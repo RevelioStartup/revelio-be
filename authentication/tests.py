@@ -1,5 +1,6 @@
 from django.test import TestCase
-from authentication.models import AppUser, Profile
+from authentication.models import AppUser, Profile, UserToken
+from authentication.views import create_shortened_token
 from django.urls import reverse
 import json
 from django.core import mail
@@ -100,6 +101,9 @@ class SendVerificationEmailTest(TestCase):
         self.user = AppUser.objects.create_user(email='email@email.com',username='testuser',password='test')
         self.client.force_authenticate(user=self.user)
     
+    def tearDown(self):
+        UserToken.objects.all().delete()
+    
     def test_sent_email(self):
         response = self.client.get(EMAIL_VERIFICATION_LINK)
         self.assertEqual(response.status_code, 200)
@@ -108,11 +112,20 @@ class SendVerificationEmailTest(TestCase):
     
     def test_valid_verification_token(self):
         token = account_token.make_token(self.user)
-        response = self.client.post((EMAIL_VERIFICATION_LINK), {'token': token})
+        short_token = token[-8:]
+        self.token = UserToken.objects.create(user=self.user, token = token, shortened_token=short_token)
+        response = self.client.post((EMAIL_VERIFICATION_LINK), {'token': short_token})
         self.assertEqual(response.status_code, 200)
         user = AppUser.objects.get(pk=self.user.pk)
         self.assertTrue(user.is_verified_user)
     
+    def test_expired_verification_token(self):
+        token = account_token.make_token(self.user)
+        short_token = token[-8:]
+        self.token = UserToken.objects.create(user=self.user, token = 'expired_token', shortened_token=short_token)
+        response = self.client.post((EMAIL_VERIFICATION_LINK), {'token': short_token})
+        self.assertEqual(response.status_code, 400)
+
     def test_invalid_verification_token(self):
         response = self.client.post((EMAIL_VERIFICATION_LINK), {'token': 'invalid token'})
         self.assertEqual(response.status_code, 400)
@@ -126,6 +139,9 @@ class SendRecoverPasswordEmailTest(TestCase):
     def setUp(self):
         self.client = APIClient()
         self.user = AppUser.objects.create_user(email='email@email.com',username='testuser',password='test')
+    
+    def tearDown(self):
+        UserToken.objects.all().delete()
     
     def test_sent_email_recover_password(self):
         response = self.client.post((RECOVER_PASSWORD_LINK), {'email':'email@email.com'})
@@ -143,14 +159,26 @@ class SendRecoverPasswordEmailTest(TestCase):
     
     def test_change_password(self):
         token = account_token.make_token(self.user)
+        short_token = token[-8:]
+        self.token = UserToken.objects.create(user=self.user, token = token, shortened_token=short_token)
         response = self.client.put((RECOVER_PASSWORD_LINK), 
-                                    {'email':'email@email.com', 'token': token, 'new_password':'newpass'})
+                                    {'email':'email@email.com', 'token': short_token, 'new_password':'newpass'})
         self.assertEqual(response.status_code, 200)
     
     def test_change_password_wrong_email(self):
         token = account_token.make_token(self.user)
+        short_token = token[-8:]
+        self.token = UserToken.objects.create(user=self.user, token = token, shortened_token=short_token)
         response = self.client.put((RECOVER_PASSWORD_LINK), 
-                                    {'email':'wrong@email.com', 'token': token, 'new_password':'newpass'})
+                                    {'email':'wrong@email.com', 'token': short_token, 'new_password':'newpass'})
+        self.assertEqual(response.status_code, 400)
+    
+    def test_change_password_expired_token(self):
+        token = account_token.make_token(self.user)
+        short_token = token[-8:]
+        self.token = UserToken.objects.create(user=self.user, token = 'expired_token', shortened_token=short_token)
+        response = self.client.put((RECOVER_PASSWORD_LINK), 
+                                    {'email':'email@email.com', 'token': short_token, 'new_password':'newpass'})
         self.assertEqual(response.status_code, 400)
     
     def test_change_password_wrong_token(self):
@@ -162,6 +190,26 @@ class SendRecoverPasswordEmailTest(TestCase):
         response = self.client.put((RECOVER_PASSWORD_LINK), 
                                     {'email':'email@email.com', 'token': 'wrong token'})
         self.assertEqual(response.status_code, 400)
+
+class CreateShortTokenTest(TestCase):
+    def setUp(self):
+        self.user = AppUser.objects.create_user(email='email@email.com',username='testuser',password='test')
+
+    def tearDown(self):
+        UserToken.objects.all().delete()
+
+    def test_create_token(self):
+        short_token = account_token.make_token(self.user)[-8:]
+        res = create_shortened_token(self.user)
+        self.assertEqual(short_token, res)
+    
+    def test_create_token_with_same_short_token(self):
+        short_token = account_token.make_token(self.user)[-8:]
+        user2 = AppUser.objects.create_user(email='email2@email.com',username='testuser2',password='test2')
+        UserToken.objects.create(user=user2, token='faketoken', shortened_token=short_token)
+        res = create_shortened_token(self.user)
+        print(UserToken.objects.all())
+        self.assertNotEqual(short_token, res)
 
 class ProfileUpdateTest(TestCase):
     def setUp(self):
