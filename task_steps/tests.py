@@ -100,15 +100,8 @@ class TaskStepDeletionTestCase(TestCase):
         self.assertFalse(TaskStep.objects.filter(task=self.task).exists())
 
     def test_delete_all_task_steps_for_a_task_with_steps(self):
-        # Debugging: Print the count before deletion to confirm setup
-        print("TaskSteps before deletion:", TaskStep.objects.filter(task=self.task_with_steps).count())
-
         url = reverse('delete-all-task-steps', args=[self.task_with_steps.id])
         response = self.client.delete(url)
-
-        # Debugging: Print response data
-        print("Response data:", response.data)
-
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertFalse(TaskStep.objects.filter(task=self.task_with_steps).exists())
         self.assertIn("Successfully deleted 2 task step(s).", response.data["message"])
