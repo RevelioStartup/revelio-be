@@ -8,7 +8,7 @@ from task.models import Task
 # Create your models here.
 class TaskStep(models.Model):
     id = models.UUIDField(primary_key = True, default = uuid.uuid4, editable = False) 
-    task = models.ForeignKey(Task, on_delete=models.CASCADE, related_name='task_steps')
+    task = models.ForeignKey(Task, on_delete=models.CASCADE, related_name='task_steps', null=True, blank=True)
     name = models.TextField()
     output = models.TextField()
     description = models.TextField()
