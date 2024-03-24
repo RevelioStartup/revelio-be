@@ -63,7 +63,6 @@ class TaskAPITestCase(BaseTestCase):
         incomplete_data = {"title": "Incomplete Vendor"}
         response = self.client.post(url, incomplete_data, format='json')
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-
 class SeeTaskListViewTestCase(BaseTestCase):
     
     def test_get_tasks_list(self):
@@ -87,3 +86,30 @@ class SeeTaskListViewTestCase(BaseTestCase):
         response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data, data)
+
+class DetailTaskViewTestCase(BaseTestCase):
+    def test_update_task(self):
+        new_data = {
+            "title": "Updated Task",
+            "description": "This is a description of the updated task",
+            "status": "On Progress",
+            "event_id": self.event_id,
+        }
+        url = reverse('detail-task', args=[self.event_id, self.task.pk])
+        response = self.client.patch(url, new_data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        
+    def test_detail_not_found(self):
+        url = reverse('detail-task', args=[UUID("9fdfb487-5101-4824-8c3b-0775732aacdb"), self.task.pk])
+        response = self.client.patch(url, {}, format='json')
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+        
+    def test_update_task_invalid_data(self):
+        url = reverse('detail-task', args=[self.event_id, self.task.pk])
+        response = self.client.patch(url, {"status": "not_on_progress"}, format='json')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_delete_task(self):
+        url = reverse('detail-task', args=[self.event_id, self.task.pk])
+        response = self.client.delete(url)
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
