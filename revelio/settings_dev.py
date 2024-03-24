@@ -51,6 +51,7 @@ INSTALLED_APPS = [
     'ai',
     'vendor',
     'task',
+    'task_steps',
     'drf_yasg',
 ]
 
