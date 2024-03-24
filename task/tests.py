@@ -108,3 +108,9 @@ class UpdateTaskViewTestCase(BaseTestCase):
         url = reverse('update-task', args=[self.event_id, self.task.pk])
         response = self.client.patch(url, {"status": "not_on_progress"}, format='json')
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        
+class DeleteTaskViewTestCase(BaseTestCase):
+    def test_delete_task(self):
+        url = reverse('delete-task', args=[self.event_id, self.task.pk])
+        response = self.client.delete(url)
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
