@@ -26,4 +26,4 @@ class TaskDetailView(generics.RetrieveUpdateDestroyAPIView):
     def patch(self, request, *args, **kwargs):
         return self.partial_update(request, *args, **kwargs)
     def delete(self, request, *args, **kwargs):
-        return self.destroy(request, *args, **kwargs)
+        return NotImplementedError("Delete method not implemented")
