@@ -1,6 +1,6 @@
 from rest_framework import generics
 
-from utils.permissions import IsOwner
+from utils.permissions import IsEventOwner, IsOwner
 from .models import Task
 from .serializers import TaskSerializer
 from rest_framework.permissions import IsAuthenticated
@@ -17,9 +17,10 @@ class SeeTaskListView(generics.ListAPIView):
     permission_classes = [IsAuthenticated]
 
 class UpdateTaskView(generics.RetrieveUpdateAPIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, IsEventOwner]
     lookup_url_kwarg = 'task_id'
     serializer_class = TaskSerializer
+    
     def get_queryset(self):
         return Task.objects.filter(event_id=self.kwargs['event_id'], id=self.kwargs['task_id'])
     def patch(self, request, *args, **kwargs):
