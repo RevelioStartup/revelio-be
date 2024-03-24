@@ -87,7 +87,7 @@ class SeeTaskListViewTestCase(BaseTestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data, data)
 
-class UpdateTaskViewTestCase(BaseTestCase):
+class DetailTaskViewTestCase(BaseTestCase):
     def test_update_task(self):
         new_data = {
             "title": "Updated Task",
@@ -99,7 +99,7 @@ class UpdateTaskViewTestCase(BaseTestCase):
         response = self.client.patch(url, new_data, format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         
-    def test_update_task_not_found(self):
+    def test_detail_not_found(self):
         url = reverse('detail-task', args=[UUID("9fdfb487-5101-4824-8c3b-0775732aacdb"), self.task.pk])
         response = self.client.patch(url, {}, format='json')
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
@@ -108,8 +108,7 @@ class UpdateTaskViewTestCase(BaseTestCase):
         url = reverse('detail-task', args=[self.event_id, self.task.pk])
         response = self.client.patch(url, {"status": "not_on_progress"}, format='json')
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        
-class DeleteTaskViewTestCase(BaseTestCase):
+
     def test_delete_task(self):
         url = reverse('detail-task', args=[self.event_id, self.task.pk])
         response = self.client.delete(url)
