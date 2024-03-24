@@ -8,6 +8,7 @@ from rest_framework import status
 from rest_framework.test import APIClient
 from authentication.models import AppUser
 from .models import Task, Event
+from .serializers import TaskSerializer
 
 class BaseTestCase(TestCase):
     def setUp(self):
@@ -62,3 +63,27 @@ class TaskAPITestCase(BaseTestCase):
         incomplete_data = {"title": "Incomplete Vendor"}
         response = self.client.post(url, incomplete_data, format='json')
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+class SeeTaskListViewTestCase(BaseTestCase):
+    
+    def test_get_tasks_list(self):
+        task_data_2 = {
+            "title": "Task Default 2 ",
+            "description": "This is a description of task default 2",
+            "status": "Not Started",
+            "event_id": self.event_id,
+        }
+        task2 = Task.objects.create(**task_data_2)
+        url = reverse('get-task-list', args=[self.event_id])
+        data = TaskSerializer([self.task, task2], many=True).data
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data, data)
+    
+    def test_get_task_list_no_task(self):
+        Task.objects.all().delete()
+        url = reverse('get-task-list', args=[self.event_id])
+        data = []
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data, data)
