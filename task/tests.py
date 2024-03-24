@@ -103,3 +103,8 @@ class UpdateTaskViewTestCase(BaseTestCase):
         url = reverse('update-task', args=[UUID("9fdfb487-5101-4824-8c3b-0775732aacdb"), self.task.pk])
         response = self.client.patch(url, {}, format='json')
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+        
+    def test_update_task_invalid_data(self):
+        url = reverse('update-task', args=[self.event_id, self.task.pk])
+        response = self.client.patch(url, {"status": "not_on_progress"}, format='json')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
