@@ -53,6 +53,7 @@ INSTALLED_APPS = [
     'ai',
     'vendor',
     'task',
+    'drf_yasg',
 ]
 
 MIDDLEWARE = [
@@ -215,3 +216,11 @@ GS_CREDENTIALS = service_account.Credentials.from_service_account_info(gcs_crede
 
 DEFAULT_FILE_STORAGE = 'storages.backends.gcloud.GoogleCloudStorage'
 GS_BUCKET_NAME = 'bucket-revelio-1'
+
+SWAGGER_SETTINGS = {
+    'SECURITY_DEFINITIONS': {
+        'Basic': {
+            'type': 'basic'
+        }
+    }
+}

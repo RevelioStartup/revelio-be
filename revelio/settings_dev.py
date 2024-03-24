@@ -51,6 +51,7 @@ INSTALLED_APPS = [
     'ai',
     'vendor',
     'task',
+    'drf_yasg',
 ]
 
 MIDDLEWARE = [
