@@ -95,6 +95,6 @@ class UpdateTaskViewTestCase(BaseTestCase):
             "status": "On Progress",
             "event_id": self.event_id,
         }
-        url = reverse('update-task', args=[self.event_id, self.task.id])
+        url = reverse('update-task', args=[self.event_id, self.task.pk])
         response = self.client.patch(url, new_data, format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)

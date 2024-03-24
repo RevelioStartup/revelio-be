@@ -17,9 +17,10 @@ class SeeTaskListView(generics.ListAPIView):
     permission_classes = [IsAuthenticated]
 
 class UpdateTaskView(generics.RetrieveUpdateAPIView):
-    lookup_field = 'id'
-    permission_classes = [IsAuthenticated, IsOwner]
+    permission_classes = [IsAuthenticated]
+    lookup_url_kwarg = 'task_id'
+    serializer_class = TaskSerializer
     def get_queryset(self):
-        return Task.objects.filter(event_id=self.kwargs['event_id'])
+        return Task.objects.filter(event_id=self.kwargs['event_id'], id=self.kwargs['task_id'])
     def patch(self, request, *args, **kwargs):
-        return NotImplementedError('Patch Method has not been implemented yet')
+        return self.partial_update(request, *args, **kwargs)
