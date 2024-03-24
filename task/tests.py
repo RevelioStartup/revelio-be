@@ -63,7 +63,6 @@ class TaskAPITestCase(BaseTestCase):
         incomplete_data = {"title": "Incomplete Vendor"}
         response = self.client.post(url, incomplete_data, format='json')
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-
 class SeeTaskListViewTestCase(BaseTestCase):
     
     def test_get_tasks_list(self):
@@ -87,3 +86,15 @@ class SeeTaskListViewTestCase(BaseTestCase):
         response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data, data)
+
+class UpdateTaskViewTestCase(BaseTestCase):
+    def test_update_task(self):
+        new_data = {
+            "title": "Updated Task",
+            "description": "This is a description of the updated task",
+            "status": "On Progress",
+            "event_id": self.event_id,
+        }
+        url = reverse('update-task', args=[self.event_id, self.task.id])
+        response = self.client.patch(url, new_data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
