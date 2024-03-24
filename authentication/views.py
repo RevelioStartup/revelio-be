@@ -1,4 +1,4 @@
-from authentication.models import AppUser, Profile
+from authentication.models import AppUser, Profile, UserToken
 from django.contrib.auth import authenticate
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -13,15 +13,17 @@ from django.core.mail import EmailMessage
 from .serializers import ProfileSerializer
 from rest_framework import status
 import asyncio
+import secrets, string
+from django.core.exceptions import ObjectDoesNotExist
 
-async def send_verification_email(user):
+async def send_verification_email(user, token):
     username = user.username
     email = user.email
     subject = "Revelio - Verify Email"
     message = render_to_string('verify_email_msg.html', {
         'username': username,
         'uid':urlsafe_base64_encode(force_bytes(user.pk)),
-        'token':account_token.make_token(user),
+        'token':token,
     })
     email = EmailMessage(
         subject, message, to=[email]
@@ -29,11 +31,11 @@ async def send_verification_email(user):
     email.content_subtype = 'html'
     email.send()
 
-async def send_recover_account_email(user):
+async def send_recover_account_email(user, token):
     email = user.email
     subject = "Revelio - Password Recovery Email"
     message = render_to_string('change_password_email_msg.html', {
-        'token':account_token.make_token(user),
+        'token':token,
     })
     email = EmailMessage(
         subject, message, to=[email]
@@ -48,6 +50,17 @@ def validate_input(username, email, password):
     if re.match(r'^[\w\.-]+@[\w\.-]+\.\w+$', email) is None:
         return 'Email format is wrong.'
     return 'valid'
+
+def create_shortened_token(user):
+    long_token = account_token.make_token(user)
+    short_token = long_token[-8:]
+    letters = string.ascii_letters + string.digits
+    is_short_exist = UserToken.objects.filter(shortened_token = short_token).exists()
+    while is_short_exist:
+        short_token = ''.join(secrets.choice(letters) for _ in range(8))
+        is_short_exist = UserToken.objects.filter(shortened_token = short_token).exists()
+    UserToken.objects.create(user=user, token = long_token, shortened_token = short_token)
+    return short_token
 
 from rest_framework.parsers import MultiPartParser, FormParser
 
@@ -97,20 +110,30 @@ class SendVerificationEmailView(APIView):
     def get(self, request):
         if request.user.is_verified_user != True:
             user = request.user
-            asyncio.run(send_verification_email(user))
+            token = create_shortened_token(user)
+            asyncio.run(send_verification_email(user, token.upper()))
             return Response({'msg': 'Email delivered!'})
     
     def post(self, request):
         user = request.user
         uid = user.pk
-        token = request.data.get('token')
+        short_token = request.data.get('token')
         user = AppUser.objects.get(pk=uid)
-        if user is not None and account_token.check_token(user, token):
-            user.is_verified_user = True
-            user.save()
-            return Response({'message': 'Email verified successfully!'}, status=200)
-        else:
-            return Response({'error': 'Invalid verification token!'}, status=400)
+        if user is not None:
+            try:
+                short_token = short_token.lower()
+                token = UserToken.objects.get(shortened_token=short_token, user=user).token
+                UserToken.objects.filter(token=token).delete()
+                if account_token.check_token(user, token):
+                    user.is_verified_user = True
+                    user.save()
+                    return Response({'message': 'Email verified successfully!'}, status=200)
+                else:
+                    return Response({'msg': 'Expired token!'}, status=400)
+            except ObjectDoesNotExist:
+                return Response({'error': 'Invalid verification token!'}, status=400)
+            except AttributeError:
+                return Response({'error': 'Missing verification token!'}, status=400)
 
 class SendRecoverPasswordEmailView(APIView):
     permission_classes =()
@@ -120,24 +143,33 @@ class SendRecoverPasswordEmailView(APIView):
         is_user_exist = AppUser.objects.filter(email=email).exists()
         if is_user_exist:
             user = AppUser.objects.get(email=email)
-            asyncio.run(send_recover_account_email(user))
+            token = create_shortened_token(user).upper()
+            asyncio.run(send_recover_account_email(user, token))
             return Response({'msg': 'Email delivered!'})
         else:
             return Response({"msg": "User with that email doesn't exist!"}, status=400)
     
     def put(self, request):
         email = request.data.get('email')
-        token = request.data.get('token')
+        short_token = request.data.get('token')
         new_password = request.data.get('new_password')
         is_user_exist = AppUser.objects.filter(email=email).exists()
         if is_user_exist:
             user = AppUser.objects.get(email=email)
-            if user is not None and account_token.check_token(user, token):
-                user.set_password(new_password)
-                user.save()
-                return Response({'msg': 'Password changes successfully!'}, status=200)
-            else:
+            try:
+                short_token = short_token.lower()
+                token = UserToken.objects.get(shortened_token=short_token, user=user).token
+                UserToken.objects.filter(token=token).delete()
+                if account_token.check_token(user, token):
+                    user.set_password(new_password)
+                    user.save()
+                    return Response({'msg': 'Password changes successfully!'}, status=200)
+                else:
+                    return Response({'msg': 'Expired token!'}, status=400)
+            except ObjectDoesNotExist:
                 return Response({'msg': 'Invalid verification token!'}, status=400)
+            except AttributeError:
+                return Response({'msg': 'Missing verification token!'}, status=400)
         else:
             return Response({'msg': "User doesn't exist!"}, status=400)
 

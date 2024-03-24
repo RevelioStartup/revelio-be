@@ -1,16 +1,27 @@
 from rest_framework import generics, status
+
+from utils.permissions import IsOwner
 from .models import TaskStep
 from .serializers import TaskStepSerializer
 from rest_framework.response import Response
+from rest_framework.permissions import IsAuthenticated
 
 
-class TaskStepListCreateView(generics.ListCreateAPIView):
+class TaskStepCreateView(generics.CreateAPIView):
     queryset = TaskStep.objects.all()
     serializer_class = TaskStepSerializer
 
-class TaskStepDestroyView(generics.DestroyAPIView): #Delete a single test step
+    def get(self, request, *args, **kwargs):
+        # This method handles GET requests, returning a list of task steps
+        queryset = self.get_queryset()
+        serializer = self.get_serializer(queryset, many=True)
+        return Response(serializer.data)
+
+
+class TaskStepDestroyView(generics.DestroyAPIView):
     queryset = TaskStep.objects.all()
     serializer_class = TaskStepSerializer
+    permission_classes = [IsOwner, IsAuthenticated]  # Apply the custom permission class
 
     def destroy(self, request, *args, **kwargs):
         instance = self.get_object()
@@ -22,11 +33,14 @@ class TaskStepDestroyView(generics.DestroyAPIView): #Delete a single test step
 
 class DeleteAllTaskStepsView(generics.GenericAPIView):
     queryset = TaskStep.objects.all()
+    permission_classes = [IsOwner, IsAuthenticated]  
 
     def delete(self, request, *args, **kwargs):
         task_id = kwargs.get('task_id')
-        deleted_count, _ = TaskStep.objects.filter(task_id=task_id).delete()  # This also returns the number of deleted objects
+        task_steps = TaskStep.objects.filter(task_id=task_id)
+        deleted_count, _ = task_steps.delete()
         return Response(
             {"message": f"Successfully deleted {deleted_count} task step(s)."}, 
             status=status.HTTP_200_OK
         )
+

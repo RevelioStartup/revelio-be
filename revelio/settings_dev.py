@@ -52,6 +52,7 @@ INSTALLED_APPS = [
     'vendor',
     'task',
     'task_steps',
+    'drf_yasg',
 ]
 
 MIDDLEWARE = [

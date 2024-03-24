@@ -18,3 +18,4 @@ class TaskStep(models.Model):
             ('DONE', 'DONE'),
         ])
     step_order = models.IntegerField()
+    user = models.ForeignKey(AppUser, on_delete = models.CASCADE)
