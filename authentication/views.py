@@ -52,6 +52,7 @@ def validate_input(username, email, password):
     return 'valid'
 
 def create_shortened_token(user):
+    UserToken.objects.filter(user=user).delete()
     long_token = account_token.make_token(user)
     short_token = long_token[-8:]
     letters = string.ascii_letters + string.digits
