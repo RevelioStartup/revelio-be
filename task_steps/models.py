@@ -1,5 +1,4 @@
 from django.db import models
-from datetime import date
 import uuid
 
 from authentication.models import AppUser
@@ -10,9 +9,8 @@ class TaskStep(models.Model):
     id = models.UUIDField(primary_key = True, default = uuid.uuid4, editable = False) 
     task = models.ForeignKey(Task, on_delete=models.CASCADE, related_name='task_steps', null=True, blank=True)
     name = models.TextField()
-    output = models.TextField()
     description = models.TextField()
-    status = models.CharField(max_length=16, default='NONE', choices=[
+    status = models.CharField(max_length=16, default='NOT_STARTED', choices=[
             ('NOT_STARTED', 'NOT_STARTED'),
             ('ON_PROGRESS', 'ON_PROGRESS'),
             ('DONE', 'DONE'),
