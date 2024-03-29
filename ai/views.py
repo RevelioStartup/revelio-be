@@ -14,7 +14,7 @@ from openai import OpenAI
 from ai.serializers import RecommendationHistorySerializer
 
 load_dotenv()
-client = OpenAI(api_key=os.getenv('OPENAI_API_KEY'), organization=os.getenv('OPENAI_API_ORGANIZATION_ID'))
+client = OpenAI(api_key=os.getenv('OPENAI_API_KEY'))
 
 class AssistantView(APIView):
 
