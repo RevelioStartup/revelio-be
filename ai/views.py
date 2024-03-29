@@ -87,6 +87,7 @@ class HistoryView(APIView):
         return Response(serializer.data)
 
 class HistoryDetailView(RetrieveDestroyAPIView):
+    serializer_class = RecommendationHistorySerializer
     permission_classes = [IsAuthenticated, IsOwner]
 
     def get(self, request, id):
