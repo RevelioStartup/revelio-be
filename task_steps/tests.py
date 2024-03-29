@@ -57,6 +57,52 @@ class TaskStepTestCase(TestCase):
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertTrue(TaskStep.objects.filter(name="New Step").exists())
 
+class TaskStepUpdateTestCase(TestCase):
+    def setUp(self):
+        self.client = APIClient()
+        self.user = AppUser.objects.create_user(email='user@example.com', username='testuser', password='testpassword')
+        self.client.force_authenticate(user=self.user)
+
+        self.event = Event.objects.create(
+            user=self.user,
+            name="Annual Gala",
+            date=date.today(),
+            budget=Decimal('10000.00'),
+            objective="To celebrate the company's annual achievements.",
+            attendees=150,
+            theme="Futuristic",
+            services="Catering, Security, Entertainment"
+        )    
+        self.task = Task.objects.create(title="Task for Steps", description="Task Description", event=self.event)
+
+        self.task_step = TaskStep.objects.create(
+            name="Initial Step",
+            output="Initial Output",
+            description="Initial Description",
+            status="NOT_STARTED",
+            step_order=1,
+            task=self.task,
+            user=self.user
+        )
+    
+    def test_update_task_step(self):
+        url = reverse('task-step-update', kwargs={'pk': self.task_step.id}) 
+        data = {
+            "name": "Updated Step",
+            "output": "Updated Output",
+            "description": "Updated Description",
+            "status": "DONE",
+            "step_order": self.task_step.step_order,
+        }
+        response = self.client.put(url, data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertTrue(TaskStep.objects.filter(name="Updated Step").exists())
+        updated_task_step = TaskStep.objects.get(id=self.task_step.id)
+        self.assertEqual(updated_task_step.name, "Updated Step")
+        self.assertEqual(updated_task_step.output, "Updated Output")
+        self.assertEqual(updated_task_step.description, "Updated Description")
+        self.assertEqual(updated_task_step.status, "DONE")
+
 class TaskStepDeletionTestCase(TestCase):
     def setUp(self):
         self.client = APIClient()
