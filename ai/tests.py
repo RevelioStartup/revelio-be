@@ -5,13 +5,15 @@ from django.urls import reverse
 from ai.models import RecommendationHistory
 from ai.serializers import RecommendationHistorySerializer
 from authentication.models import AppUser
+from event.models import Event
 import json
+from decimal import Decimal
+from uuid import UUID
 
 # Create your tests here.
 
 ASSISTANT_LINK = reverse('ai:assistant')
 AUTOFILL_LINK = reverse('ai:autofill')
-HISTORY_LINK = reverse('ai:history')
 
 class AssistantTest(TestCase):
     def setUp(self):
@@ -20,15 +22,24 @@ class AssistantTest(TestCase):
         self.another_user = AppUser.objects.create_user(email = 'anonymous@gmail.com', username='anonymous', password='test')
         
         self.client.force_authenticate(user=self.user)
+        self.event_data = {
+            "id": UUID("9fdfb487-5101-4824-8c3b-0775732aacda"),
+            "user": self.user,
+            "name": "Revelio Onboarding",
+            "date": date.today(),
+            "budget": Decimal('20000000'),
+            "objective": "To onboard new employees",
+            "attendees": 100,
+            "theme": "Harry Potter",
+            "services": "Catering, Decorations, Music"
+        }
+        self.event = Event.objects.create(**self.event_data)
 
     def test_assitant_valid(self):
         data = {
             'prompt' : 'Berikan rekomendasi tempat untuk acara ulang tahun di Braga, Bandung.',
             'type': 'specific',
-             "event": {
-                "name": "Revelio Onboarding",
-                "theme": "Sports"
-            }
+            'event_id': str(self.event.id)
         }
         response = self.client.post(ASSISTANT_LINK, json.dumps(data), content_type='application/json')
         self.assertEqual(response.status_code, 200)
@@ -39,16 +50,13 @@ class AssistantTest(TestCase):
             'type': 'specific'
         }
         response = self.client.post(ASSISTANT_LINK, json.dumps(data), content_type='application/json')
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, 400)
     
     def test_assitant_valid_general(self):
         data = {
             'prompt' : 'Di mana letak Braga dari ITB bandung?',
             'type': 'general',
-                    "event": {
-                "name": "Revelio Onboarding",
-                "theme": "Sports"
-            }
+            'event_id': str(self.event.id)
         }
         response = self.client.post(ASSISTANT_LINK, json.dumps(data), content_type='application/json')
         self.assertEqual(response.status_code, 200)
@@ -56,6 +64,7 @@ class AssistantTest(TestCase):
     def test_assistant_empty_input(self):
         data = {
             'prompt' : ', .',
+            'event_id': str(self.event.id)
         }
         response = self.client.post(ASSISTANT_LINK, json.dumps(data), content_type='application/json')
         self.assertEqual(response.status_code, 400)
@@ -69,9 +78,21 @@ class HistoryTest(TestCase):
         self.another_user = AppUser.objects.create_user(email = 'anonymous@gmail.com', username='anonymous', password='test')
         
         self.client.force_authenticate(user=self.user)
-        
+        self.event_data = {
+            "id": UUID("9fdfb487-5101-4824-8c3b-0775732aacda"),
+            "user": self.user,
+            "name": "Revelio Onboarding",
+            "date": date.today(),
+            "budget": Decimal('20000000'),
+            "objective": "To onboard new employees",
+            "attendees": 100,
+            "theme": "Harry Potter",
+            "services": "Catering, Decorations, Music"
+        }
+        self.event = Event.objects.create(**self.event_data)
         self.recommendation_attributes = {
             "user": self.user,
+            "event": self.event,
             "prompt": "Berikan rekomendasi tempat untuk acara ulang tahun di Braga, Bandung.",
             "output": "Berikut adalah 5 tempat makan favorit di Bandung.",
             "list": "[\"Tempat makan 1\", \"Tempat makan 2\", \"Tempat makan 3\"]",
@@ -80,15 +101,16 @@ class HistoryTest(TestCase):
         }
         self.model = RecommendationHistory.objects.create(**self.recommendation_attributes)
         self.serializer = RecommendationHistorySerializer(instance = self.model)
+        self.HISTORY_LINK = reverse('ai:history', kwargs={'event_id': str(self.event.id)})
 
     def test_get_list_recommendation_history(self):
-        response = self.client.get(HISTORY_LINK)
+        response = self.client.get(self.HISTORY_LINK)
         self.assertEqual(response.status_code, 200)
         self.assertEqual(len(response.data), 1)         
     
     def test_get_list_recommendation_history_unauthenticated(self):
         self.client.force_authenticate(user=None)
-        response = self.client.get(HISTORY_LINK)
+        response = self.client.get(self.HISTORY_LINK)
         self.assertEqual(response.status_code, 401)
 
 class HistoryDetailTest(TestCase):
@@ -109,7 +131,7 @@ class HistoryDetailTest(TestCase):
         }
         self.model = RecommendationHistory.objects.create(**self.recommendation_attributes)
         self.serializer = RecommendationHistorySerializer(instance = self.model)
-        self.HISTORY_DETAIL_LINK = reverse('ai:history-detail', kwargs={'id': self.model.id})
+        self.HISTORY_DETAIL_LINK = reverse('ai:history-detail', kwargs={'id': str(self.model.id)})
 
     def test_get_detail_event(self):
         response = self.client.get(self.HISTORY_DETAIL_LINK)
