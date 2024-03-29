@@ -1,4 +1,5 @@
 import re
+from event.models import Event
 
 BASE_AUTOFILL_PROMPT = """
 You are going to fill data of an event, like objective, theme, and services, where I give you the name, date, and other information
@@ -36,14 +37,14 @@ now, respond to this input
 
 """
 
-def create_assistant_prompt(prompt, event):
-    if event != None and 'name' in event:
-        name = event['name']
+def create_assistant_prompt(prompt, event: Event):
+    if event.name:
+        name = event.name
     else:
         name = 'unknown'
     
-    if event != None and 'theme' in event:
-        theme = event['theme']
+    if event.theme:
+        theme = event.theme
     else:
         theme = 'unknown'
     

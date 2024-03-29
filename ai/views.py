@@ -6,12 +6,12 @@ from rest_framework.generics import RetrieveDestroyAPIView
 from utils.permissions import IsOwner
 from ai.models import RecommendationHistory
 from ai.prompts import create_autofill_prompt, create_assistant_prompt
+from ai.serializers import RecommendationHistorySerializer
+from event.models import Event
 import re
 import os
 import json
 from openai import OpenAI
-
-from ai.serializers import RecommendationHistorySerializer
 
 load_dotenv()
 client = OpenAI(api_key=os.getenv('OPENAI_API_KEY'))
@@ -22,10 +22,17 @@ class AssistantView(APIView):
 
     def post(self, request):
         prompt = request.data.get('prompt')
-        event = request.data.get('event')
+        event_id = request.data.get('event_id')
         tipe = request.data.get('type')
+
+        if event_id == None or not Event.objects.get(pk=event_id):
+            return Response(
+                {
+                    'msg': 'Event does not exist.'
+                }, status=400)
+
+        event_object = Event.objects.get(pk=event_id)
         cleaned_prompt = re.sub(r'[^a-zA-Z0-9\s]', '', prompt)
-        
         if len(cleaned_prompt.strip()) == 0:
             return Response(
                 {
@@ -33,7 +40,7 @@ class AssistantView(APIView):
                 }, status=400)
 
         if tipe == 'specific':
-            full_prompt = create_assistant_prompt(prompt, event)
+            full_prompt = create_assistant_prompt(prompt, event_object)
         else:
             full_prompt = prompt
         
@@ -50,6 +57,7 @@ class AssistantView(APIView):
         if tipe == 'specific':
             response = json.loads(response)
             data = {
+                'event': event_id,
                 'prompt': prompt,
                 'output': response['output'] if 'output' in response else '',
                 'list': response['list'] if 'list' in response else [],
@@ -58,6 +66,7 @@ class AssistantView(APIView):
             }
         else :
             data = {
+                'event': event_id,
                 'prompt': prompt,
                 'output': response,
                 'list': [],
@@ -72,14 +81,16 @@ class AssistantView(APIView):
         
         if serializer.is_valid():
             serializer.save()
+            data['id'] = serializer.data['id']
+            data['date'] = serializer.data['date']
 
         return Response(data, status=200)
 
 class HistoryView(APIView):
     permission_classes = [IsAuthenticated]
 
-    def get(self, request):
-        history = RecommendationHistory.objects.select_related('user').filter(user = request.user)
+    def get(self, request, event_id):
+        history = RecommendationHistory.objects.filter(event=event_id)
         serializer = RecommendationHistorySerializer(history, many=True)
         for item in serializer.data:
             item['list'] = [i.strip().strip('"') for i in item['list'][1:-1].split(',') if i.strip().strip('"')]
