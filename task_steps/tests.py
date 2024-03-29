@@ -103,6 +103,18 @@ class TaskStepUpdateTestCase(TestCase):
         self.assertEqual(updated_task_step.description, "Updated Description")
         self.assertEqual(updated_task_step.status, "DONE")
 
+    def test_update_invalid(self):
+        url = reverse('task-step-update', kwargs={'pk': self.task_step.id}) 
+        data = {
+            "nam": "Updated Step",
+            "outpu": "Updated Output",
+            "description": "Updated Description",
+            "statu": "DONE",
+            "step_orde": self.task_step.step_order,
+        }
+        response = self.client.put(url, data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
 class TaskStepDeletionTestCase(TestCase):
     def setUp(self):
         self.client = APIClient()
