@@ -8,3 +8,8 @@ class TaskStepSerializer(serializers.ModelSerializer):
     class Meta:
         model = TaskStep
         fields = '__all__'
+
+    def create(self, validated_data):
+        if isinstance(validated_data, list):
+            return TaskStep.objects.bulk_create([TaskStep(**item) for item in validated_data])
+        return TaskStep.objects.create(**validated_data)
