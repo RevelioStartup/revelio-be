@@ -204,20 +204,20 @@ class TaskStepsTest(TestCase):
 
         self.event = Event.objects.create(
             user=self.user,
-            name="Annual Gala",
+            name="Mom's birthdat",
             date=date.today(),
-            budget=Decimal('10000.00'),
-            objective="To celebrate the company's annual achievements.",
+            budget=Decimal('1000000.00'),
+            objective="To celebrate mom's 45th birthday with family.",
             attendees=150,
-            theme="Futuristic",
-            services="Catering, Security, Entertainment"
+            theme="Floral and nature",
+            services=""
         )    
-        self.task = Task.objects.create(title="Task for Steps", description="Task Description", event=self.event)
+        self.task = Task.objects.create(title="Prepare everything", description="Prepare all needs for the birthday party", event=self.event)
         self.AI_TASK_STEPS_LINK_VALID = reverse('ai:ai-task-steps', kwargs={'task_id': self.task.id})
         self.AI_TASK_STEPS_LINK_INVALID = reverse('ai:ai-task-steps', kwargs={'task_id': 0})
 
     def test_ai_task_steps_valid(self):
-        response = self.client.get(self.AI_TASK_STEPS_LINK_VALID).json()
+        response = self.client.get(self.AI_TASK_STEPS_LINK_VALID)
         self.assertEqual(response.status_code, 200)
         self.assertTrue('task_id' in response)
         self.assertTrue('steps' in response)
@@ -226,6 +226,6 @@ class TaskStepsTest(TestCase):
         self.assertTrue(len(response['steps']) > 0)
 
     def test_ai_task_steps_task_invalid(self):
-        response = self.client.get(self.AI_TASK_STEPS_LINK_INVALID).json()
+        response = self.client.get(self.AI_TASK_STEPS_LINK_INVALID)
         self.assertEqual(response.status_code, 400)
         self.assertEqual(response.json()['msg'], 'Task not found.')
