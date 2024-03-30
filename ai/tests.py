@@ -6,6 +6,7 @@ from ai.models import RecommendationHistory
 from ai.serializers import RecommendationHistorySerializer
 from authentication.models import AppUser
 from event.models import Event
+from task.models import Task
 import json
 from decimal import Decimal
 from uuid import UUID
@@ -194,3 +195,37 @@ class AutofillTest(TestCase):
         response = self.client.post(AUTOFILL_LINK, json.dumps(data), content_type='application/json')
         self.assertEqual(response.status_code, 400)
         self.assertEqual(response.json()['msg'], 'Make sure you are putting a correct form data.')
+
+class TaskStepsTest(TestCase):
+    def setUp(self):
+        self.client = APIClient()
+        self.user = AppUser.objects.create_user(email='user@example.com', username='testuser', password='testpassword')
+        self.client.force_authenticate(user=self.user)
+
+        self.event = Event.objects.create(
+            user=self.user,
+            name="Annual Gala",
+            date=date.today(),
+            budget=Decimal('10000.00'),
+            objective="To celebrate the company's annual achievements.",
+            attendees=150,
+            theme="Futuristic",
+            services="Catering, Security, Entertainment"
+        )    
+        self.task = Task.objects.create(title="Task for Steps", description="Task Description", event=self.event)
+        self.AI_TASK_STEPS_LINK_VALID = reverse('ai:ai-task-steps', kwargs={'task_id': self.task.id})
+        self.AI_TASK_STEPS_LINK_INVALID = reverse('ai:ai-task-steps', kwargs={'task_id': 0})
+
+    def test_ai_task_steps_valid(self):
+        response = self.client.get(self.AI_TASK_STEPS_LINK_VALID).json()
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue('task_id' in response)
+        self.assertTrue('steps' in response)
+        self.assertTrue('name' in response['steps'])
+        self.assertTrue('description' in response['steps'])
+        self.assertTrue(len(response['steps']) > 0)
+
+    def test_ai_task_steps_task_invalid(self):
+        response = self.client.get(self.AI_TASK_STEPS_LINK_INVALID).json()
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.json()['msg'], 'Task not found.')

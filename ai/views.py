@@ -136,5 +136,5 @@ class AutoFillView(APIView):
 class TaskStepView(APIView):
     permission_classes = [IsAuthenticated]
 
-    def get(self, request):
+    def get(self, request, task_id):
         pass

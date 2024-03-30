@@ -8,5 +8,5 @@ urlpatterns = [
     path('assistant/', AssistantView.as_view(), name='assistant'),
     path('history/all/<str:event_id>/', HistoryView.as_view(), name='history'),
     path('history/<str:id>/', HistoryDetailView.as_view(), name='history-detail'),
-    path('task-steps/', TaskStepView.as_view(), name='ai-task-steps'),
+    path('task-steps/<str:task_id>/', TaskStepView.as_view(), name='ai-task-steps'),
 ]
