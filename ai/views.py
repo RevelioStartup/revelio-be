@@ -141,7 +141,7 @@ class TaskStepView(APIView):
 
     def get(self, request, task_id):
         task_id = int(task_id)
-        task = Task.objects.get(id=task_id)
+        task = Task.objects.filter(id=task_id).first()
         if not task:
             return Response(
                 {

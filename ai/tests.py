@@ -219,11 +219,12 @@ class TaskStepsTest(TestCase):
     def test_ai_task_steps_valid(self):
         response = self.client.get(self.AI_TASK_STEPS_LINK_VALID)
         self.assertEqual(response.status_code, 200)
+        response = response.json()
         self.assertTrue('task_id' in response)
         self.assertTrue('steps' in response)
-        self.assertTrue('name' in response['steps'])
-        self.assertTrue('description' in response['steps'])
         self.assertTrue(len(response['steps']) > 0)
+        self.assertTrue('name' in response['steps'][0])
+        self.assertTrue('description' in response['steps'][0])
 
     def test_ai_task_steps_task_invalid(self):
         response = self.client.get(self.AI_TASK_STEPS_LINK_INVALID)

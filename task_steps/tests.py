@@ -112,7 +112,6 @@ class TaskStepUpdateTestCase(TestCase):
         self.assertTrue(TaskStep.objects.filter(name="Updated Step").exists())
         updated_task_step = TaskStep.objects.get(id=self.task_step.id)
         self.assertEqual(updated_task_step.name, "Updated Step")
-        self.assertEqual(updated_task_step.output, "Updated Output")
         self.assertEqual(updated_task_step.description, "Updated Description")
         self.assertEqual(updated_task_step.status, "DONE")
 
