@@ -126,6 +126,17 @@ class TaskStepUpdateTestCase(TestCase):
         }
         response = self.client.put(url, data, format='json')
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+    
+    def test_update_status_invalid(self):
+        url = reverse('task-step-update', kwargs={'pk': self.task_step.id}) 
+        data = {
+            "name": "Updated Step",
+            "description": "Updated Description",
+            "status": "dummy",
+            "step_order": self.task_step.step_order,
+        }
+        response = self.client.put(url, data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
 class TaskStepDeletionTestCase(TestCase):
     def setUp(self):
