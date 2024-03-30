@@ -37,6 +37,24 @@ now, respond to this input
 
 """
 
+BASE_TASK_STEP_PROMPT = """
+You're going to respond to a prompt about a task. The prompt will ask you to give answer in steps. Return at least 4 steps. Each step contains name and description.
+
+name is the name of the step for the task, description is the detailed explanation of the step.
+
+Input is like
+event name = Emma's graduation
+event theme = Family
+task title = Rent photographer
+task description = Looking for photographer experienced in graduation photos
+
+based on this, respond with an array JSON string. do not give anything other than JSON string.  for example
+{"steps": [{"name": "Search photographer", "description":"Search photographer on social media"}, {"name": "Pay", "description":"Pay photographer before D-Day"}, {"name": "Contact the photographer", "description":"Contact the photographer to give briefing and discuss ideas"}, {"name": "Ask for copies", "description":"Request copies physically on CD and digitally through flash disk"}]}
+
+now, respond to this input
+
+"""
+
 def create_assistant_prompt(prompt, event: Event):
     if event.name:
         name = event.name
@@ -60,4 +78,28 @@ def create_autofill_prompt(event):
     for key, value in event.items():
         prompt_data += f"{str(key)} = {str(value)}\n"
     full_prompt = f"{BASE_AUTOFILL_PROMPT}{prompt_data}"
+    return full_prompt
+
+def create_task_steps_prompt(task, event):
+    if task.title:
+        task_title = task.title
+    else:
+        return {'"steps": [{"name": "", "description": ""}]'}
+
+    if task.description:
+        task_description = task.description
+    else:
+        return {'"steps": [{"name": "", "description": ""}]'}
+
+    if event.name:
+        event_name = event.name
+    else:
+        event_name = 'unknown'
+    
+    if event.theme:
+        event_theme = event.theme
+    else: 
+        event_theme = 'unknown'
+
+    full_prompt = f"{BASE_TASK_STEP_PROMPT}event name = {event_name}\nevent theme = {event_theme}\ntask title = {task_title}\ntask description = {task_description}"
     return full_prompt

@@ -5,9 +5,12 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.generics import RetrieveDestroyAPIView
 from utils.permissions import IsOwner
 from ai.models import RecommendationHistory
-from ai.prompts import create_autofill_prompt, create_assistant_prompt
+from ai.prompts import create_autofill_prompt, create_assistant_prompt, create_task_steps_prompt
 from ai.serializers import RecommendationHistorySerializer
 from event.models import Event
+from event.serializers import EventSerializer
+from task.models import Task
+from task.serializers import TaskSerializer
 import re
 import os
 import json
@@ -137,4 +140,32 @@ class TaskStepView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request, task_id):
-        pass
+        task_id = int(task_id)
+        task = Task.objects.get(id=task_id)
+        if not task:
+            return Response(
+                {
+                    'msg': 'Task not found.'
+                }, status=400)
+        
+        event = Event.objects.get(id=task.event_id)
+
+        prompt = create_task_steps_prompt(task, event)
+
+        response = client.chat.completions.create(
+            model="gpt-3.5-turbo",
+            messages=[
+                {"role": "user", "content": prompt},
+            ],
+            temperature=0.8,
+            max_tokens=256,
+        ).choices[0].message.content
+
+        response = json.loads(response)
+
+        data = {
+            'task_id': task_id,
+            'steps': response['steps']
+        }
+
+        return Response(data, status=200)
