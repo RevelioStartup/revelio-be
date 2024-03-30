@@ -134,3 +134,23 @@ class EventTest(TestCase):
         self.client.force_authenticate(user=self.another_user)
         response = self.client.delete(self.EVENT_DETAIL_LINK)
         self.assertEqual(response.status_code, 403)
+
+    def test_update_event(self):
+        self.client.force_authenticate(user=self.user)
+        url = reverse('event:update', args=[self.model.id])
+        updated_data = {
+            "user": self.user.id,
+            "name": "Revelio Onboarding",
+            "date": date.today(),
+            "budget": Decimal('20000000'),
+            "objective": "To onboard new employees",
+            "attendees": 100,
+            "theme": "Harry Potter",
+            "services": "Catering, Decorations, Music",
+            "recommend_venue": False,
+            "recommend_vendor": False,
+            }
+        response = self.client.put(url, updated_data, format='json')
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.data['recommend_venue'], False)
+        self.assertEqual(response.data['recommend_vendor'], False)

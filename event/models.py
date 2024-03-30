@@ -14,3 +14,5 @@ class Event(models.Model):
     attendees = models.IntegerField()    
     theme = models.TextField()
     services = models.TextField()
+    recommend_venue = models.BooleanField(default=True)
+    recommend_vendor = models.BooleanField(default=True)
