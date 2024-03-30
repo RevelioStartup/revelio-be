@@ -8,6 +8,7 @@ from django.shortcuts import get_object_or_404
 from event.models import Event
 from event.serializers import EventSerializer
 from utils.permissions import IsOwner
+from rest_framework import generics
 
 class EventList(APIView):        
     def get(self, request):
@@ -26,6 +27,12 @@ class EventList(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class EventDetail(RetrieveDestroyAPIView):
+    queryset = Event.objects.all()
+    serializer_class = EventSerializer
+    lookup_field = 'id'
+    permission_classes = [IsAuthenticated, IsOwner]
+
+class EventUpdateView(generics.UpdateAPIView):
     queryset = Event.objects.all()
     serializer_class = EventSerializer
     lookup_field = 'id'
