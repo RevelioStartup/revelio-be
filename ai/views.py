@@ -132,3 +132,9 @@ class AutoFillView(APIView):
         )
 
         return Response(json.loads(response.choices[0].message.content), status=200)  
+    
+class TaskStepView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        pass
