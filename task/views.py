@@ -11,10 +11,12 @@ class TaskCreateView(generics.CreateAPIView):
     serializer_class = TaskSerializer
 
 class SeeTaskListView(generics.ListAPIView):
-    queryset = Task.objects.all()
     serializer_class = TaskSerializer
-    lookup_field = 'event_id'
     permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        event_id = self.kwargs.get('event_id')
+        return Task.objects.filter(event_id=event_id)
 
 class TaskDetailView(generics.RetrieveUpdateDestroyAPIView):
     permission_classes = [IsAuthenticated, IsEventOwner]
