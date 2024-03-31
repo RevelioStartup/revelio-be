@@ -81,15 +81,11 @@ def create_autofill_prompt(event):
     return full_prompt
 
 def create_task_steps_prompt(task, event):
-    if task.title:
+    if task.title and task.description:
         task_title = task.title
-    else:
-        return {'"steps": [{"name": "", "description": ""}]'}
-
-    if task.description:
         task_description = task.description
     else:
-        return {'"steps": [{"name": "", "description": ""}]'}
+        return '{"steps": [{"name": "", "description": ""}]}'
 
     if event.name:
         event_name = event.name
