@@ -115,6 +115,28 @@ class TaskStepUpdateTestCase(TestCase):
         self.assertEqual(updated_task_step.description, "Updated Description")
         self.assertEqual(updated_task_step.status, "DONE")
 
+    def test_update_task_step_2(self):
+        url = reverse('task-step-update', kwargs={'pk': self.task_step.id}) 
+        data = {
+            "name": "Updated Step",
+            "description": "Updated Description",
+            "status": "ON_PROGRESS",
+            "step_order": self.task_step.step_order,
+        }
+        response = self.client.put(url, data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_update_task_step_3(self):
+        url = reverse('task-step-update', kwargs={'pk': self.task_step.id}) 
+        data = {
+            "name": "Updated Step",
+            "description": "Updated Description",
+            "status": "NOT_STARTED",
+            "step_order": self.task_step.step_order,
+        }
+        response = self.client.put(url, data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
     def test_update_invalid(self):
         url = reverse('task-step-update', kwargs={'pk': self.task_step.id}) 
         data = {
@@ -136,6 +158,45 @@ class TaskStepUpdateTestCase(TestCase):
         }
         response = self.client.put(url, data, format='json')
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+class TaskStepAppendTestCase(TestCase):
+    def setUp(self):
+        self.client = APIClient()
+        self.user = AppUser.objects.create_user(email='user@example.com', username='testuser', password='testpassword')
+        self.client.force_authenticate(user=self.user)
+
+        self.event = Event.objects.create(
+            user=self.user,
+            name="Annual Gala",
+            date=date.today(),
+            budget=Decimal('10000.00'),
+            objective="To celebrate the company's annual achievements.",
+            attendees=150,
+            theme="Futuristic",
+            services="Catering, Security, Entertainment"
+        )    
+        self.task = Task.objects.create(title="Task for Steps", description="Task Description", event=self.event, status='Done')
+
+        self.task_step = TaskStep.objects.create(
+            name="Initial Step",
+            description="Initial Description",
+            status="DONE",
+            step_order=1,
+            task=self.task,
+            user=self.user
+        )
+    
+    def test_append_task_valid(self):
+        url = reverse('append-task-step', kwargs={'task_id': self.task.id}) 
+        data = {
+            "name": "append step",
+            "description": "append step",
+        }
+        response = self.client.post(url, data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        steps = TaskStep.objects.filter(task=self.task.id)
+        self.assertTrue(len(steps) == 2)
+        self.assertEqual(self.task.status, 'On Progress')
 
 class TaskStepDeletionTestCase(TestCase):
     def setUp(self):
