@@ -90,6 +90,29 @@ class TaskStepUpdateView(generics.UpdateAPIView):
 
         if serializer.is_valid():
             serializer.save()
+            task_instance = instance.task
+            steps = TaskStep.objects.filter(task_id=task_instance.id).order_by('step_order')
+            
+            done = True
+            not_started = True
+            for step in steps:
+                if step.status == 'ON_PROGRESS':
+                    done = False
+                    not_started = False
+                    break
+                elif step.status == 'DONE':
+                    not_started = False
+                elif step.status == 'NOT_STARTED':
+                    done = False
+            
+            if not done and not not_started:
+                task_instance.status = 'ON_PROGRESS'
+            elif not done:
+                task_instance.status = 'NOT_STARTED'
+            elif not not_started:
+                task_instance.status = 'DONE'
+            
+            task_instance.save()
             return Response(serializer.data,
                 status=status.HTTP_200_OK,
             )
@@ -97,6 +120,30 @@ class TaskStepUpdateView(generics.UpdateAPIView):
             return Response(
                 serializer.errors,
                 status=status.HTTP_400_BAD_REQUEST,
+            )
+        
+class TaskStepAppendView(generics.CreateAPIView):
+    permission_classes = [IsOwner, IsAuthenticated]
+
+    def post(self, request, *args, **kwargs):
+        task_id = kwargs['task_id']
+        task_instance = Task.objects.get(id=task_id)
+        last_step_order = TaskStep.objects.filter(task_id=task_instance.id).order_by('-step_order')[0].step_order
+        data = {
+            'task': task_id,
+            'name': request.data.get('name'),
+            'description': request.data.get('description'),
+            'step_order': last_step_order + 1
+        }
+        serializer = TaskStepSerializer(data=data, context={'request': request})
+
+        if serializer.is_valid():
+            if task_instance.status == 'Done':
+                task_instance.status = 'On Progress'
+            serializer.save()
+            return Response(
+                serializer.data,
+                status=status.HTTP_200_OK,
             )
 
 class TaskStepDestroyView(generics.DestroyAPIView):
