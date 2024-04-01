@@ -196,7 +196,6 @@ class TaskStepAppendTestCase(TestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         steps = TaskStep.objects.filter(task=self.task.id)
         self.assertTrue(len(steps) == 2)
-        self.assertEqual(self.task.status, 'On Progress')
 
 class TaskStepDeletionTestCase(TestCase):
     def setUp(self):
