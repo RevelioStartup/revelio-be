@@ -8,9 +8,7 @@ from ai.models import RecommendationHistory
 from ai.prompts import create_autofill_prompt, create_assistant_prompt, create_task_steps_prompt
 from ai.serializers import RecommendationHistorySerializer
 from event.models import Event
-from event.serializers import EventSerializer
 from task.models import Task
-from task.serializers import TaskSerializer
 import re
 import os
 import json
@@ -18,6 +16,7 @@ from openai import OpenAI
 
 load_dotenv()
 client = OpenAI(api_key=os.getenv('OPENAI_API_KEY'))
+AI_MODEL = 'gpt-3.5-turbo'
 
 class AssistantView(APIView):
 
@@ -48,7 +47,7 @@ class AssistantView(APIView):
             full_prompt = prompt
         
         response = client.chat.completions.create(
-            model="gpt-3.5-turbo",
+            model=AI_MODEL,
             messages=[
                 {"role": "user", "content": full_prompt},
             ],
@@ -126,7 +125,7 @@ class AutoFillView(APIView):
             return Response({'msg': 'Make sure you are putting a correct form data.'}, status=400)
 
         response = client.chat.completions.create(
-            model="gpt-3.5-turbo",
+            model=AI_MODEL,
             messages=[
                 {"role": "user", "content": prompt},
             ],
@@ -153,7 +152,7 @@ class TaskStepView(APIView):
         prompt = create_task_steps_prompt(task, event)
 
         response = client.chat.completions.create(
-            model="gpt-3.5-turbo",
+            model=AI_MODEL,
             messages=[
                 {"role": "user", "content": prompt},
             ],
