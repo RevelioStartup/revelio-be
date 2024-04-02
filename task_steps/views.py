@@ -106,11 +106,11 @@ class TaskStepUpdateView(generics.UpdateAPIView):
                     done = False
             
             if not done and not not_started:
-                task_instance.status = 'ON_PROGRESS'
+                task_instance.status = 'On Progress'
             elif not done:
-                task_instance.status = 'NOT_STARTED'
+                task_instance.status = 'Not Started'
             elif not not_started:
-                task_instance.status = 'DONE'
+                task_instance.status = 'Done'
             
             task_instance.save()
             return Response(serializer.data,
