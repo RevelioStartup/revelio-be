@@ -6,7 +6,12 @@ import sys
 
 def main():
     """Run administrative tasks."""
-    os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'revelio.settings')
+    if 'dev' in sys.argv:
+        sys.argv.remove('dev')
+        os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'revelio.settings_dev')
+    else:
+        os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'revelio.settings')
+
     try:
         from django.core.management import execute_from_command_line
     except ImportError as exc:

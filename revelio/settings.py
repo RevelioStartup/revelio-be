@@ -11,8 +11,13 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 """
 
 from pathlib import Path
-import os
 import sys
+from datetime import timedelta
+from dotenv import load_dotenv
+import os
+
+load_dotenv()
+
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -22,10 +27,10 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-o^$o854ewkumms=p^%lmvupmlp&0-5!d*ltjp%3gn8w@z3jccz'
+SECRET_KEY = os.getenv('DJANGO_SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
 ALLOWED_HOSTS = ['*']
 
@@ -39,13 +44,24 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'corsheaders',
     'authentication',
+    'venue',
+    'rest_framework',
+    'rest_framework_simplejwt',
+    'event',
+    'ai',
+    'vendor',
+    'task',
+    'task_steps',
+    'drf_yasg',
 ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
@@ -72,6 +88,12 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'revelio.wsgi.application'
 
+CORS_ALLOWED_ORIGINS = [
+    "https://revelio-two.vercel.app",
+    "https://revelio-reveliostartup-gmailcom-revelios-projects.vercel.app",
+    "http://localhost:3001"
+]
+
 
 # Database
 # Adapted from: https://medium.com/intelligentmachines/github-actions-end-to-end-ci-cd-pipeline-for-django-5d48d6f00abf
@@ -88,16 +110,16 @@ else:
     DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'HOST': 'aws-0-ap-southeast-1.pooler.supabase.com',
-        'NAME': 'postgres',
-        'USER': 'postgres.gkvuaueyujmheifpdqun',
+        'HOST': os.getenv('DB_HOST'),
+        'NAME': os.getenv('DB_NAME'),
+        'USER': os.getenv('DB_USER'),
         'PORT': '5432',
-        'PASSWORD': 'projectstartupReveliopastiberhasil!!!!',
+        'PASSWORD': os.getenv('DB_PASS'),
         }
     }
 
 
-
+AUTH_USER_MODEL = 'authentication.AppUser'
 
 
 # Password validation
@@ -118,6 +140,33 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+REST_FRAMEWORK = {
+    'DEFAULT_PERMISSION_CLASSES': (
+        'rest_framework.permissions.IsAuthenticated',
+    ),
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    ),
+}
+
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=480),
+    'SLIDING_TOKEN_REFRESH_LIFETIME': timedelta(days=1),
+    'SLIDING_TOKEN_LIFETIME': timedelta(days=30),
+    'SLIDING_TOKEN_REFRESH_LIFETIME_LATE_USER': timedelta(days=1),
+    'SLIDING_TOKEN_LIFETIME_LATE_USER': timedelta(days=30),
+}
+
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+
+EMAIL_HOST = os.getenv('EMAIL_HOST')
+EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER')
+EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD')
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+DEFAULT_FROM_EMAIL = os.getenv('DEFAULT_FROM_EMAIL')
+
+PASSWORD_RESET_TIMEOUT = 300
 
 # Internationalization
 # https://docs.djangoproject.com/en/5.0/topics/i18n/
@@ -136,7 +185,43 @@ USE_TZ = True
 
 STATIC_URL = 'static/'
 
+GS_BUCKET_NAME = 'bucket-revelio-1'
+
+STATIC_ROOT = BASE_DIR / "staticfiles_build" / "static"
+
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+from google.oauth2 import service_account
+import os
+
+private_key = os.getenv("GCP_PRIVATE_KEY").replace("\\n", "\n")
+
+gcs_credentials_info = {
+    "type": "service_account",
+    "project_id": os.getenv("GCP_PROJECT_ID"),
+    "private_key_id": os.getenv("GCP_PRIVATE_KEY_ID"),
+    "private_key": private_key,
+    "client_email": os.getenv("GCP_CLIENT_EMAIL"),
+    "client_id": os.getenv("GCP_CLIENT_ID"),
+    "auth_uri": os.getenv("GCP_AUTH_URI"),
+    "token_uri": os.getenv("GCP_TOKEN_URI"),
+    "auth_provider_x509_cert_url": os.getenv("GCP_AUTH_PROVIDER_X509_CERT_URL"),
+    "client_x509_cert_url": os.getenv("GCP_CLIENT_X509_CERT_URL"),
+    "universe_domain": os.getenv("GCP_UNIVERSE_DOMAIN")
+}
+
+GS_CREDENTIALS = service_account.Credentials.from_service_account_info(gcs_credentials_info)
+
+DEFAULT_FILE_STORAGE = 'storages.backends.gcloud.GoogleCloudStorage'
+GS_BUCKET_NAME = 'bucket-revelio-1'
+
+SWAGGER_SETTINGS = {
+    'SECURITY_DEFINITIONS': {
+        'Basic': {
+            'type': 'basic'
+        }
+    }
+}
