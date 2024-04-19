@@ -18,6 +18,7 @@ def validate_rundown_data(rundown_data):
         prev_end_time = end_time
     return True
 
+
 class RundownCreateView(APIView):
     def post(self, request):
         event_id = request.data.get('event_id')
@@ -41,3 +42,7 @@ class RundownCreateView(APIView):
         created_rundown = Rundown.objects.bulk_create([Rundown(**data) for data in rundown_data])
         rundown_serializers = RundownSerializer(created_rundown, many=True)
         return Response(rundown_serializers.data, status=201)    
+    
+class RundownUpdateView(APIView):
+    def patch(self, request, id):
+        pass

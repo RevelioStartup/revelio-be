@@ -7,7 +7,8 @@ from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APIClient
 from authentication.models import AppUser
-from .models import Event
+from .models import Event, Rundown
+import datetime
 
 class BaseTestCase(TestCase):
     def setUp(self):
@@ -82,6 +83,63 @@ class CreateRundownTestCase(BaseTestCase):
         response = self.client.post(self.url, self.rundown_data, format='json')
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
+class UpdateRundownTestCase(BaseTestCase):
+
+    def set_up_rundown(self):
+        self.rundown_1 = Rundown.objects.create(
+            event = self.event,
+            rundown_order = 1,
+            description = "Acara 1",
+            start_time = datetime.time(8,0),
+            end_time = datetime.time(9,0),
+        )
+        self.rundown_2 = Rundown.objects.create(
+            event = self.event,
+            rundown_order = 2,
+            description = "Acara 2",
+            start_time = datetime.time(9,0),
+            end_time = datetime.time(9,30),
+        )
+
+    def test_update_rundown_successfully(self):
+        self.set_up_rundown()
+        updated_rundown_data={
+                "description":"Acara 2 Updated",
+                "start_time":"09:10",
+                "end_time":"09:30"
+        }
+        url = reverse('rundown-update', args=[self.rundown_2.id])
+        response = self.client.patch(url, updated_rundown_data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_update_rundown_invalid_data(self):
+        self.set_up_rundown()
+        updated_rundown_data_invalid={
+                "description":"Acara 2 Updated",
+                "start_time":"08:10",
+                "end_time":"09:30"
+        }
+        url = reverse('rundown-update', args=[self.rundown_2.id])
+        response = self.client.patch(url, updated_rundown_data_invalid, format='json')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+        updated_rundown_data_invalid_2={
+                "description":"Acara 1 Updated",
+                "start_time":"08:10",
+                "end_time":"11:30"
+        }
+        url = reverse('rundown-update', args=[self.rundown_1.id])
+        response = self.client.patch(url, updated_rundown_data_invalid_2, format='json')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+        updated_rundown_data_invalid_3={
+                "description":"Acara 1 Updated",
+                "start_time":"18:10",
+                "end_time":"11:30"
+        }
+        url = reverse('rundown-update', args=[self.rundown_1.id])
+        response = self.client.patch(url, updated_rundown_data_invalid_3, format='json')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         
 
 
