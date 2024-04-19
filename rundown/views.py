@@ -18,6 +18,30 @@ def validate_rundown_data(rundown_data):
         prev_end_time = end_time
     return True
 
+def is_valid_updated_data(rundown: Rundown, new_start_time, new_end_time):
+    
+    if new_end_time <= new_start_time:
+        return False
+    
+    current_order = rundown.rundown_order
+    event_id = rundown.event.id
+    prev_rundown = Rundown.objects.all().filter(event_id=event_id, rundown_order=current_order-1)
+    next_rundown = Rundown.objects.all().filter(event_id=event_id, rundown_order=current_order+1)
+    new_start_time = new_start_time.split(":")
+    new_start_time = datetime.time(int(new_start_time[0]), int(new_start_time[1]))
+    new_end_time = new_end_time.split(":")
+    new_end_time = datetime.time(int(new_end_time[0]), int(new_end_time[1]))
+    if len(prev_rundown) > 0:
+        prev_rundown = prev_rundown[0]
+        prev_end_time = prev_rundown.end_time
+        if (prev_end_time > new_start_time): 
+            return False
+    if len(next_rundown) > 0:
+        next_rundown = next_rundown[0]
+        next_start_time = next_rundown.start_time
+        if (next_start_time < new_end_time): 
+            return False
+    return True
 
 class RundownCreateView(APIView):
     def post(self, request):
@@ -45,4 +69,18 @@ class RundownCreateView(APIView):
     
 class RundownUpdateView(APIView):
     def patch(self, request, id):
-        pass
+        new_start_time = request.data.get("start_time")
+        new_end_time = request.data.get("end_time")
+        new_description = request.data.get("description")
+
+        updated_rundown = get_object_or_404(Rundown, id = id)
+
+        if not is_valid_updated_data(updated_rundown, new_start_time, new_end_time):
+            return Response({"message":"Invalid rundown data"}, status=400)
+        
+        updated_rundown.start_time = new_start_time
+        updated_rundown.end_time = new_end_time
+        updated_rundown.description = new_description
+        updated_rundown.save()
+        rundown_serializers = RundownSerializer(updated_rundown)
+        return Response(rundown_serializers.data, status=200) 
