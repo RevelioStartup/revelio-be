@@ -55,7 +55,7 @@ class RundownCreateView(APIView):
         rundown_serializers = RundownSerializer(created_rundown, many=True)
         return Response(rundown_serializers.data, status=201)    
     
-class RundownUpdateView(APIView):
+class RundownDetailView(APIView):
     @swagger_auto_schema(
         request_body=openapi.Schema(
             type=openapi.TYPE_OBJECT,

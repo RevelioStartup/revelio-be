@@ -108,7 +108,7 @@ class UpdateRundownTestCase(BaseTestCase):
                 "start_time":"09:10",
                 "end_time":"09:30"
         }
-        url = reverse('rundown-update', args=[self.rundown_2.id])
+        url = reverse('rundown-detail', args=[self.rundown_2.id])
         response = self.client.patch(url, updated_rundown_data, format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
@@ -119,7 +119,7 @@ class UpdateRundownTestCase(BaseTestCase):
                 "start_time":"08:10",
                 "end_time":"09:30"
         }
-        url = reverse('rundown-update', args=[self.rundown_2.id])
+        url = reverse('rundown-detail', args=[self.rundown_2.id])
         response = self.client.patch(url, updated_rundown_data_invalid, format='json')
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
@@ -128,7 +128,7 @@ class UpdateRundownTestCase(BaseTestCase):
                 "start_time":"08:10",
                 "end_time":"11:30"
         }
-        url = reverse('rundown-update', args=[self.rundown_1.id])
+        url = reverse('rundown-detail', args=[self.rundown_1.id])
         response = self.client.patch(url, updated_rundown_data_invalid_2, format='json')
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
@@ -137,7 +137,7 @@ class UpdateRundownTestCase(BaseTestCase):
                 "start_time":"18:10",
                 "end_time":"11:30"
         }
-        url = reverse('rundown-update', args=[self.rundown_1.id])
+        url = reverse('rundown-detail', args=[self.rundown_1.id])
         response = self.client.patch(url, updated_rundown_data_invalid_3, format='json')
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         
