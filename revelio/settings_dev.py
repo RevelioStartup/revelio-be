@@ -54,6 +54,7 @@ INSTALLED_APPS = [
     'task_steps',
     'timeline',
     'drf_yasg',
+    'rundown',
 ]
 
 MIDDLEWARE = [
