@@ -44,6 +44,7 @@ urlpatterns = [
     path('vendors/', include('vendor.urls')),
     path('tasks/', include('task.urls')),
     path('task-steps/', include('task_steps.urls')),
+    path('rundowns/', include('rundown.urls')),
     path('swagger/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
     path('redoc/', schema_view.with_ui('redoc', cache_timeout=0), name='schema-redoc'),
 ]

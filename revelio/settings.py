@@ -55,6 +55,7 @@ INSTALLED_APPS = [
     'task',
     'task_steps',
     'drf_yasg',
+    'rundown',
 ]
 
 MIDDLEWARE = [
