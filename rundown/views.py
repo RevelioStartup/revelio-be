@@ -7,6 +7,8 @@ from rest_framework.response import Response
 from .validators import validate_rundown_data, is_valid_updated_data
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
+from rest_framework import generics
+from rest_framework.permissions import IsAuthenticated
 
 class RundownCreateView(APIView):
 
@@ -84,3 +86,11 @@ class RundownDetailView(APIView):
         updated_rundown.save()
         rundown_serializers = RundownSerializer(updated_rundown)
         return Response(rundown_serializers.data, status=200) 
+
+class RundownListView(generics.ListAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = RundownSerializer
+    lookup_field='event_id'
+    
+    def get_queryset(self):
+        return Rundown.objects.filter(event_id=self.kwargs['event_id'])
