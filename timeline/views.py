@@ -41,3 +41,20 @@ class TimelineCreateView(generics.CreateAPIView):
         except serializers.ValidationError as e:
             error_message = get_validation_error_detail(e)
             return Response({"error": error_message}, status=status.HTTP_400_BAD_REQUEST)
+        
+class TimelineDeleteView(generics.DestroyAPIView):
+    queryset = Timeline.objects.all()
+    serializer_class = TimelineSerializer
+    lookup_field = 'id'  
+
+    def delete(self, request, *args, **kwargs):
+        timeline = self.get_object()
+        timeline.delete()
+        return Response({"message": "Timeline deleted successfully"}, status=status.HTTP_204_NO_CONTENT)
+    
+class TimelineDetailView(generics.RetrieveAPIView):
+    queryset = Timeline.objects.all()
+    serializer_class = TimelineSerializer
+    lookup_field = 'id'
+
+
