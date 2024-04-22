@@ -52,6 +52,7 @@ INSTALLED_APPS = [
     'vendor',
     'task',
     'task_steps',
+    'timeline',
     'drf_yasg',
     'rundown',
 ]
