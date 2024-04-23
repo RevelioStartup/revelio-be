@@ -1,5 +1,5 @@
 from django.db import models
-from pytz import timezone
+from django.utils import timezone
 
 from authentication.models import AppUser
 
@@ -18,6 +18,3 @@ class Subscription(models.Model):
     @property
     def is_active(self):
         return self.end_date > timezone.now()
-    
-    def __str__(self):
-        return self.plan
