@@ -1,5 +1,6 @@
 
 from decimal import Decimal
+import uuid
 from django.test import TestCase
 from rest_framework.test import APIClient
 from rest_framework import status
@@ -167,5 +168,14 @@ class TimelineTestCase(TestCase):
         }, format='json')
 
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+    
+    def test_timeline_not_found(self):
+        update_url = reverse('timeline-detail', kwargs={'pk': uuid.UUID('12345678-1234-5678-1234-567812345678')})
         
+        response = self.client.patch(update_url, {
+            "start_datetime": self.start_datetime.isoformat(),
+            "end_datetime": self.end_datetime.isoformat(),
+        }, format='json')
+
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
     

@@ -64,14 +64,18 @@ class TimelineDetailView(generics.RetrieveUpdateDestroyAPIView):
     )
     
     def patch(self, request, *args, **kwargs):
-        instance = self.get_object()
-        serializer = TimelineUpdateSerializer(instance, data=request.data, partial=True)
-        
-        if(serializer.is_valid()):
-            serializer.save()
-            return Response(serializer.data)
-        else:
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        try:
+            instance = self.get_object()
+            serializer = TimelineUpdateSerializer(instance, data=request.data, partial=True)
+            
+            if(serializer.is_valid()):
+                serializer.save()
+                return Response(serializer.data)
+            else:
+                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        except serializers.ValidationError as e:
+            error_message = get_validation_error_detail(e)
+            return Response({"error": error_message}, status=status.HTTP_404_NOT_FOUND)
         
     def get_object(self):
         try:
