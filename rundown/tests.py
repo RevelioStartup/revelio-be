@@ -157,3 +157,11 @@ class GetRundownListTestCase(BaseTestCase):
         response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data, [])
+
+    def test_not_rundown_owner(self):
+        self.client = APIClient()
+        self.user = AppUser.objects.create_user(email='invalid@email.com', username='invalid', password='invalid')
+        self.client.force_authenticate(user=self.user)
+        url = reverse('rundown-list', args=[self.event_id])
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
