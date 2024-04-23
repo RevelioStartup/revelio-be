@@ -71,7 +71,6 @@ class TimelineDetailView(generics.RetrieveUpdateDestroyAPIView):
             serializer.save()
             return Response(serializer.data)
         
-        
     def get_object(self):
         try:
             return Timeline.objects.get(pk=self.kwargs['pk'])

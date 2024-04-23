@@ -145,3 +145,25 @@ class TimelineCreateTestCase(TestCase):
 
         self.assertIn('start_datetime', response.data)
         self.assertIn('end_datetime', response.data)
+        
+    def test_update_detail_timeline_invalid_date(self):
+        new_starttime = timezone.localtime(timezone.now() + + timedelta(hours=2), timezone=self.current_timezone)
+        new_endtime = timezone.localtime(timezone.now() + timedelta(hours=3), timezone=self.current_timezone)
+        
+        created_timeline = self.client.post(self.url,                
+            {
+                "task_step": str(self.task_step.id),
+                "start_datetime": self.start_datetime.isoformat(),
+                "end_datetime": self.end_datetime.isoformat(),
+            }, format='json')
+        
+        timeline_id = created_timeline.data['id']
+        
+        update_url = reverse('timeline-detail', kwargs={'pk': timeline_id})
+        
+        response = self.client.patch(update_url, {
+            "start_datetime": new_endtime.isoformat(),
+            "end_datetime": new_starttime.isoformat(),
+        }, format='json')
+
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
