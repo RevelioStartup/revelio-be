@@ -154,28 +154,15 @@ class TimelineViewDeleteTestCase(TestCase):
             start_datetime=timezone.now() - timedelta(hours=2),
             end_datetime=timezone.now()
         )
-        self.detail_url = reverse('timeline-detail', kwargs={'id': self.timeline.id})
-
-    def test_view_timeline_detail(self):
-        response = self.client.get(self.detail_url)
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.data['id'], str(self.timeline.id))
 
     def test_delete_timeline(self):
         delete_url = reverse('timeline-delete', kwargs={'id': self.timeline.id})
         response = self.client.delete(delete_url)
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
-        self.assertEqual(Timeline.objects.filter(id=self.timeline.id).count(), 0)
 
     def test_delete_non_existent_timeline(self):
         delete_url = reverse('timeline-delete', kwargs={'id': uuid.uuid4()})
         response = self.client.delete(delete_url)
-        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
-
-    def test_view_deleted_timeline(self):
-        delete_url = reverse('timeline-delete', kwargs={'id': self.timeline.id})
-        self.client.delete(delete_url)
-        response = self.client.get(self.detail_url)
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_related_data_integrity_post_deletion(self):

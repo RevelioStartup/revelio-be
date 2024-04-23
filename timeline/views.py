@@ -51,10 +51,5 @@ class TimelineDeleteView(generics.DestroyAPIView):
         timeline = self.get_object()
         timeline.delete()
         return Response({"message": "Timeline deleted successfully"}, status=status.HTTP_204_NO_CONTENT)
+
     
-class TimelineDetailView(generics.RetrieveAPIView):
-    queryset = Timeline.objects.all()
-    serializer_class = TimelineSerializer
-    lookup_field = 'id'
-
-
