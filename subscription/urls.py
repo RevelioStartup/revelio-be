@@ -1,4 +1,7 @@
+from django.urls import path
+from subscription.views import SubscriptionHistory
+
+
 urlpatterns = [
-    path('', TimelineCreateView.as_view(), name='timeline-create'),
-    path('<uuid:pk>/', TimelineDetailView.as_view(), name='timeline-detail'),
+    path('history', SubscriptionHistory.as_view(), name='history'),
 ]

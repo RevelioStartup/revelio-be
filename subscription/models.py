@@ -1,6 +1,7 @@
-from django.contrib.auth.models import User
 from django.db import models
 from pytz import timezone
+
+from authentication.models import AppUser
 
 # Create your models here.
 class Subscription(models.Model):
@@ -9,7 +10,7 @@ class Subscription(models.Model):
         ('PREMIUM', 'Premium'),
     )
     
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    user = models.ForeignKey(AppUser, on_delete=models.CASCADE)
     plan = models.CharField(choices=OPTION_PLANS, max_length=10)
     start_date = models.DateTimeField(auto_now_add=True)
     end_date = models.DateTimeField()
