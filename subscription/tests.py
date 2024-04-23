@@ -21,4 +21,20 @@ class SubscriptionHistoryTestCase(TestCase):
     def test_get_subscription_history(self):
         response = self.client.get(self.url)
         
-        print(response)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.data[0]['plan'], 'PREMIUM')
+    
+    def test_get_subscription_history_no_subscription(self):
+        Subscription.objects.all().delete()
+        
+        response = self.client.get(self.url)
+        
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.data, [])
+        
+    def test_get_subscription_history_unauthenticated(self):
+        self.client.logout()
+        
+        response = self.client.get(self.url)
+        
+        self.assertEqual(response.status_code, 401)
