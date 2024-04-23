@@ -70,6 +70,8 @@ class TimelineDetailView(generics.RetrieveUpdateDestroyAPIView):
         if(serializer.is_valid()):
             serializer.save()
             return Response(serializer.data)
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         
     def get_object(self):
         try:
