@@ -3,5 +3,5 @@ from subscription.views import SubscriptionHistory
 
 
 urlpatterns = [
-    path('history', SubscriptionHistory.as_view(), name='history'),
+    path('history/', SubscriptionHistory.as_view(), name='history'),
 ]
