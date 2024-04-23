@@ -1,6 +1,6 @@
 from datetime import timedelta
+from django.utils import timezone
 from django.test import TestCase
-from pytz import timezone
 from rest_framework.test import APIClient
 
 from authentication.models import AppUser
