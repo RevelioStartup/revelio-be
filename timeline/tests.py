@@ -12,7 +12,7 @@ from timeline.models import Timeline
 from event.models import Event 
 from django.utils import timezone
 
-class TimelineCreateTestCase(TestCase):
+class TimelineTestCase(TestCase):
     def setUp(self):
         self.client = APIClient()
         self.user = AppUser.objects.create_user(email='user@example.com', username='testuser', password='testpassword')
@@ -167,3 +167,5 @@ class TimelineCreateTestCase(TestCase):
         }, format='json')
 
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        
+    
