@@ -52,5 +52,14 @@ class TimelineDeleteView(generics.DestroyAPIView):
         timeline.delete()
         return Response({"message": "Timeline deleted successfully"}, status=status.HTTP_204_NO_CONTENT)
 
+class TimelineList(generics.ListAPIView):
+    serializer_class = TimelineSerializer
 
+    def get_queryset(self):
+        event_id = self.kwargs.get('event_id')  # Assuming event_id is passed as a URL parameter
+
+        queryset = Timeline.objects.filter(task_step__task__event_id=event_id)
+
+        return queryset
     
+
