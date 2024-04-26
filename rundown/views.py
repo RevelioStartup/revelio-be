@@ -88,6 +88,11 @@ class RundownDetailView(APIView):
         updated_rundown.save()
         rundown_serializers = RundownSerializer(updated_rundown)
         return Response(rundown_serializers.data, status=200) 
+    
+    def delete(self, request, id):
+        rundown_instance = get_object_or_404(Rundown, id=id)
+        rundown_instance.delete()
+        return Response({"message": "Rundown successfully deleted"}, status=200)
 
 class RundownListView(generics.ListAPIView):
     permission_classes = [IsAuthenticated]

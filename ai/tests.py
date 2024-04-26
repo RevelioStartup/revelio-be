@@ -237,6 +237,67 @@ class AutofillTest(TestCase):
         self.assertEqual(response.status_code, 400)
         self.assertEqual(response.json()['msg'], 'Make sure you are putting a correct form data.')
 
+class RundownTest(TestCase):
+    def setUp(self):
+        self.client = APIClient()
+        self.user = AppUser.objects.create_user(email='user@example.com', username='testuser', password='testpassword')
+        self.client.force_authenticate(user=self.user)
+
+        self.event = Event.objects.create(
+            user=self.user,
+            name="Mom's birthday",
+            date=date.today(),
+            budget=Decimal('1000000.00'),
+            objective="To celebrate mom's 45th birthday with family.",
+            attendees=150,
+            theme="Floral and nature",
+            services=""
+        )
+        self.event_2 = Event.objects.create(
+            user=self.user,
+            name="",
+            date=date.today(),
+            budget=Decimal('1000000.00'),
+            objective="To celebrate mom's 45th birthday with family.",
+            attendees=150,
+            theme="",
+            services=""
+        ) 
+        self.mock_response = {'choices': [{'message': {'content': '{"rundown_data": [{"description": "Welcome and registration", "start_time":"10:00", "end_time":"11:00"}, {"description": "Ice breaker games", "start_time":"11:00", "end_time":"12:00"}, {"description": "Lunch", "start_time":"12:00", "end_time":"12:30"}, {"description": "Magic Show", "start_time":"12:30", "end_time":"13:00"}]}'} }]}
+
+    @patch(OPEN_AI_MODULE)
+    def test_ai_rundown_valid(self, mock_openai):
+        mock_openai.chat.completions.create.return_value = self.mock_response
+        response = self.client.get(reverse('ai:ai-rundown', kwargs={'event_id': self.event.id}))
+        self.assertEqual(response.status_code, 200)
+        response = response.json()
+        self.assertTrue('event_id' in response)
+        self.assertTrue('rundown_data' in response)
+        self.assertTrue(len(response['rundown_data']) > 0)
+        self.assertTrue('description' in response['rundown_data'][0])
+        self.assertTrue('start_time' in response['rundown_data'][0])
+        self.assertTrue('end_time' in response['rundown_data'][0])
+
+    @patch(OPEN_AI_MODULE)
+    def test_ai_rundown_event_name_desc_empty(self, mock_openai):
+        mock_openai.chat.completions.create.return_value = self.mock_response
+        response = self.client.get(reverse('ai:ai-rundown', kwargs={'event_id': self.event_2.id}))
+        self.assertEqual(response.status_code, 200)
+        response = response.json()
+        self.assertTrue('event_id' in response)
+        self.assertTrue('rundown_data' in response)
+        self.assertTrue(len(response['rundown_data']) > 0)
+        self.assertTrue('description' in response['rundown_data'][0])
+        self.assertTrue('start_time' in response['rundown_data'][0])
+        self.assertTrue('end_time' in response['rundown_data'][0])
+
+    @patch(OPEN_AI_MODULE)
+    def test_ai_rundown_task_invalid(self, mock_openai):
+        mock_openai.chat.completions.create.return_value = self.mock_response
+        response = self.client.get(reverse('ai:ai-rundown', kwargs={'event_id': UUID('a335f7e8-0b06-4b77-b6d1-39c1d4c6b3fd')}))
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.json()['msg'], 'Event not found.')
+
 class TaskStepsTest(TestCase):
     def setUp(self):
         self.client = APIClient()
@@ -245,7 +306,7 @@ class TaskStepsTest(TestCase):
 
         self.event = Event.objects.create(
             user=self.user,
-            name="Mom's birthdat",
+            name="Mom's birthday",
             date=date.today(),
             budget=Decimal('1000000.00'),
             objective="To celebrate mom's 45th birthday with family.",

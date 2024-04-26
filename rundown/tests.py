@@ -165,3 +165,27 @@ class GetRundownListTestCase(BaseTestCase):
         url = reverse('rundown-list', args=[self.event_id])
         response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+class DeleteRundownTestCase(BaseTestCase):
+    def set_up_rundown(self):
+        self.rundown_1 = Rundown.objects.create(
+            event = self.event,
+            rundown_order = 1,
+            description = "Acara 1",
+            start_time = datetime.time(8,0),
+            end_time = datetime.time(9,0),
+        )
+        self.rundown_2 = Rundown.objects.create(
+            event = self.event,
+            rundown_order = 2,
+            description = "Acara 2",
+            start_time = datetime.time(9,0),
+            end_time = datetime.time(9,30),
+        )
+
+    def test_delete_single_rundown(self):
+        self.set_up_rundown()
+        url = reverse('rundown-detail', args=[self.rundown_2.id])  
+        response = self.client.delete(url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK) 
+        self.assertFalse(Rundown.objects.filter(id=self.rundown_2.id).exists())
