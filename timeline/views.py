@@ -52,4 +52,5 @@ class TimelineDeleteView(generics.DestroyAPIView):
         timeline.delete()
         return Response({"message": "Timeline deleted successfully"}, status=status.HTTP_204_NO_CONTENT)
 
+
     
