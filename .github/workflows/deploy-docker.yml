@@ -116,6 +116,7 @@ jobs:
           port: 22
           passphrase: ${{ secrets.DOCKER_SSH_PASSPHRASE }}
           script: |
+            sudo docker login --username=${{ secrets.DOCKER_USERNAME }} --password=${{ secrets.DOCKER_PASSWORD }}
             sudo docker container rm -f ${{ secrets.DOCKER_IMAGE_NAME }} || true
             sudo docker image rm -f ${{ secrets.DOCKER_USERNAME }}/${{ secrets.DOCKER_IMAGE_NAME }}:latest || true
             sudo docker run --name ${{ secrets.DOCKER_IMAGE_NAME }} -d -p 8000:8000 ${{ secrets.DOCKER_USERNAME }}/${{ secrets.DOCKER_IMAGE_NAME }}:latest
