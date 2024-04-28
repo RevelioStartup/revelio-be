@@ -112,6 +112,7 @@ jobs:
           port: 22
           passphrase: ${{ secrets.DOCKER_SSH_PASSPHRASE }}
           script: |
+            docker login --username=${{ secrets.DOCKER_USERNAME }} --password=${{ secrets.DOCKER_PASSWORD }}
             sudo docker container rm -f revelio-be || true
             sudo docker image rm -f johannessetiawan/revelio-be:latest || true
             sudo docker run --name revelio-be -d -p 8000:8000 johannessetiawan/revelio-be:latest
