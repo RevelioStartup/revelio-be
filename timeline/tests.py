@@ -215,7 +215,7 @@ class TimelineListTestCase(TestCase):
         self.task_step1 = TaskStep.objects.create(
             name="Initial Step",
             description="Initial Description",
-            task=self.task1,  # Here is the corrected reference
+            task=self.task1, 
             status='NOT_STARTED',
             step_order=1,
             user=self.user
@@ -223,7 +223,7 @@ class TimelineListTestCase(TestCase):
         self.task_step2 = TaskStep.objects.create(
             name="Next Step",
             description="Initial Description",
-            task=self.task2,  # Here is the corrected reference
+            task=self.task2,  
             status='NOT_STARTED',
             step_order=2,
             user=self.user
