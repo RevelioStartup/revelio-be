@@ -1,11 +1,16 @@
+from django.http import Http404
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework import generics, status, serializers
 from rest_framework.response import Response
+
+from event.models import Event
 from .serializers import TimelineSerializer, TimelineUpdateSerializer
 from .models import Timeline
 from task_steps.models import TaskStep
 from drf_yasg import openapi
 from revelio.utils import get_validation_error_detail
+from utils.permissions import IsEventOwner
+from rest_framework.permissions import IsAuthenticated
 
 class TimelineCreateView(generics.CreateAPIView):
     queryset = Timeline.objects.all()
@@ -93,4 +98,14 @@ class TimelineDeleteView(generics.DestroyAPIView):
         timeline.delete()
         return Response({"message": "Timeline deleted successfully"}, status=status.HTTP_204_NO_CONTENT)
 
+class TimelineList(generics.ListAPIView):
+    permission_classes = [IsAuthenticated, IsEventOwner]
+    serializer_class = TimelineSerializer
+
+    def get_queryset(self):
+        event_id = self.kwargs.get('event_id')
+        if not Event.objects.filter(id=event_id).exists():
+            raise Http404("No Event matches the given query.")
+        return Timeline.objects.filter(task_step__task__event_id=event_id)
     
+

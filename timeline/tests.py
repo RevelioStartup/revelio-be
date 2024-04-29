@@ -228,5 +228,92 @@ class TimelineViewDeleteTestCase(TestCase):
         self.assertTrue(Task.objects.filter(id=self.task.id).exists())
 
 
+class TimelineListTestCase(TestCase):
+    def setUp(self):
+        self.client = APIClient()
+        self.user = AppUser.objects.create_user(email='user@example.com', username='testuser', password='testpassword')
+        self.client.force_authenticate(user=self.user)
 
+        self.event1 = Event.objects.create(
+            user=self.user, 
+            name="Event 1", 
+            date=timezone.now().date(),
+            budget=Decimal('5000.00'),
+            objective="To onboard new employees",
+            attendees=100,
+            theme="Harry",
+            services="Catering, Decorations, Music"
+        )
+        self.event2 = Event.objects.create(
+            user=self.user, 
+            name="Event 2", 
+            date=timezone.now().date(),
+            budget=Decimal('3000.00'),
+            objective="To onboard new employees",
+            attendees=100,
+            theme="Harry",
+            services="Catering, Decorations, Music"
+        )
+
+        self.task1 = Task.objects.create(
+            title="Task 1", 
+            event=self.event1,
+            description="This is a sample task description.",
+            status="Not Started"
+        )
+        self.task2 = Task.objects.create(
+            title="Task 2", 
+            event=self.event2,
+            description="This is a sample task description.",
+            status="Not Started"
+        )
+
+        self.task_step1 = TaskStep.objects.create(
+            name="Initial Step",
+            description="Initial Description",
+            task=self.task1,  # Here is the corrected reference
+            status='NOT_STARTED',
+            step_order=1,
+            user=self.user
+        )
+        self.task_step2 = TaskStep.objects.create(
+            name="Next Step",
+            description="Initial Description",
+            task=self.task2,  # Here is the corrected reference
+            status='NOT_STARTED',
+            step_order=2,
+            user=self.user
+        )
+
+        self.timeline1 = Timeline.objects.create(
+            task_step=self.task_step1, 
+            start_datetime=timezone.now(), 
+            end_datetime=timezone.now() + timedelta(hours=1)
+        )
+        self.timeline2 = Timeline.objects.create(
+            task_step=self.task_step2, 
+            start_datetime=timezone.now(), 
+            end_datetime=timezone.now() + timedelta(hours=1)
+        )
+
+    def test_list_timelines_specific_event(self):
+        url = reverse('event-timelines', kwargs={'event_id': self.event1.id})
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_list_timelines_no_event_timelines(self):
+        event3 = Event.objects.create(
+            user=self.user,
+            name="Event 3",
+            date=timezone.now().date(),
+            budget=Decimal('2000.00'),  
+            attendees=50,  
+            objective="A new event with no timelines",
+            theme="Minimal",
+            services="Basic Services"
+        )
+        url = reverse('event-timelines', kwargs={'event_id': event3.id})
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.data), 0)  
 
