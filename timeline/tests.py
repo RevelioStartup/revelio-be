@@ -179,3 +179,54 @@ class TimelineTestCase(TestCase):
 
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
     
+
+class TimelineViewDeleteTestCase(TestCase):
+    def setUp(self):
+        self.client = APIClient()
+        self.user = AppUser.objects.create_user(email='user@example.com', username='testuser', password='testpassword')
+        self.client.force_authenticate(user=self.user)
+
+        self.event = Event.objects.create(
+            user=self.user,
+            name="Annual Meeting",
+            date=date.today(),
+            budget=Decimal('20000.00'),
+            objective="Discuss annual results and future plans.",
+            attendees=100,
+            theme="Corporate Blue",
+            services="Catering, IT Support"
+        )
+        self.task = Task.objects.create(title="Setup Venue", description="Arranging chairs and tables", event=self.event)
+        self.task_step = TaskStep.objects.create(
+            name="Setup Tables",
+            description="Arrange tables as per the layout",
+            task=self.task,
+            status='IN_PROGRESS',
+            step_order=1,
+            user=self.user
+        )
+        self.timeline = Timeline.objects.create(
+            task_step=self.task_step,
+            start_datetime=timezone.now() - timedelta(hours=2),
+            end_datetime=timezone.now()
+        )
+
+    def test_delete_timeline(self):
+        delete_url = reverse('timeline-delete', kwargs={'id': self.timeline.id})
+        response = self.client.delete(delete_url)
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+
+    def test_delete_non_existent_timeline(self):
+        delete_url = reverse('timeline-delete', kwargs={'id': uuid.uuid4()})
+        response = self.client.delete(delete_url)
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+    def test_related_data_integrity_post_deletion(self):
+        delete_url = reverse('timeline-delete', kwargs={'id': self.timeline.id})
+        self.client.delete(delete_url)
+        self.assertTrue(Event.objects.filter(id=self.event.id).exists())
+        self.assertTrue(Task.objects.filter(id=self.task.id).exists())
+
+
+
+

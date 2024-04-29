@@ -82,3 +82,15 @@ class TimelineDetailView(generics.RetrieveUpdateDestroyAPIView):
             return Timeline.objects.get(pk=self.kwargs['pk'])
         except Timeline.DoesNotExist:
             raise serializers.ValidationError("Timeline does not exist")
+        
+class TimelineDeleteView(generics.DestroyAPIView):
+    queryset = Timeline.objects.all()
+    serializer_class = TimelineSerializer
+    lookup_field = 'id'  
+
+    def delete(self, request, *args, **kwargs):
+        timeline = self.get_object()
+        timeline.delete()
+        return Response({"message": "Timeline deleted successfully"}, status=status.HTTP_204_NO_CONTENT)
+
+    

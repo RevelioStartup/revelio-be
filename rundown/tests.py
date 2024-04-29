@@ -7,6 +7,7 @@ from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APIClient
 from authentication.models import AppUser
+from rundown.serializers import RundownSerializer
 from .models import Event, Rundown
 import datetime
 
@@ -141,5 +142,50 @@ class UpdateRundownTestCase(BaseTestCase):
         response = self.client.patch(url, updated_rundown_data_invalid_3, format='json')
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         
+class GetRundownListTestCase(BaseTestCase):
+    url = reverse('rundown-create')
 
+    def test_get_rundown_list(self):
+        self.client.post(self.url, self.rundown_data, format='json')
+        url = reverse('rundown-list', args=[self.event_id])
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data[0]["description"], "Acara 1")
 
+    def test_no_rundown(self):
+        url = reverse('rundown-list', args=[self.event_id])
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data, [])
+
+    def test_not_rundown_owner(self):
+        self.client = APIClient()
+        self.user = AppUser.objects.create_user(email='invalid@email.com', username='invalid', password='invalid')
+        self.client.force_authenticate(user=self.user)
+        url = reverse('rundown-list', args=[self.event_id])
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+class DeleteRundownTestCase(BaseTestCase):
+    def set_up_rundown(self):
+        self.rundown_1 = Rundown.objects.create(
+            event = self.event,
+            rundown_order = 1,
+            description = "Acara 1",
+            start_time = datetime.time(8,0),
+            end_time = datetime.time(9,0),
+        )
+        self.rundown_2 = Rundown.objects.create(
+            event = self.event,
+            rundown_order = 2,
+            description = "Acara 2",
+            start_time = datetime.time(9,0),
+            end_time = datetime.time(9,30),
+        )
+
+    def test_delete_single_rundown(self):
+        self.set_up_rundown()
+        url = reverse('rundown-detail', args=[self.rundown_2.id])  
+        response = self.client.delete(url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK) 
+        self.assertFalse(Rundown.objects.filter(id=self.rundown_2.id).exists())
