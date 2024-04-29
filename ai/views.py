@@ -5,7 +5,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.generics import RetrieveDestroyAPIView
 from utils.permissions import IsOwner
 from ai.models import RecommendationHistory
-from ai.prompts import create_autofill_prompt, create_assistant_prompt, create_task_steps_prompt
+from ai.prompts import *
 from ai.serializers import RecommendationHistorySerializer
 from event.models import Event
 from task.models import Task
@@ -165,6 +165,38 @@ class TaskStepView(APIView):
         data = {
             'task_id': task_id,
             'steps': response['steps']
+        }
+
+        return Response(data, status=200)
+    
+class RundownView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, event_id):
+        event = Event.objects.filter(id=event_id).first()
+        if not event:
+            return Response(
+                {
+                    'msg': 'Event not found.'
+                }, status=400)
+        
+
+        prompt = create_rundown_prompt(event)
+
+        response = client.chat.completions.create(
+            model=AI_MODEL,
+            messages=[
+                {"role": "user", "content": prompt},
+            ],
+            temperature=0.8,
+            max_tokens=256,
+        ).choices[0].message.content
+
+        response = json.loads(response)
+
+        data = {
+            'event_id': event_id,
+            'rundown_data': response['rundown_data']
         }
 
         return Response(data, status=200)
