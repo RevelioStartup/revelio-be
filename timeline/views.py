@@ -1,7 +1,7 @@
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework import generics, status, serializers
 from rest_framework.response import Response
-from .serializers import TimelineSerializer
+from .serializers import TimelineSerializer, TimelineUpdateSerializer
 from .models import Timeline
 from task_steps.models import TaskStep
 from drf_yasg import openapi
@@ -41,6 +41,47 @@ class TimelineCreateView(generics.CreateAPIView):
         except serializers.ValidationError as e:
             error_message = get_validation_error_detail(e)
             return Response({"error": error_message}, status=status.HTTP_400_BAD_REQUEST)
+        
+class TimelineDetailView(generics.RetrieveUpdateDestroyAPIView):
+    queryset = Timeline.objects.all()
+    serializer_class = TimelineSerializer
+
+    @swagger_auto_schema(
+        operation_summary="Update a timeline",
+        operation_description="Update a timeline by its UUID.",
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'start_datetime': openapi.Schema(type=openapi.TYPE_STRING, format=openapi.FORMAT_DATETIME, description="Start date and time of the timeline"),
+                'end_datetime': openapi.Schema(type=openapi.TYPE_STRING, format=openapi.FORMAT_DATETIME, description="End date and time of the timeline"),
+            }
+        ),
+        responses={
+            200: TimelineSerializer(),
+            400: 'Bad request - Data validation error or missing data',
+            404: 'Not found - Timeline does not exist'
+        }
+    )
+    
+    def patch(self, request, *args, **kwargs):
+        try:
+            instance = self.get_object()
+            serializer = TimelineUpdateSerializer(instance, data=request.data, partial=True)
+            
+            if(serializer.is_valid()):
+                serializer.save()
+                return Response(serializer.data)
+            else:
+                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        except serializers.ValidationError as e:
+            error_message = get_validation_error_detail(e)
+            return Response({"error": error_message}, status=status.HTTP_404_NOT_FOUND)
+        
+    def get_object(self):
+        try:
+            return Timeline.objects.get(pk=self.kwargs['pk'])
+        except Timeline.DoesNotExist:
+            raise serializers.ValidationError("Timeline does not exist")
         
 class TimelineDeleteView(generics.DestroyAPIView):
     queryset = Timeline.objects.all()
