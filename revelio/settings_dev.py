@@ -55,6 +55,7 @@ INSTALLED_APPS = [
     'timeline',
     'drf_yasg',
     'rundown',
+    'subscription',
 ]
 
 MIDDLEWARE = [
