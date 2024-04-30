@@ -3,7 +3,6 @@ from rest_framework import generics, status, serializers
 from rest_framework.response import Response
 from .serializers import TimelineSerializer
 from .models import Timeline
-from task_steps.models import TaskStep
 from drf_yasg import openapi
 from revelio.utils import get_validation_error_detail
 
