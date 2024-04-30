@@ -56,6 +56,7 @@ INSTALLED_APPS = [
     'payment',
     'drf_yasg',
     'rundown',
+    'subscription',
 ]
 
 MIDDLEWARE = [

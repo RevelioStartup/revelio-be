@@ -13,7 +13,7 @@ from timeline.models import Timeline
 from event.models import Event 
 from django.utils import timezone
 
-class TimelineCreateTestCase(TestCase):
+class TimelineTestCase(TestCase):
     def setUp(self):
         self.client = APIClient()
         self.user = AppUser.objects.create_user(email='user@example.com', username='testuser', password='testpassword')
@@ -123,6 +123,62 @@ class TimelineCreateTestCase(TestCase):
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertIn('error', response.data)
         self.assertIn("A task step with a smaller step order cannot follow a task step with a larger step order.", response.data["error"])
+        
+    def test_update_detail_timeline_success(self):
+        new_starttime = timezone.localtime(timezone.now() + + timedelta(hours=2), timezone=self.current_timezone)
+        new_endtime = timezone.localtime(timezone.now() + timedelta(hours=3), timezone=self.current_timezone)
+        
+        created_timeline = self.client.post(self.url,                
+            {
+                "task_step": str(self.task_step.id),
+                "start_datetime": self.start_datetime.isoformat(),
+                "end_datetime": self.end_datetime.isoformat(),
+            }, format='json')
+        
+        timeline_id = created_timeline.data['id']
+        
+        update_url = reverse('timeline-detail', kwargs={'pk': timeline_id})
+        
+        response = self.client.patch(update_url, {
+            "start_datetime": new_starttime.isoformat(),
+            "end_datetime": new_endtime.isoformat(),
+        }, format='json')
+
+        self.assertIn('start_datetime', response.data)
+        self.assertIn('end_datetime', response.data)
+        
+    def test_update_detail_timeline_invalid_date(self):
+        new_starttime = timezone.localtime(timezone.now() + + timedelta(hours=2), timezone=self.current_timezone)
+        new_endtime = timezone.localtime(timezone.now() + timedelta(hours=3), timezone=self.current_timezone)
+        
+        created_timeline = self.client.post(self.url,                
+            {
+                "task_step": str(self.task_step.id),
+                "start_datetime": self.start_datetime.isoformat(),
+                "end_datetime": self.end_datetime.isoformat(),
+            }, format='json')
+        
+        timeline_id = created_timeline.data['id']
+        
+        update_url = reverse('timeline-detail', kwargs={'pk': timeline_id})
+        
+        response = self.client.patch(update_url, {
+            "start_datetime": new_endtime.isoformat(),
+            "end_datetime": new_starttime.isoformat(),
+        }, format='json')
+
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+    
+    def test_timeline_not_found(self):
+        update_url = reverse('timeline-detail', kwargs={'pk': uuid.UUID('12345678-1234-5678-1234-567812345678')})
+        
+        response = self.client.patch(update_url, {
+            "start_datetime": self.start_datetime.isoformat(),
+            "end_datetime": self.end_datetime.isoformat(),
+        }, format='json')
+
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+    
 
 class TimelineViewDeleteTestCase(TestCase):
     def setUp(self):
@@ -172,5 +228,92 @@ class TimelineViewDeleteTestCase(TestCase):
         self.assertTrue(Task.objects.filter(id=self.task.id).exists())
 
 
+class TimelineListTestCase(TestCase):
+    def setUp(self):
+        self.client = APIClient()
+        self.user = AppUser.objects.create_user(email='user@example.com', username='testuser', password='testpassword')
+        self.client.force_authenticate(user=self.user)
 
+        self.event1 = Event.objects.create(
+            user=self.user, 
+            name="Event 1", 
+            date=timezone.now().date(),
+            budget=Decimal('5000.00'),
+            objective="To onboard new employees",
+            attendees=100,
+            theme="Harry",
+            services="Catering, Decorations, Music"
+        )
+        self.event2 = Event.objects.create(
+            user=self.user, 
+            name="Event 2", 
+            date=timezone.now().date(),
+            budget=Decimal('3000.00'),
+            objective="To onboard new employees",
+            attendees=100,
+            theme="Harry",
+            services="Catering, Decorations, Music"
+        )
+
+        self.task1 = Task.objects.create(
+            title="Task 1", 
+            event=self.event1,
+            description="This is a sample task description.",
+            status="Not Started"
+        )
+        self.task2 = Task.objects.create(
+            title="Task 2", 
+            event=self.event2,
+            description="This is a sample task description.",
+            status="Not Started"
+        )
+
+        self.task_step1 = TaskStep.objects.create(
+            name="Initial Step",
+            description="Initial Description",
+            task=self.task1,  # Here is the corrected reference
+            status='NOT_STARTED',
+            step_order=1,
+            user=self.user
+        )
+        self.task_step2 = TaskStep.objects.create(
+            name="Next Step",
+            description="Initial Description",
+            task=self.task2,  # Here is the corrected reference
+            status='NOT_STARTED',
+            step_order=2,
+            user=self.user
+        )
+
+        self.timeline1 = Timeline.objects.create(
+            task_step=self.task_step1, 
+            start_datetime=timezone.now(), 
+            end_datetime=timezone.now() + timedelta(hours=1)
+        )
+        self.timeline2 = Timeline.objects.create(
+            task_step=self.task_step2, 
+            start_datetime=timezone.now(), 
+            end_datetime=timezone.now() + timedelta(hours=1)
+        )
+
+    def test_list_timelines_specific_event(self):
+        url = reverse('event-timelines', kwargs={'event_id': self.event1.id})
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_list_timelines_no_event_timelines(self):
+        event3 = Event.objects.create(
+            user=self.user,
+            name="Event 3",
+            date=timezone.now().date(),
+            budget=Decimal('2000.00'),  
+            attendees=50,  
+            objective="A new event with no timelines",
+            theme="Minimal",
+            services="Basic Services"
+        )
+        url = reverse('event-timelines', kwargs={'event_id': event3.id})
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.data), 0)  
 
