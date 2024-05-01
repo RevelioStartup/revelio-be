@@ -15,6 +15,8 @@ from rest_framework import status
 import asyncio
 import secrets, string
 from django.core.exceptions import ObjectDoesNotExist
+from drf_yasg.utils import swagger_auto_schema
+from drf_yasg import openapi
 
 async def send_verification_email(user, token):
     username = user.username
@@ -69,6 +71,23 @@ class RegisterView(APIView):
     
     permission_classes = ()
 
+    @swagger_auto_schema(
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'username': openapi.Schema(type=openapi.TYPE_STRING),
+                'password': openapi.Schema(type=openapi.TYPE_STRING),
+                'email': openapi.Schema(type=openapi.TYPE_STRING),
+            },
+            required=['username', 'password', 'email'],
+        ),
+        responses={
+            200: 'Successful registration',
+            400: 'Bad request'
+        },
+        operation_summary="Register a new user",
+    )
+
     def post(self, request):
         username = request.data.get('username')
         password = request.data.get('password')
@@ -92,6 +111,22 @@ class RegisterView(APIView):
 class LoginView(APIView):
 
     permission_classes =()
+
+    @swagger_auto_schema(
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'username': openapi.Schema(type=openapi.TYPE_STRING),
+                'password': openapi.Schema(type=openapi.TYPE_STRING),
+            },
+            required=['username', 'password'],
+        ),
+        responses={
+            200: 'Successful login',
+            400: 'Wrong credentials'
+        },
+        operation_summary="Login existing user",
+    )
 
     def post(self, request):
         username = request.data.get('username')
@@ -139,6 +174,21 @@ class SendVerificationEmailView(APIView):
 class SendRecoverPasswordEmailView(APIView):
     permission_classes =()
 
+    swagger_auto_schema(
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'email': openapi.Schema(type=openapi.TYPE_STRING),
+            },
+            required=['email'],
+        ),
+        responses={
+            200: 'Password recovery email sent successfully',
+            400: 'Bad request'
+        },
+        operation_summary="Send Password Recovery Email",
+    )
+
     def post(self, request):
         email = request.data.get('email')
         is_user_exist = AppUser.objects.filter(email=email).exists()
@@ -178,6 +228,14 @@ class ProfileView(APIView):
     permission_classes = [IsAuthenticated]
     serializer_class = ProfileSerializer
     parser_classes = [MultiPartParser, FormParser]
+
+    @swagger_auto_schema(
+        responses={
+            200: 'Profile retrieved successfully',
+            400: 'Bad request'
+        },
+        operation_summary="Get Profile",
+    )
 
     def get_object(self):
         profile, created = Profile.objects.get_or_create(user=self.request.user)

@@ -40,5 +40,24 @@ class TimelineSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         return Timeline.objects.create(**validated_data)
 
+class TimelineUpdateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Timeline
+        fields = ['start_datetime', 'end_datetime']
 
-    
+    def validate(self, data):
+        if data['end_datetime'] < data['start_datetime']:
+            raise ValidationError("End datetime cannot be earlier than start datetime.")
+        
+        existing_timelines = Timeline.objects.filter(task_step__task=self.instance.task_step.task)
+        
+        for timeline in existing_timelines:
+            if (timeline.task_step.step_order < self.instance.task_step.step_order and timeline.start_datetime > data['start_datetime']):
+                raise ValidationError(
+                    "A task step with a larger step order cannot precede a task step with a smaller step order."
+                )
+            elif timeline.task_step.step_order > self.instance.task_step.step_order and timeline.start_datetime < data['start_datetime']:
+                raise ValidationError(
+                    "A task step with a smaller step order cannot follow a task step with a larger step order."
+                )
+        return data

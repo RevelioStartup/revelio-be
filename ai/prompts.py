@@ -55,6 +55,23 @@ now, respond to this input
 
 """
 
+# TODO
+BASE_RUNDOWN_PROMPT = """
+You're going to respond to a prompt about a D-day rundown of an event. The prompt will ask you to give answer in list of activities. Each activities contains description, start time, and end time.
+
+description is the activity in the rundown.
+
+Input is like
+event name = Emma's birthday party
+event theme = the magic showman
+
+based on this, respond with an array JSON string. do not give anything other than JSON string.  for example
+{"rundown_data": [{"description": "Welcome and registration", "start_time":"10:00", "end_time":"11:00"}, {"description": "Ice breaker games", "start_time":"11:00", "end_time":"12:00"}, {"description": "Lunch", "start_time":"12:00", "end_time":"12:30"}, {"description": "Magic Show", "start_time":"12:30", "end_time":"13:00"}, {"description": "Face painting", "start_time":"13:00", "end_time":"14:00"}, {"description": "Cake cutting ceremony", "start_time":"14:00", "end_time":"14:30"}, {"description": "Opening gifts", "start_time":"14:30", "end_time":"15:00"}, {"description": "Farewell and clean up", "start_time":"15:00", "end_time":"15:30"}]}
+
+now, respond to this input
+
+"""
+
 def create_assistant_prompt(prompt, event: Event):
     if event.name:
         name = event.name
@@ -102,4 +119,18 @@ def create_task_steps_prompt(task, event):
         event_theme = 'unknown'
 
     full_prompt = f"{BASE_TASK_STEP_PROMPT}event name = {event_name}\nevent theme = {event_theme}\ntask title = {task_title}\ntask description = {task_description}"
+    return full_prompt
+
+def create_rundown_prompt(event):
+    if event.name:
+        event_name = event.name
+    else:
+        event_name = 'unknown'
+    
+    if event.theme:
+        event_theme = event.theme
+    else: 
+        event_theme = 'unknown'
+
+    full_prompt = f"{BASE_RUNDOWN_PROMPT}event name = {event_name}\nevent theme = {event_theme}"
     return full_prompt

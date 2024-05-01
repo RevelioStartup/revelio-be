@@ -7,6 +7,10 @@ from rest_framework.response import Response
 from .validators import validate_rundown_data, is_valid_updated_data
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
+from rest_framework import generics
+from rest_framework.permissions import IsAuthenticated
+from utils.permissions import IsOwner
+from rest_framework.exceptions import PermissionDenied
 
 class RundownCreateView(APIView):
 
@@ -84,3 +88,19 @@ class RundownDetailView(APIView):
         updated_rundown.save()
         rundown_serializers = RundownSerializer(updated_rundown)
         return Response(rundown_serializers.data, status=200) 
+    
+    def delete(self, request, id):
+        rundown_instance = get_object_or_404(Rundown, id=id)
+        rundown_instance.delete()
+        return Response({"message": "Rundown successfully deleted"}, status=200)
+
+class RundownListView(generics.ListAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = RundownSerializer
+    lookup_field='event_id'
+    
+    def get_queryset(self):
+        event = Event.objects.get(id=self.kwargs['event_id'])
+        if not IsOwner().has_object_permission(self.request, self, event):
+            raise PermissionDenied("You do not have permission to view this event's rundown.")
+        return Rundown.objects.filter(event_id=self.kwargs['event_id'])
