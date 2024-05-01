@@ -6,7 +6,6 @@ from rest_framework.response import Response
 from event.models import Event
 from .serializers import TimelineSerializer, TimelineUpdateSerializer
 from .models import Timeline
-from task_steps.models import TaskStep
 from drf_yasg import openapi
 from revelio.utils import get_validation_error_detail
 from utils.permissions import IsEventOwner
