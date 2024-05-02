@@ -20,8 +20,8 @@ def is_valid_updated_data(rundown: Rundown, new_start_time, new_end_time):
     
     current_order = rundown.rundown_order
     event_id = rundown.event.id
-    prev_rundown = Rundown.objects.all().filter(event_id=event_id, rundown_order=current_order-1)
-    next_rundown = Rundown.objects.all().filter(event_id=event_id, rundown_order=current_order+1)
+    prev_rundown = Rundown.objects.all().filter(event_id=event_id, rundown_order__lt=current_order)
+    next_rundown = Rundown.objects.all().filter(event_id=event_id, rundown_order__gt=current_order)
     new_start_time = new_start_time.split(":")
     new_start_time = datetime.time(int(new_start_time[0]), int(new_start_time[1]))
     new_end_time = new_end_time.split(":")
