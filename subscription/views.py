@@ -4,7 +4,6 @@ from rest_framework.response import Response
 
 from subscription.models import Subscription
 from subscription.serializers import SubscriptionSerializer
-from utils.permissions import isPremiumUser
 
 # Create your views here.
 class SubscriptionHistory(generics.RetrieveAPIView):    

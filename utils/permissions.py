@@ -19,7 +19,7 @@ class IsEventOwner(BasePermission):
     def has_object_permission(self, request, view, obj):
         return obj.event.user == request.user
     
-class isPremiumUser(BasePermission):
+class IsPremiumUser(BasePermission):
     """
     Permission to check whether the current user is a premium user (subscribed right now)
     """
