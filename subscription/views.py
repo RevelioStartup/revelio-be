@@ -7,9 +7,7 @@ from subscription.serializers import SubscriptionSerializer
 from utils.permissions import isPremiumUser
 
 # Create your views here.
-class SubscriptionHistory(generics.RetrieveAPIView):
-    permission_classes = [isPremiumUser]
-    
+class SubscriptionHistory(generics.RetrieveAPIView):    
     def get(self, request):
         subscription = Subscription.objects.filter(user=request.user).order_by('-start_date') # Ordering
                 
