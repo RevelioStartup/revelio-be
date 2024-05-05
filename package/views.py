@@ -1,3 +1,8 @@
-from django.shortcuts import render
+from package.serializers import PackageSerializer
+from .models import Package
+from rest_framework.generics import RetrieveAPIView
 
-# Create your views here.
+class Package(RetrieveAPIView):
+    queryset = Package.objects.all()
+    serializer_class = PackageSerializer
+    lookup_field = 'id'
