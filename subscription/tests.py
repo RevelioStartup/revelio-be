@@ -38,3 +38,18 @@ class SubscriptionHistoryTestCase(TestCase):
         response = self.client.get(self.url)
         
         self.assertEqual(response.status_code, 401)
+        
+class LatestSubscriptionTestCase(TestCase):
+    def setUp(self):
+        self.client = APIClient()
+        self.user = AppUser.objects.create_user(email='user@example.com', username='testuser', password='testpassword')
+        self.client.force_authenticate(user=self.user)
+        
+        self.subscription = Subscription.objects.create(user=self.user, plan='PREMIUM', end_date=timezone.now() + timedelta(days=30))
+        self.url = reverse('latest') 
+        
+    def test_get_latest_subscription(self):
+        response = self.client.get(self.url)
+        
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.data['plan'], 'PREMIUM')
