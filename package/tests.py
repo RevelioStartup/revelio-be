@@ -15,6 +15,7 @@ class PackageRetrieveAPIViewTest(TestCase):
         self.package1 = Package.objects.create(
             name='Free',
             price=0,
+            duration=0,
             event_planner=True,
             event_tracker=True,
             event_timeline=True,
@@ -24,6 +25,7 @@ class PackageRetrieveAPIViewTest(TestCase):
         self.package2 = Package.objects.create(
             name='Premium',
             price=10000,
+            duration=30,
             event_planner=True,
             event_tracker=True,
             event_timeline=True,
