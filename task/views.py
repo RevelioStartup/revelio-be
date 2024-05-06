@@ -4,22 +4,24 @@ from utils.permissions import IsEventOwner, IsOwner
 from .models import Task
 from .serializers import TaskSerializer
 from rest_framework.permissions import IsAuthenticated
-from rest_framework.generics import RetrieveDestroyAPIView
+from utils.permissions import HasEventTracker
 
 class TaskCreateView(generics.CreateAPIView):
+    permission_classes=[IsAuthenticated, IsEventOwner, HasEventTracker]
     queryset = Task.objects.all()
     serializer_class = TaskSerializer
 
 class SeeTaskListView(generics.ListAPIView):
+    permission_classes = [IsAuthenticated, IsEventOwner, HasEventTracker]
+    queryset = Task.objects.all()
     serializer_class = TaskSerializer
-    permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
-        event_id = self.kwargs.get('event_id')
+        event_id = self.kwargs['event_id']
         return Task.objects.filter(event_id=event_id)
 
 class TaskDetailView(generics.RetrieveUpdateDestroyAPIView):
-    permission_classes = [IsAuthenticated, IsEventOwner]
+    permission_classes = [IsAuthenticated, IsEventOwner, HasEventTracker]
     lookup_url_kwarg = 'task_id'
     serializer_class = TaskSerializer
     
