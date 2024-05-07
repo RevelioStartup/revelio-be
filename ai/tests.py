@@ -1,16 +1,16 @@
+import json
+from decimal import Decimal
+from uuid import UUID
 from datetime import date
 from rest_framework.test import APIClient
-from django.test import TestCase
 from django.urls import reverse
 from unittest.mock import patch
+from utils.base_test import BaseTestCase
 from ai.models import RecommendationHistory
 from ai.serializers import RecommendationHistorySerializer
 from authentication.models import AppUser
 from event.models import Event
 from task.models import Task
-import json
-from decimal import Decimal
-from uuid import UUID
 
 # Create your tests here.
 
@@ -18,16 +18,16 @@ ASSISTANT_LINK = reverse('ai:assistant')
 AUTOFILL_LINK = reverse('ai:autofill')
 OPEN_AI_MODULE = 'ai.views.OpenAI'
 
-class AssistantTest(TestCase):
+class AssistantTest(BaseTestCase):
     def setUp(self):
+        super().setUp()
+        # self.user = AppUser.objects.create_user(email='email@email.com',username='testuser',password='test')
+        # self.another_user = AppUser.objects.create_user(email = 'anonymous@gmail.com', username='anonymous', password='test')
         self.client = APIClient()
-        self.user = AppUser.objects.create_user(email='email@email.com',username='testuser',password='test')
-        self.another_user = AppUser.objects.create_user(email = 'anonymous@gmail.com', username='anonymous', password='test')
-        
-        self.client.force_authenticate(user=self.user)
+        self.client.force_authenticate(user=self.premium_user)
         self.event_data = {
             "id": UUID("9fdfb487-5101-4824-8c3b-0775732aacda"),
-            "user": self.user,
+            "user": self.premium_user,
             "name": "Revelio Onboarding",
             "date": date.today(),
             "budget": Decimal('20000000'),
@@ -38,7 +38,7 @@ class AssistantTest(TestCase):
         }
         self.event_data_2 = {
             "id": UUID("9fdfb487-5101-4824-8c3b-0775732aacdb"),
-            "user": self.user,
+            "user": self.premium_user,
             "name": "",
             "date": date.today(),
             "budget": Decimal('20000000'),
@@ -105,17 +105,17 @@ class AssistantTest(TestCase):
         self.assertEqual(response.status_code, 400)
         self.assertEqual(response.json()['msg'], 'Make sure you are putting a correct prompt to the assistant.')
 
-class HistoryTest(TestCase):
+class HistoryTest(BaseTestCase):
 
     def setUp(self):
         self.client = APIClient()
-        self.user = AppUser.objects.create_user(email='email@email.com',username='testuser',password='test')
-        self.another_user = AppUser.objects.create_user(email = 'anonymous@gmail.com', username='anonymous', password='test')
+        # self.user = AppUser.objects.create_user(email='email@email.com',username='testuser',password='test')
+        # self.another_user = AppUser.objects.create_user(email = 'anonymous@gmail.com', username='anonymous', password='test')
         
-        self.client.force_authenticate(user=self.user)
+        self.client.force_authenticate(user=self.premium_user)
         self.event_data = {
             "id": UUID("9fdfb487-5101-4824-8c3b-0775732aacda"),
-            "user": self.user,
+            "user": self.premium_user,
             "name": "Revelio Onboarding",
             "date": date.today(),
             "budget": Decimal('20000000'),
@@ -126,7 +126,7 @@ class HistoryTest(TestCase):
         }
         self.event = Event.objects.create(**self.event_data)
         self.recommendation_attributes = {
-            "user": self.user,
+            "user": self.premium_user,
             "event": self.event,
             "prompt": "Berikan rekomendasi tempat untuk acara ulang tahun di Braga, Bandung.",
             "output": "Berikut adalah 5 tempat makan favorit di Bandung.",
@@ -148,16 +148,16 @@ class HistoryTest(TestCase):
         response = self.client.get(self.HISTORY_LINK)
         self.assertEqual(response.status_code, 401)
 
-class HistoryDetailTest(TestCase):
+class HistoryDetailTest(BaseTestCase):
     def setUp(self):
         self.client = APIClient()
-        self.user = AppUser.objects.create_user(email='email@email.com',username='testuser',password='test')
-        self.another_user = AppUser.objects.create_user(email = 'anonymous@gmail.com', username='anonymous', password='test')
+        # self.user = AppUser.objects.create_user(email='email@email.com',username='testuser',password='test')
+        # self.another_user = AppUser.objects.create_user(email = 'anonymous@gmail.com', username='anonymous', password='test')
         
-        self.client.force_authenticate(user=self.user)
+        self.client.force_authenticate(user=self.premium_user)
         
         self.recommendation_attributes = {
-            "user": self.user,
+            "user": self.premium_user,
             "prompt": "Berikan rekomendasi tempat untuk acara ulang tahun di Braga, Bandung.",
             "output": "Berikut adalah 5 tempat makan favorit di Bandung.",
             "list": "[\"Tempat makan 1\", \"Tempat makan 2\", \"Tempat makan 3\"]",
@@ -179,13 +179,13 @@ class HistoryDetailTest(TestCase):
         response = self.client.get(self.HISTORY_DETAIL_LINK)
         self.assertEqual(response.status_code, 401)
         
-class AutofillTest(TestCase):
+class AutofillTest(BaseTestCase):
     def setUp(self):
         self.client = APIClient()
-        self.user = AppUser.objects.create_user(email='email@email.com',username='testuser',password='test')
-        self.another_user = AppUser.objects.create_user(email = 'anonymous@gmail.com', username='anonymous', password='test')
+        # self.user = AppUser.objects.create_user(email='email@email.com',username='testuser',password='test')
+        # self.another_user = AppUser.objects.create_user(email = 'anonymous@gmail.com', username='anonymous', password='test')
         
-        self.client.force_authenticate(user=self.user)
+        self.client.force_authenticate(user=self.premium_user)
         self.mock_response = {'choices': [{'message': {'content': '{"name": "Class meet", "date" = "26/02/2024", "budget":1000000, "objective" : "Meningkatkan keakraban pertemanan antar kelas", "attendees":400, "theme" : "Valentine", "services" :  ["stand makanan", "sound system", "MC"]}'} }]}
 
     @patch(OPEN_AI_MODULE)
@@ -237,14 +237,13 @@ class AutofillTest(TestCase):
         self.assertEqual(response.status_code, 400)
         self.assertEqual(response.json()['msg'], 'Make sure you are putting a correct form data.')
 
-class RundownTest(TestCase):
+class RundownTest(BaseTestCase):
     def setUp(self):
         self.client = APIClient()
-        self.user = AppUser.objects.create_user(email='user@example.com', username='testuser', password='testpassword')
-        self.client.force_authenticate(user=self.user)
+        self.client.force_authenticate(user=self.premium_user)
 
         self.event = Event.objects.create(
-            user=self.user,
+            user=self.premium_user,
             name="Mom's birthday",
             date=date.today(),
             budget=Decimal('1000000.00'),
@@ -254,7 +253,7 @@ class RundownTest(TestCase):
             services=""
         )
         self.event_2 = Event.objects.create(
-            user=self.user,
+            user=self.premium_user,
             name="",
             date=date.today(),
             budget=Decimal('1000000.00'),
@@ -298,14 +297,13 @@ class RundownTest(TestCase):
         self.assertEqual(response.status_code, 400)
         self.assertEqual(response.json()['msg'], 'Event not found.')
 
-class TaskStepsTest(TestCase):
+class TaskStepsTest(BaseTestCase):
     def setUp(self):
         self.client = APIClient()
-        self.user = AppUser.objects.create_user(email='user@example.com', username='testuser', password='testpassword')
-        self.client.force_authenticate(user=self.user)
+        self.client.force_authenticate(user=self.premium_user)
 
         self.event = Event.objects.create(
-            user=self.user,
+            user=self.premium_user,
             name="Mom's birthday",
             date=date.today(),
             budget=Decimal('1000000.00'),
@@ -315,7 +313,7 @@ class TaskStepsTest(TestCase):
             services=""
         )
         self.event_2 = Event.objects.create(
-            user=self.user,
+            user=self.premium_user,
             name="",
             date=date.today(),
             budget=Decimal('1000000.00'),

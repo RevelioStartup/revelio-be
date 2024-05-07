@@ -9,17 +9,18 @@ from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
 from rest_framework import generics, status
 from rest_framework.permissions import IsAuthenticated
-from utils.permissions import IsOwner
+from utils.permissions import IsOwner, HasEventRundown, IsEventOwner
 from rest_framework.exceptions import PermissionDenied
 
 class RundownCreateView(APIView):
+    permission_classes = [IsAuthenticated, HasEventRundown]
 
     @swagger_auto_schema(
         request_body=openapi.Schema(
             type=openapi.TYPE_OBJECT,
             required=['event_id', 'rundown_data'],
             properties={
-                'event_id': openapi.Schema(type=openapi.TYPE_INTEGER, description='Event ID'),
+                'event_id': openapi.Schema(type=openapi.TYPE_STRING, description='Event ID'),
                 'rundown_data': openapi.Schema(
                     type=openapi.TYPE_ARRAY,
                     description='List of rundowns',
@@ -41,6 +42,9 @@ class RundownCreateView(APIView):
         rundown_data = request.data.get('rundown_data')
 
         event = get_object_or_404(Event, id=event_id)
+        
+        if not IsOwner().has_object_permission(self.request, self, event):
+            raise PermissionDenied("You do not have permission to create this event's rundown.")
 
         if Rundown.objects.filter(event=event).exists():
             return Response({"error": "Rundown for that event already exists"}, status=400)
@@ -60,6 +64,7 @@ class RundownCreateView(APIView):
         return Response(rundown_serializers.data, status=201)    
     
 class RundownDetailView(APIView):
+    permission_classes = [IsAuthenticated, HasEventRundown]
     @swagger_auto_schema(
         request_body=openapi.Schema(
             type=openapi.TYPE_OBJECT,
@@ -95,7 +100,7 @@ class RundownDetailView(APIView):
         return Response({"message": "Rundown successfully deleted"}, status=200)
 
 class RundownListView(generics.ListAPIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, HasEventRundown]
     serializer_class = RundownSerializer
     lookup_field='event_id'
     

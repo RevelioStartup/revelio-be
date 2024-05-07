@@ -1,20 +1,24 @@
-from django.http import Http404
+from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
+from django.http import Http404
 from rest_framework import generics, status, serializers
 from rest_framework.response import Response
-
 from event.models import Event
 from .serializers import TimelineSerializer, TimelineUpdateSerializer
 from .models import Timeline
-from drf_yasg import openapi
 from revelio.utils import get_validation_error_detail
-from utils.permissions import IsEventOwner
+from utils.permissions import IsEventOwner, HasEventTimeline, IsTaskStepOwner, IsOwner
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.exceptions import PermissionDenied
 
 class TimelineCreateView(generics.CreateAPIView):
+    permission_classes=[IsAuthenticated, IsTaskStepOwner, HasEventTimeline]
     queryset = Timeline.objects.all()
     serializer_class = TimelineSerializer
 
+    def get_serializer_context(self):
+        return {'request': self.request}
+    
     @swagger_auto_schema(
         operation_summary="Create a new timeline",
         operation_description="Create a new timeline with start and end datetimes and a specific task step.",
@@ -33,9 +37,6 @@ class TimelineCreateView(generics.CreateAPIView):
             404: 'Not found - Task step does not exist'
         }
     )
-    def get_serializer_context(self):
-        return {'request': self.request}
-    
     def post(self, request):
         serializer = self.get_serializer(data=request.data)
         try:
@@ -47,8 +48,10 @@ class TimelineCreateView(generics.CreateAPIView):
             return Response({"error": error_message}, status=status.HTTP_400_BAD_REQUEST)
         
 class TimelineDetailView(generics.RetrieveUpdateDestroyAPIView):
+    permission_classes=[IsAuthenticated, IsOwner, HasEventTimeline]
     queryset = Timeline.objects.all()
     serializer_class = TimelineSerializer
+    lookup_field = 'id'  
 
     @swagger_auto_schema(
         operation_summary="Update a timeline",
@@ -83,22 +86,28 @@ class TimelineDetailView(generics.RetrieveUpdateDestroyAPIView):
         
     def get_object(self):
         try:
-            return Timeline.objects.get(pk=self.kwargs['pk'])
+            timeline = Timeline.objects.get(pk=self.kwargs['pk'])
+            if not IsOwner().has_object_permission(self.request, self, timeline.task_step.task.event):
+                raise PermissionDenied("You do not have permission to view this event's timeline.")
+            return timeline
         except Timeline.DoesNotExist:
             raise serializers.ValidationError("Timeline does not exist")
         
 class TimelineDeleteView(generics.DestroyAPIView):
+    permission_classes=[IsAuthenticated, HasEventTimeline]
     queryset = Timeline.objects.all()
     serializer_class = TimelineSerializer
     lookup_field = 'id'  
 
     def delete(self, request, *args, **kwargs):
         timeline = self.get_object()
+        if not IsOwner().has_object_permission(self.request, self, timeline.task_step.task.event):
+                raise PermissionDenied("You do not have permission to view this event's timeline.")
         timeline.delete()
         return Response({"message": "Timeline deleted successfully"}, status=status.HTTP_204_NO_CONTENT)
 
 class TimelineList(generics.ListAPIView):
-    permission_classes = [IsAuthenticated, IsEventOwner]
+    permission_classes = [IsAuthenticated, IsEventOwner, HasEventTimeline]
     serializer_class = TimelineSerializer
 
     def get_queryset(self):
