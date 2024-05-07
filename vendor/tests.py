@@ -4,7 +4,6 @@ from decimal import Decimal
 from uuid import UUID
 from django.db import IntegrityError
 from django.forms import ValidationError
-from django.test import TestCase
 from collections import OrderedDict
 from django.urls import reverse
 from rest_framework import status

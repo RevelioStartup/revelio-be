@@ -1,26 +1,24 @@
 
 from decimal import Decimal
 import uuid
-from django.test import TestCase
 from rest_framework.test import APIClient
 from rest_framework import status
 from django.urls import reverse
-from datetime import datetime, timedelta, date
+from datetime import timedelta, date
 from task.models import Task
 from task_steps.models import TaskStep
-from authentication.models import AppUser
 from timeline.models import Timeline  
 from event.models import Event 
+from utils.base_test import BaseTestCase
 from django.utils import timezone
 
-class TimelineTestCase(TestCase):
+class TimelineTestCase(BaseTestCase):
     def setUp(self):
         self.client = APIClient()
-        self.user = AppUser.objects.create_user(email='user@example.com', username='testuser', password='testpassword')
-        self.client.force_authenticate(user=self.user)
+        self.client.force_authenticate(user=self.free_user)
 
         self.event = Event.objects.create(
-            user=self.user,
+            user=self.free_user,
             name="Annual Gala",
             date=date.today(),
             budget=Decimal('10000.00'),
@@ -37,7 +35,7 @@ class TimelineTestCase(TestCase):
             task=self.task,
             status='NOT_STARTED',
             step_order=2,
-            user=self.user
+            user=self.free_user
         )
 
         self.url = reverse('timeline-create') 
@@ -88,7 +86,7 @@ class TimelineTestCase(TestCase):
             task=self.task,
             status='NOT_STARTED',
             step_order=3,  
-            user=self.user
+            user=self.free_user
         )
         small_start_datetime = timezone.localtime(timezone.now(), timezone=self.current_timezone) - timedelta(hours=1)
         small_end_datetime = timezone.localtime(timezone.now(), timezone=self.current_timezone)
@@ -110,7 +108,7 @@ class TimelineTestCase(TestCase):
             task=self.task,
             status='NOT_STARTED',
             step_order=1,  
-            user=self.user
+            user=self.free_user
         )
         large_start_datetime = timezone.localtime(timezone.now(), timezone=self.current_timezone) + timedelta(hours=1)
         large_end_datetime = timezone.localtime(timezone.now(), timezone=self.current_timezone)  + timedelta(hours=2)
@@ -180,14 +178,13 @@ class TimelineTestCase(TestCase):
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
     
 
-class TimelineViewDeleteTestCase(TestCase):
+class TimelineViewDeleteTestCase(BaseTestCase):
     def setUp(self):
         self.client = APIClient()
-        self.user = AppUser.objects.create_user(email='user@example.com', username='testuser', password='testpassword')
-        self.client.force_authenticate(user=self.user)
+        self.client.force_authenticate(user=self.free_user)
 
         self.event = Event.objects.create(
-            user=self.user,
+            user=self.free_user,
             name="Annual Meeting",
             date=date.today(),
             budget=Decimal('20000.00'),
@@ -203,7 +200,7 @@ class TimelineViewDeleteTestCase(TestCase):
             task=self.task,
             status='IN_PROGRESS',
             step_order=1,
-            user=self.user
+            user=self.free_user
         )
         self.timeline = Timeline.objects.create(
             task_step=self.task_step,
@@ -228,14 +225,13 @@ class TimelineViewDeleteTestCase(TestCase):
         self.assertTrue(Task.objects.filter(id=self.task.id).exists())
 
 
-class TimelineListTestCase(TestCase):
+class TimelineListTestCase(BaseTestCase):
     def setUp(self):
         self.client = APIClient()
-        self.user = AppUser.objects.create_user(email='user@example.com', username='testuser', password='testpassword')
-        self.client.force_authenticate(user=self.user)
+        self.client.force_authenticate(user=self.free_user)
 
         self.event1 = Event.objects.create(
-            user=self.user, 
+            user=self.free_user, 
             name="Event 1", 
             date=timezone.now().date(),
             budget=Decimal('5000.00'),
@@ -245,7 +241,7 @@ class TimelineListTestCase(TestCase):
             services="Catering, Decorations, Music"
         )
         self.event2 = Event.objects.create(
-            user=self.user, 
+            user=self.free_user, 
             name="Event 2", 
             date=timezone.now().date(),
             budget=Decimal('3000.00'),
@@ -274,7 +270,7 @@ class TimelineListTestCase(TestCase):
             task=self.task1,  # Here is the corrected reference
             status='NOT_STARTED',
             step_order=1,
-            user=self.user
+            user=self.free_user
         )
         self.task_step2 = TaskStep.objects.create(
             name="Next Step",
@@ -282,7 +278,7 @@ class TimelineListTestCase(TestCase):
             task=self.task2,  # Here is the corrected reference
             status='NOT_STARTED',
             step_order=2,
-            user=self.user
+            user=self.free_user
         )
 
         self.timeline1 = Timeline.objects.create(
@@ -303,7 +299,7 @@ class TimelineListTestCase(TestCase):
 
     def test_list_timelines_no_event_timelines(self):
         event3 = Event.objects.create(
-            user=self.user,
+            user=self.free_user,
             name="Event 3",
             date=timezone.now().date(),
             budget=Decimal('2000.00'),  

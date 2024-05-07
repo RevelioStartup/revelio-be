@@ -4,17 +4,16 @@ from rest_framework import status
 from django.urls import reverse
 from .models import Transaction
 from authentication.models import AppUser
-from rest_framework.test import APIClient, APITestCase
+from rest_framework.test import APIClient
 from package.models import Package
-from django.urls.exceptions import NoReverseMatch
+from utils.base_test import BaseTestCase
 
 SNAP_API = 'payment.views.SNAP_API'
 
-class CreatePaymentViewTestCase(APITestCase):
+class CreatePaymentViewTestCase(BaseTestCase):
     def setUp(self):
         self.client = APIClient()
-        self.user = AppUser.objects.create_user(email='user@example.com', username='testuser', password='testpassword')
-        self.client.force_authenticate(user=self.user)
+        self.client.force_authenticate(user=self.another_user)
         self.url = reverse('payment:create-payment')
         self.package = Package.objects.create(
             name="Dummy Premium",
@@ -41,7 +40,7 @@ class CreatePaymentViewTestCase(APITestCase):
         self.assertIn('redirect_url', response.data)
 
         self.assertEqual(Transaction.objects.count(), 1)
-        self.assertTrue(Transaction.objects.filter(user=self.user).exists())
+        self.assertTrue(Transaction.objects.filter(user=self.another_user).exists())
 
     @patch(SNAP_API)
     def test_get_payment_details(self, mock_snap_api):
@@ -55,7 +54,7 @@ class CreatePaymentViewTestCase(APITestCase):
             'status_message': 'dummy_status_message'
         }
 
-        transaction = Transaction.objects.create(order_id=str(uuid.uuid4()), price=100, user=self.user, package=self.package)
+        transaction = Transaction.objects.create(order_id=str(uuid.uuid4()), price=100, user=self.another_user, package=self.package)
 
         response = self.client.get(f"{self.url}?order_id={transaction.order_id}")
 
@@ -70,16 +69,15 @@ class CreatePaymentViewTestCase(APITestCase):
     def test_get_payment_details_failure(self, mock_snap_api):
         mock_snap_api.transactions.status.return_value = None
         # Create a transaction with a UUID order_id
-        transaction = Transaction.objects.create(order_id=str(uuid.uuid4()), price=100, user=self.user, package=self.package)
+        transaction = Transaction.objects.create(order_id=str(uuid.uuid4()), price=100, user=self.another_user, package=self.package)
         response = self.client.get(f"{self.url}?order_id={transaction.order_id}")
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
 
-class TransactionListAPIViewTestCase(APITestCase):
+class TransactionListAPIViewTestCase(BaseTestCase):
     def setUp(self):
         self.client = APIClient()
-        self.user = AppUser.objects.create_user(email='user@example.com', username='testuser', password='testpassword')
-        self.client.force_authenticate(user=self.user)
+        self.client.force_authenticate(user=self.another_user)
         self.url = reverse('payment:transaction-list')
         self.package = Package.objects.create(
             name="Dummy Premium",
@@ -91,7 +89,7 @@ class TransactionListAPIViewTestCase(APITestCase):
             event_rundown=True,
             ai_assistant=True
         )
-        self.transaction = Transaction.objects.create(order_id=str(uuid.uuid4()), price=100, user=self.user, package=self.package)
+        self.transaction = Transaction.objects.create(order_id=str(uuid.uuid4()), price=100, user=self.another_user, package=self.package)
 
     def test_get_transaction_list(self):
         response = self.client.get(self.url)
@@ -106,11 +104,10 @@ class TransactionListAPIViewTestCase(APITestCase):
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
-class TransactionDetailAPIViewTestCase(APITestCase):
+class TransactionDetailAPIViewTestCase(BaseTestCase):
     def setUp(self):
         self.client = APIClient()
-        self.user = AppUser.objects.create_user(email='user@example.com', username='testuser', password='testpassword')
-        self.client.force_authenticate(user=self.user)
+        self.client.force_authenticate(user=self.another_user)
         self.package = Package.objects.create(
             name="Dummy Premium",
             price=10000,
@@ -122,7 +119,7 @@ class TransactionDetailAPIViewTestCase(APITestCase):
             ai_assistant=True
         )
         self.order_id = str(uuid.uuid4())
-        self.transaction = Transaction.objects.create(order_id=self.order_id, price=100, user=self.user, package=self.package)
+        self.transaction = Transaction.objects.create(order_id=self.order_id, price=100, user=self.another_user, package=self.package)
 
     def test_get_transaction_detail(self):
         url = reverse('payment:transaction-detail', kwargs={'id': self.transaction.id})

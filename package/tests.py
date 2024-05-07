@@ -1,16 +1,14 @@
-from django.test import TestCase
+
 from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APIClient
-
-from authentication.models import AppUser
 from .models import Package
+from utils.base_test import BaseTestCase
 
-class PackageRetrieveAPIViewTest(TestCase):
+class PackageRetrieveAPIViewTest(BaseTestCase):
     def setUp(self):
         self.client = APIClient()
-        self.user = AppUser.objects.create_user(email='email@email.com', username='testuser', password='test')
-        self.client.force_authenticate(user=self.user)
+        self.client.force_authenticate(user=self.another_user)
 
         self.package1 = Package.objects.create(
             name='Free',
