@@ -1,16 +1,11 @@
+import json
 from datetime import date
 from decimal import Decimal
-import json
 from uuid import UUID
-import uuid
 from django.db import IntegrityError
 from django.forms import ValidationError
 from django.test import TestCase
 from collections import OrderedDict
-
-# Create your tests here.
-
-from django.test import TestCase
 from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APIClient
@@ -19,16 +14,15 @@ from authentication.models import AppUser
 from .models import Vendor, PhotoVendor, Event
 from .serializers import VendorSerializer
 from django.core.files.uploadedfile import SimpleUploadedFile
-from django.core.serializers.json import DjangoJSONEncoder
+from utils.base_test import BaseTestCase
 
-class BaseTestCaseVendor(TestCase):
+class BaseTestCaseVendor(BaseTestCase):
     def setUp(self):
         self.client = APIClient()
-        self.user = AppUser.objects.create_user(email='email@email.com',username='testuser',password='test')
-        self.client.force_authenticate(user=self.user)
+        self.client.force_authenticate(user=self.free_user)
         self.event_data = {
             "id": UUID("9fdfb487-5101-4824-8c3b-0775732aacda"),
-            "user": self.user,
+            "user": self.free_user,
             "name": "Revelio Onboarding",
             "date": date.today(),
             "budget": Decimal('20000000'),
@@ -72,14 +66,13 @@ class BaseTestCaseVendor(TestCase):
         }
         self.vendor2 = Vendor.objects.create(**self.vendor2_data)
 
-class BaseTestCasePhoto(TestCase):
+class BaseTestCasePhoto(BaseTestCase):
     def setUp(self):
         self.client = APIClient()
-        self.user = AppUser.objects.create_user(email='email@email.com',username='testuser',password='test')
-        self.client.force_authenticate(user=self.user)
+        self.client.force_authenticate(user=self.free_user)
         self.event_data = {
             "id": UUID("9fdfb487-5101-4824-8c3b-0775732aacda"),
-            "user": self.user,
+            "user": self.free_user,
             "name": "Revelio Onboarding",
             "date": date.today(),
             "budget": Decimal('20000000'),
