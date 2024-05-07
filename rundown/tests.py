@@ -189,3 +189,9 @@ class DeleteRundownTestCase(BaseTestCase):
         response = self.client.delete(url)
         self.assertEqual(response.status_code, status.HTTP_200_OK) 
         self.assertFalse(Rundown.objects.filter(id=self.rundown_2.id).exists())
+
+    def test_delete_all_task_steps_for_a_task(self):
+        url = reverse('rundown-delete-all', args=[self.event.id])  
+        response = self.client.delete(url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK) 
+        self.assertFalse(Rundown.objects.filter(event=self.event).exists())
