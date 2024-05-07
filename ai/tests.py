@@ -3,7 +3,6 @@ from decimal import Decimal
 from uuid import UUID
 from datetime import date
 from rest_framework.test import APIClient
-from django.test import TestCase
 from django.urls import reverse
 from unittest.mock import patch
 from utils.base_test import BaseTestCase
