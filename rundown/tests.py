@@ -1,7 +1,5 @@
 from datetime import date
 from decimal import Decimal
-from uuid import UUID
-
 from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APIClient
@@ -9,13 +7,13 @@ from authentication.models import AppUser
 from .models import Event, Rundown
 import datetime
 from utils.base_test import BaseTestCase
+
 class RundownBaseTestCase(BaseTestCase):
     def setUp(self):
         self.client = APIClient()
         self.client.force_authenticate(user=self.free_user)
 
         self.event_data = {
-            "id": UUID("9fdfb487-5101-4824-8c3b-0775732aacda"),
             "user": self.free_user,
             "name": "Revelio Onboarding",
             "date": date.today(),
@@ -26,28 +24,29 @@ class RundownBaseTestCase(BaseTestCase):
             "services": "Catering, Decorations, Music"
         }
         self.event = Event.objects.create(**self.event_data)
-        self.event_id = UUID("9fdfb487-5101-4824-8c3b-0775732aacda")
+        self.event_id = self.event.id
 
         self.rundown_data = {
-            "event_id":UUID("9fdfb487-5101-4824-8c3b-0775732aacda"),
-            "rundown_data":[
+            "event_id": self.event_id,  
+            "rundown_data": [
                 {
-                    "description":"Acara 1",
-                    "start_time":"08:00",
-                    "end_time":"09:00"
+                    "description": "Acara 1",
+                    "start_time": "08:00",
+                    "end_time": "09:00"
                 },
                 {
-                    "description":"Acara 2",
-                    "start_time":"09:00",
-                    "end_time":"09:30"
+                    "description": "Acara 2",
+                    "start_time": "09:00",
+                    "end_time": "09:30"
                 },
                 {
-                    "description":"Acara 3",
-                    "start_time":"10:00",
-                    "end_time":"10:30"
+                    "description": "Acara 3",
+                    "start_time": "10:00",
+                    "end_time": "10:30"
                 }
             ]
         }
+
 
 class CreateRundownTestCase(RundownBaseTestCase):
 
@@ -59,17 +58,17 @@ class CreateRundownTestCase(RundownBaseTestCase):
     
     def test_create_rundown_invalid_data(self):
         invalid_rundown_data = {
-            "event_id":UUID("9fdfb487-5101-4824-8c3b-0775732aacda"),
-            "rundown_data":[
+            "event_id": self.event_id,  # Use the dynamic event ID
+            "rundown_data": [
                 {
-                    "description":"Acara 1",
-                    "start_time":"08:00",
-                    "end_time":"09:00"
+                    "description": "Acara 1",
+                    "start_time": "08:00",
+                    "end_time": "09:00"
                 },
                 {
-                    "description":"Acara 2",
-                    "start_time":"08:00",
-                    "end_time":"09:30"
+                    "description": "Acara 2",
+                    "start_time": "08:00",
+                    "end_time": "09:30"
                 }
             ]
         }
@@ -81,22 +80,23 @@ class CreateRundownTestCase(RundownBaseTestCase):
         response = self.client.post(self.url, self.rundown_data, format='json')
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
+
 class UpdateRundownTestCase(RundownBaseTestCase):
 
     def set_up_rundown(self):
         self.rundown_1 = Rundown.objects.create(
-            event = self.event,
-            rundown_order = 1,
-            description = "Acara 1",
-            start_time = datetime.time(8,0),
-            end_time = datetime.time(9,0),
+            event=self.event,
+            rundown_order=1,
+            description="Acara 1",
+            start_time=datetime.time(8,0),
+            end_time=datetime.time(9,0),
         )
         self.rundown_2 = Rundown.objects.create(
-            event = self.event,
-            rundown_order = 2,
-            description = "Acara 2",
-            start_time = datetime.time(9,0),
-            end_time = datetime.time(9,30),
+            event=self.event,
+            rundown_order=2,
+            description="Acara 2",
+            start_time=datetime.time(9,0),
+            end_time=datetime.time(9,30),
         )
 
     def test_update_rundown_successfully(self):
@@ -138,7 +138,7 @@ class UpdateRundownTestCase(RundownBaseTestCase):
         url = reverse('rundown-detail', args=[self.rundown_1.id])
         response = self.client.patch(url, updated_rundown_data_invalid_3, format='json')
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        
+
 class GetRundownListTestCase(RundownBaseTestCase):
     url = reverse('rundown-create')
 
