@@ -9,10 +9,11 @@ from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
 from rest_framework import generics
 from rest_framework.permissions import IsAuthenticated
-from utils.permissions import IsOwner
+from utils.permissions import IsOwner, HasEventRundown, IsEventOwner
 from rest_framework.exceptions import PermissionDenied
 
 class RundownCreateView(APIView):
+    permission_classes = [IsAuthenticated, IsEventOwner, HasEventRundown]
 
     @swagger_auto_schema(
         request_body=openapi.Schema(
@@ -60,6 +61,7 @@ class RundownCreateView(APIView):
         return Response(rundown_serializers.data, status=201)    
     
 class RundownDetailView(APIView):
+    permission_classes = [IsAuthenticated, IsEventOwner, HasEventRundown]
     @swagger_auto_schema(
         request_body=openapi.Schema(
             type=openapi.TYPE_OBJECT,
@@ -95,7 +97,7 @@ class RundownDetailView(APIView):
         return Response({"message": "Rundown successfully deleted"}, status=200)
 
 class RundownListView(generics.ListAPIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, IsEventOwner, HasEventRundown]
     serializer_class = RundownSerializer
     lookup_field='event_id'
     

@@ -6,10 +6,12 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from event.models import Event
 from event.serializers import EventSerializer
-from utils.permissions import IsOwner
+from utils.permissions import IsOwner, HasEventPlanner
 from rest_framework import generics
 
-class EventList(APIView):        
+class EventList(APIView): 
+    permission_classes = [IsAuthenticated, IsOwner, HasEventPlanner]
+           
     def get(self, request):
         events = Event.objects.select_related('user').filter(user = request.user)
         serializer = EventSerializer(events, many=True)
@@ -29,10 +31,10 @@ class EventDetail(RetrieveDestroyAPIView):
     queryset = Event.objects.all()
     serializer_class = EventSerializer
     lookup_field = 'id'
-    permission_classes = [IsAuthenticated, IsOwner]
+    permission_classes = [IsAuthenticated, IsOwner, HasEventPlanner]
 
 class EventUpdateView(generics.UpdateAPIView):
     queryset = Event.objects.all()
     serializer_class = EventSerializer
     lookup_field = 'id'
-    permission_classes = [IsAuthenticated, IsOwner]
+    permission_classes = [IsAuthenticated, IsOwner, HasEventPlanner]
