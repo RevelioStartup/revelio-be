@@ -16,7 +16,8 @@ class SubscriptionHistory(generics.RetrieveAPIView):
     
 class LatestSubscription(generics.RetrieveAPIView):
     def get(self, request):
-        subscription = Subscription.objects.filter(user=request.user).latest('start_date')
+    
+        subscription = Subscription.objects.filter(user=request.user).filter(plan__name = "PREMIUM").latest('start_date')
         
         serializer = SubscriptionSerializer(subscription)
         
