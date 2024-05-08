@@ -13,6 +13,7 @@ import re
 import os
 import json
 from openai import OpenAI
+from utils.permissions import HasAIAssistant
 
 load_dotenv()
 client = OpenAI(api_key=os.getenv('OPENAI_API_KEY'))
@@ -20,7 +21,7 @@ AI_MODEL = 'gpt-3.5-turbo'
 
 class AssistantView(APIView):
 
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, HasAIAssistant]
 
     def post(self, request):
         prompt = request.data.get('prompt')
@@ -89,7 +90,7 @@ class AssistantView(APIView):
         return Response(data, status=200)
 
 class HistoryView(APIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, HasAIAssistant]
 
     def get(self, request, event_id):
         history = RecommendationHistory.objects.filter(event=event_id)
@@ -100,7 +101,7 @@ class HistoryView(APIView):
         return Response(serializer.data)
 
 class HistoryDetailView(RetrieveDestroyAPIView):
-    permission_classes = [IsAuthenticated, IsOwner]
+    permission_classes = [IsAuthenticated, IsOwner, HasAIAssistant]
 
     def get(self, request, id):
         history = RecommendationHistory.objects.get(pk=id)
@@ -112,7 +113,7 @@ class HistoryDetailView(RetrieveDestroyAPIView):
 
 class AutoFillView(APIView):
     
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, HasAIAssistant]
 
     def post(self, request):
         form = request.data.get('event')
@@ -136,7 +137,7 @@ class AutoFillView(APIView):
         return Response(json.loads(response.choices[0].message.content), status=200)  
     
 class TaskStepView(APIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, HasAIAssistant]
 
     def get(self, request, task_id):
         task_id = int(task_id)
@@ -170,7 +171,7 @@ class TaskStepView(APIView):
         return Response(data, status=200)
     
 class RundownView(APIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, HasAIAssistant]
 
     def get(self, request, event_id):
         event = Event.objects.filter(id=event_id).first()

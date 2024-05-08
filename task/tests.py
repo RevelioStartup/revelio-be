@@ -1,24 +1,20 @@
 from datetime import date
 from decimal import Decimal
 from uuid import UUID
-from django.test import TestCase
-from django.test import TestCase
 from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APIClient
-from authentication.models import AppUser
 from .models import Task, Event
 from .serializers import TaskSerializer
-
-class BaseTestCase(TestCase):
+from utils.base_test import BaseTestCase
+class BaseTaskTestCase(BaseTestCase):
     def setUp(self):
         self.client = APIClient()
-        self.user = AppUser.objects.create_user(email='email@email.com', username='testuser', password='test')
-        self.client.force_authenticate(user=self.user)
+        self.client.force_authenticate(user=self.free_user)
 
         self.event_data = {
             "id": UUID("9fdfb487-5101-4824-8c3b-0775732aacda"),
-            "user": self.user,
+            "user": self.free_user,
             "name": "Revelio Onboarding",
             "date": date.today(),
             "budget": Decimal('20000000'),
@@ -38,7 +34,7 @@ class BaseTestCase(TestCase):
         }
         self.task = Task.objects.create(**self.task_data)
 
-class TaskModelTestCase(BaseTestCase):
+class TaskModelTestCase(BaseTaskTestCase):
     def test_task_model(self):
         self.assertEqual(str(self.task), "Task Default")
 
@@ -46,7 +42,7 @@ class TaskModelTestCase(BaseTestCase):
         non_existent_task = Task.objects.filter(title="Non Existent Task").first()
         self.assertIsNone(non_existent_task)
 
-class TaskAPITestCase(BaseTestCase):
+class TaskAPITestCase(BaseTaskTestCase):
     def test_create_task(self):
         new_data = {
             "title": "Updated Task",
@@ -63,7 +59,7 @@ class TaskAPITestCase(BaseTestCase):
         incomplete_data = {"title": "Incomplete Vendor"}
         response = self.client.post(url, incomplete_data, format='json')
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-class SeeTaskListViewTestCase(BaseTestCase):
+class SeeTaskListViewTestCase(BaseTaskTestCase):
     
     def test_get_tasks_list(self):
         task_data_2 = {
@@ -87,7 +83,7 @@ class SeeTaskListViewTestCase(BaseTestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data, data)
 
-class DetailTaskViewTestCase(BaseTestCase):
+class DetailTaskViewTestCase(BaseTaskTestCase):
     def test_update_task(self):
         new_data = {
             "title": "Updated Task",
@@ -99,10 +95,10 @@ class DetailTaskViewTestCase(BaseTestCase):
         response = self.client.patch(url, new_data, format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         
-    def test_detail_not_found(self):
+    def test_detail_permission_denied(self):
         url = reverse('detail-task', args=[UUID("9fdfb487-5101-4824-8c3b-0775732aacdb"), self.task.pk])
         response = self.client.patch(url, {}, format='json')
-        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
         
     def test_update_task_invalid_data(self):
         url = reverse('detail-task', args=[self.event_id, self.task.pk])
