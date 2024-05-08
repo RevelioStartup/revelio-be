@@ -1,18 +1,18 @@
 from rest_framework import generics, status
-from utils.permissions import IsOwner
+from rest_framework.exceptions import PermissionDenied
+from utils.permissions import IsOwner, HasEventTracker
+from rest_framework.permissions import IsAuthenticated
 from django.db import transaction, IntegrityError
-
 from task.models import Task
 from .models import TaskStep
 from .serializers import TaskStepSerializer
-
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
 from rest_framework.response import Response
-from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
 from django.shortcuts import get_object_or_404
 class TaskStepCreateListView(APIView):
+    permission_classes = [IsAuthenticated, HasEventTracker]
 
     @swagger_auto_schema(
         request_body=openapi.Schema(
@@ -41,6 +41,8 @@ class TaskStepCreateListView(APIView):
 
         # Validate task existence
         task = get_object_or_404(Task, id=task_id)
+        if not IsOwner().has_object_permission(self.request, self, task.event):
+            raise PermissionDenied("You do not have permission to create task step.")
 
         # Check if any TaskStep already exists for the task
         if TaskStep.objects.filter(task=task).exists():
@@ -61,11 +63,9 @@ class TaskStepCreateListView(APIView):
             else:
                 errors.append(serializer.errors)
 
-        # If there are any errors in any step, return the errors
         if errors:
             return Response({"errors": errors}, status=status.HTTP_400_BAD_REQUEST)
 
-        # If all steps are valid, perform bulk creation
         try:
             with transaction.atomic():
                 created_steps = [TaskStep(**data) for data in validated_steps_data]  # Use the TaskStep model directly
@@ -149,7 +149,7 @@ class TaskStepAppendView(generics.CreateAPIView):
 class TaskStepDestroyView(generics.DestroyAPIView):
     queryset = TaskStep.objects.all()
     serializer_class = TaskStepSerializer
-    permission_classes = [IsOwner, IsAuthenticated]  # Apply the custom permission class
+    permission_classes = [IsOwner, IsAuthenticated]  
 
     def destroy(self, request, *args, **kwargs):
         instance = self.get_object()

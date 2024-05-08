@@ -1,27 +1,22 @@
 from datetime import date
 from decimal import Decimal
 import uuid
-from django.test import TestCase
 from django.urls import NoReverseMatch, reverse
 from rest_framework.test import APIClient
-
-from authentication.models import AppUser
+from utils.base_test import BaseTestCase
 from event.models import Event
 from event.serializers import EventSerializer
 
 # Create your tests here.
 EVENT_LIST_LINK = reverse('event:list')
 
-class EventTest(TestCase):
+class EventTest(BaseTestCase):
     def setUp(self):
         self.client = APIClient()
-        self.user = AppUser.objects.create_user(email='email@email.com',username='testuser',password='test')
-        self.another_user = AppUser.objects.create_user(email = 'anonymous@gmail.com', username='anonymous', password='test')
-        
-        self.client.force_authenticate(user=self.user)
+        self.client.force_authenticate(user=self.free_user)
         
         self.event_attributes = {
-            "user": self.user,
+            "user": self.free_user,
             "name": "Revelio Onboarding",
             "date": date.today(),
             "budget": Decimal('20000000'),
@@ -86,8 +81,7 @@ class EventTest(TestCase):
         
     def test_post_missing_event(self):
         response = self.client.post(EVENT_LIST_LINK, {
-            "user": self.user,
-            # "name": "Revelio Onboarding",
+            "user": self.free_user,
             "date": date.today(),
             "budget": Decimal('20000000'),
             "objective": "To onboard new employees",
@@ -136,10 +130,10 @@ class EventTest(TestCase):
         self.assertEqual(response.status_code, 403)
 
     def test_update_event(self):
-        self.client.force_authenticate(user=self.user)
+        self.client.force_authenticate(user=self.free_user)
         url = reverse('event:update', args=[self.model.id])
         updated_data = {
-            "user": self.user.id,
+            "user": self.free_user.id,
             "name": "Revelio Onboarding",
             "date": date.today(),
             "budget": Decimal('20000000'),

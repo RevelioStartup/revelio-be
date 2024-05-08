@@ -54,7 +54,12 @@ INSTALLED_APPS = [
     'vendor',
     'task',
     'task_steps',
+    'timeline',
+    'payment',
     'drf_yasg',
+    'rundown',
+    'subscription',
+    'package',
 ]
 
 MIDDLEWARE = [

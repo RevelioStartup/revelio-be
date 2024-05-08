@@ -1,5 +1,4 @@
 from decimal import Decimal
-from django.test import TestCase
 from rest_framework.test import APIClient
 from rest_framework import status
 from django.urls import reverse
@@ -7,16 +6,15 @@ from datetime import date
 from task.models import Task
 from event.models import Event
 from task_steps.models import TaskStep
-from authentication.models import AppUser
+from utils.base_test import BaseTestCase
 
-class TaskStepCreateTestCase(TestCase):
+class TaskStepCreateTestCase(BaseTestCase):
     def setUp(self):
         self.client = APIClient()
-        self.user = AppUser.objects.create_user(email='user@example.com', username='testuser', password='testpassword')
-        self.client.force_authenticate(user=self.user)
+        self.client.force_authenticate(user=self.free_user)
 
         self.event = Event.objects.create(
-            user=self.user,
+            user=self.free_user,
             name="Annual Gala",
             date=date.today(),
             budget=Decimal('10000.00'),
@@ -72,14 +70,13 @@ class TaskStepCreateTestCase(TestCase):
         response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)
 
-class TaskStepUpdateTestCase(TestCase):
+class TaskStepUpdateTestCase(BaseTestCase):
     def setUp(self):
         self.client = APIClient()
-        self.user = AppUser.objects.create_user(email='user@example.com', username='testuser', password='testpassword')
-        self.client.force_authenticate(user=self.user)
+        self.client.force_authenticate(user=self.free_user)
 
         self.event = Event.objects.create(
-            user=self.user,
+            user=self.free_user,
             name="Annual Gala",
             date=date.today(),
             budget=Decimal('10000.00'),
@@ -96,7 +93,7 @@ class TaskStepUpdateTestCase(TestCase):
             status="NOT_STARTED",
             step_order=1,
             task=self.task,
-            user=self.user
+            user=self.free_user
         )
     
     def test_update_task_step(self):
@@ -159,14 +156,13 @@ class TaskStepUpdateTestCase(TestCase):
         response = self.client.put(url, data, format='json')
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
-class TaskStepAppendTestCase(TestCase):
+class TaskStepAppendTestCase(BaseTestCase):
     def setUp(self):
         self.client = APIClient()
-        self.user = AppUser.objects.create_user(email='user@example.com', username='testuser', password='testpassword')
-        self.client.force_authenticate(user=self.user)
+        self.client.force_authenticate(user=self.free_user)
 
         self.event = Event.objects.create(
-            user=self.user,
+            user=self.free_user,
             name="Annual Gala",
             date=date.today(),
             budget=Decimal('10000.00'),
@@ -183,7 +179,7 @@ class TaskStepAppendTestCase(TestCase):
             status="DONE",
             step_order=1,
             task=self.task,
-            user=self.user
+            user=self.free_user
         )
     
     def test_append_task_valid(self):
@@ -197,14 +193,13 @@ class TaskStepAppendTestCase(TestCase):
         steps = TaskStep.objects.filter(task=self.task.id)
         self.assertTrue(len(steps) == 2)
 
-class TaskStepDeletionTestCase(TestCase):
+class TaskStepDeletionTestCase(BaseTestCase):
     def setUp(self):
         self.client = APIClient()
-        self.user = AppUser.objects.create_user(email='user@example.com', username='testuser', password='testpassword')
-        self.client.force_authenticate(user=self.user)
+        self.client.force_authenticate(user=self.free_user)
 
         self.event = Event.objects.create(
-            user=self.user,
+            user=self.free_user,
             name="Annual Gala",
             date=date.today(),
             budget=Decimal('10000.00'),
@@ -221,7 +216,7 @@ class TaskStepDeletionTestCase(TestCase):
             status="NOT_STARTED",
             step_order=1,
             task=self.task,
-            user=self.user 
+            user=self.free_user 
         )
 
     def test_delete_single_task_step(self):
