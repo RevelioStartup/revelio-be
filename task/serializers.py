@@ -13,6 +13,7 @@ class TaskSerializer(serializers.ModelSerializer):
 
     def get_task_steps(self, obj):
         task_steps = obj.task_steps.all().order_by('step_order')
+
         serializer = TaskStepSerializer(instance=task_steps, many=True, read_only=True)
 
         return serializer.data
