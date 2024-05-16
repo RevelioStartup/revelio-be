@@ -41,12 +41,12 @@ jobs:
         echo "GCP_AUTH_PROVIDER_X509_CERT_URL=${{ secrets.GCP_AUTH_PROVIDER_X509_CERT_URL }}" >> .env
         echo "GCP_CLIENT_X509_CERT_URL=${{ secrets.GCP_CLIENT_X509_CERT_URL }}" >> .env
         echo "GCP_UNIVERSE_DOMAIN=${{ secrets.GCP_UNIVERSE_DOMAIN }}" >> .env
-        echo "POSTGRES_PASSWORD=${{ secrets.DB_PASS }}" >> .env
-        echo "POSTGRES_USER=${{ secrets.DB_USER }}" >> .env
-        echo "POSTGRES_DB=${{ secrets.DB_NAME }}" >> .env
-        echo "POSGRES_HOST=${{ secrets.DB_HOST }}" >> .env
-        echo "DOCKER_USERNAME=${{ secrets.DOCKER_USERNAME }}" >> .env
-        echo "DOCKER_IMAGE_NAME=${{ secrets.DOCKER_IMAGE_NAME }}" >> .env
+        echo "MIDTRANS_API_BASE_URL=${{ secrets.MIDTRANS_API_BASE_URL }}" >> .env
+        echo "MIDTRANS_SERVER_KEY=${{ secrets.MIDTRANS_SERVER_KEY }}" >> .env
+        echo "MIDTRANS_CLIENT_KEY=${{ secrets.MIDTRANS_CLIENT_KEY }}" >> .env
+        echo "MIDTRANS_IS_PRODUCTION=${{ secrets.MIDTRANS_IS_PRODUCTION }}" >> .env
+        echo "REVELIO_FE_BASE_URL=${{ secrets.REVELIO_FE_BASE_URL }}" >> .env
+        
 
     - name: Run Tests
       run: |
@@ -87,12 +87,12 @@ jobs:
           echo "GCP_AUTH_PROVIDER_X509_CERT_URL=${{ secrets.GCP_AUTH_PROVIDER_X509_CERT_URL }}" >> .env
           echo "GCP_CLIENT_X509_CERT_URL=${{ secrets.GCP_CLIENT_X509_CERT_URL }}" >> .env
           echo "GCP_UNIVERSE_DOMAIN=${{ secrets.GCP_UNIVERSE_DOMAIN }}" >> .env
-          echo "POSTGRES_PASSWORD=${{ secrets.DB_PASS }}" >> .env
-          echo "POSTGRES_USER=${{ secrets.DB_USER }}" >> .env
-          echo "POSTGRES_DB=${{ secrets.DB_NAME }}" >> .env
-          echo "POSGRES_HOST=${{ secrets.DB_HOST }}" >> .env
-          echo "DOCKER_USERNAME=${{ secrets.DOCKER_USERNAME }}" >> .env
-          echo "DOCKER_IMAGE_NAME=${{ secrets.DOCKER_IMAGE_NAME }}" >> .env
+          echo "MIDTRANS_API_BASE_URL=${{ secrets.MIDTRANS_API_BASE_URL }}" >> .env
+          echo "MIDTRANS_SERVER_KEY=${{ secrets.MIDTRANS_SERVER_KEY }}" >> .env
+          echo "MIDTRANS_CLIENT_KEY=${{ secrets.MIDTRANS_CLIENT_KEY }}" >> .env
+          echo "MIDTRANS_IS_PRODUCTION=${{ secrets.MIDTRANS_IS_PRODUCTION }}" >> .env
+          echo "REVELIO_FE_BASE_URL=${{ secrets.REVELIO_FE_BASE_URL }}" >> .env
+          
     
     - name: Build Docker Image
       run: |
