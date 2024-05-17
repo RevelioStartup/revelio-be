@@ -21,11 +21,11 @@ jobs:
     
     - name: Set Up Environment Variables
       run: |
-        echo "DB_HOST=${{ secrets.DB_HOST }}" >> .env
+        echo "DB_HOST=${{ secrets.DB_HOST_PROD }}" >> .env
         echo "DJANGO_SECRET_KEY=${{ secrets.DJANGO_SECRET_KEY }}" >> .env
-        echo "DB_NAME=${{ secrets.DB_NAME }}" >> .env
-        echo "DB_USER=${{ secrets.DB_USER }}" >> .env
-        echo "DB_PASS=${{ secrets.DB_PASS }}" >> .env
+        echo "DB_NAME=${{ secrets.DB_NAME_PROD }}" >> .env
+        echo "DB_USER=${{ secrets.DB_USER_PROD }}" >> .env
+        echo "DB_PASS=${{ secrets.DB_PASS_PROD }}" >> .env
         echo "EMAIL_HOST=${{ secrets.EMAIL_HOST }}" >> .env
         echo "EMAIL_HOST_USER=${{ secrets.EMAIL_HOST_USER }}" >> .env
         echo "EMAIL_HOST_PASSWORD=${{ secrets.EMAIL_HOST_PASSWORD }}" >> .env
@@ -67,11 +67,11 @@ jobs:
     
     - name: Set Up Environment Variables
       run: |
-          echo "DB_HOST=${{ secrets.DB_HOST }}" >> .env
+          echo "DB_HOST=${{ secrets.DB_HOST_PROD }}" >> .env
           echo "DJANGO_SECRET_KEY=${{ secrets.DJANGO_SECRET_KEY }}" >> .env
-          echo "DB_NAME=${{ secrets.DB_NAME }}" >> .env
-          echo "DB_USER=${{ secrets.DB_USER }}" >> .env
-          echo "DB_PASS=${{ secrets.DB_PASS }}" >> .env
+          echo "DB_NAME=${{ secrets.DB_NAME_PROD }}" >> .env
+          echo "DB_USER=${{ secrets.DB_USER_PROD }}" >> .env
+          echo "DB_PASS=${{ secrets.DB_PASS_PROD }}" >> .env
           echo "EMAIL_HOST=${{ secrets.EMAIL_HOST }}" >> .env
           echo "EMAIL_HOST_USER=${{ secrets.EMAIL_HOST_USER }}" >> .env
           echo "EMAIL_HOST_PASSWORD=${{ secrets.EMAIL_HOST_PASSWORD }}" >> .env
