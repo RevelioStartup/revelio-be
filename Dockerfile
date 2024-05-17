@@ -16,4 +16,5 @@ EXPOSE 5432
 HEALTHCHECK --interval=15s --timeout=1s \
     CMD curl --fail http://localhost:8000/swagger/ || exit 1  
 
+CMD ["python", "manage.py", "migrate"]
 CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
