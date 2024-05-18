@@ -48,6 +48,7 @@ jobs:
         echo "GCP_AUTH_PROVIDER_X509_CERT_URL=${{ secrets.GCP_AUTH_PROVIDER_X509_CERT_URL }}" >> .env
         echo "GCP_CLIENT_X509_CERT_URL=${{ secrets.GCP_CLIENT_X509_CERT_URL }}" >> .env
         echo "GCP_UNIVERSE_DOMAIN=${{ secrets.GCP_UNIVERSE_DOMAIN }}" >> .env
+        echo "SENTRY_DSN=${{ secrets.SENTRY_DSN }}" >> .env
         cp .env revelio/.env
 
     - name: Run Tests
