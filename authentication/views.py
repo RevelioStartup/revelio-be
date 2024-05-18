@@ -1,3 +1,4 @@
+import sentry_sdk
 from authentication.models import AppUser, Profile, UserToken
 from django.contrib.auth import authenticate
 from rest_framework.views import APIView
@@ -217,7 +218,8 @@ class SendRecoverPasswordEmailView(APIView):
                     return Response({'msg': 'Password changes successfully!'}, status=200)
                 else:
                     return Response({'msg': 'Expired token!'}, status=400)
-            except ObjectDoesNotExist:
+            except ObjectDoesNotExist as e:
+                sentry_sdk.capture_exception(e)
                 return Response({'msg': 'Invalid verification token!'}, status=400)
             except AttributeError:
                 return Response({'msg': 'Missing verification token!'}, status=400)
