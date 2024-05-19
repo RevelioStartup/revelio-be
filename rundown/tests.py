@@ -6,6 +6,7 @@ from rest_framework.test import APIClient
 from authentication.models import AppUser
 from .models import Event, Rundown
 import datetime
+from django.contrib.auth.models import BaseUserManager
 from utils.base_test import BaseTestCase
 
 class RundownBaseTestCase(BaseTestCase):
@@ -157,7 +158,8 @@ class GetRundownListTestCase(RundownBaseTestCase):
 
     def test_not_rundown_owner(self):
         self.client = APIClient()
-        self.user = AppUser.objects.create_user(email='invalid@email.com', username='invalid', password='invalid')
+        invalid_owner_password = BaseUserManager().make_random_password()
+        self.user = AppUser.objects.create_user(email='invalid@email.com', username='invalid', password=invalid_owner_password)
         self.client.force_authenticate(user=self.user)
         url = reverse('rundown-list', args=[self.event_id])
         response = self.client.get(url)
