@@ -5,7 +5,6 @@ from django.urls import reverse
 import json
 from django.core import mail
 from rest_framework.test import APIClient
-
 from subscription.models import Subscription
 from .tokens import account_token
 from django.core.files.uploadedfile import SimpleUploadedFile
