@@ -79,7 +79,6 @@ class HasEventPlanner(BasePermission):
     def has_permission(self, request, view):
         user = request.user
         current_subscription = get_current_subscription(user)
-        print(current_subscription)
         
         if current_subscription:
             return current_subscription.plan.event_planner
