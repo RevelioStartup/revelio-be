@@ -7,6 +7,7 @@ from authentication.models import AppUser
 from rest_framework.test import APIClient
 from package.models import Package
 from utils.base_test import BaseTestCase
+from django.contrib.auth.models import BaseUserManager
 
 SNAP_API = 'payment.views.SNAP_API'
 
@@ -132,7 +133,8 @@ class TransactionDetailAPIViewTestCase(BaseTestCase):
 
     def test_get_transaction_detail_unauthorized(self):
         url = reverse('payment:transaction-detail', kwargs={'id': self.transaction.id})
-        other_user = AppUser.objects.create_user(email='otheruser@example.com', username='otheruser', password='testpassword')
+        other_password = BaseUserManager().make_random_password()
+        other_user = AppUser.objects.create_user(email='otheruser@example.com', username='otheruser', password=other_password)
         self.client.force_authenticate(user=other_user)
         response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)

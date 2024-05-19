@@ -2,18 +2,19 @@ from datetime import timedelta
 from django.utils import timezone
 from django.test import TestCase
 from rest_framework.test import APIClient
-
 from authentication.models import AppUser
 from package.models import Package
 from subscription.models import Subscription
 from django.urls import reverse
+from django.contrib.auth.models import BaseUserManager
 
 
 # Create your tests here.
 class SubscriptionHistoryTestCase(TestCase):
     def setUp(self):
         self.client = APIClient()
-        self.user = AppUser.objects.create_user(email='user@example.com', username='testuser', password='testpassword')
+        self.password = BaseUserManager().make_random_password()
+        self.user = AppUser.objects.create_user(email='user@example.com', username='testuser', password=self.password)
         self.client.force_authenticate(user=self.user)
         
         self.package = Package.objects.create(name='PREMIUM', price=100, duration=30, event_planner=True, event_tracker=True, event_timeline=True, event_rundown=True, ai_assistant=True)
@@ -45,7 +46,8 @@ class SubscriptionHistoryTestCase(TestCase):
 class LatestSubscriptionTestCase(TestCase):
     def setUp(self):
         self.client = APIClient()
-        self.user = AppUser.objects.create_user(email='user@example.com', username='testuser', password='testpassword')
+        self.password = BaseUserManager().make_random_password()
+        self.user = AppUser.objects.create_user(email='user@example.com', username='testuser', password=self.password)
         self.client.force_authenticate(user=self.user)
         
         self.package = Package.objects.create(name='PREMIUM', price=100, duration=30, event_planner=True, event_tracker=True, event_timeline=True, event_rundown=True, ai_assistant=True)

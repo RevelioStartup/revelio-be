@@ -8,7 +8,6 @@ from unittest.mock import patch
 from utils.base_test import BaseTestCase
 from ai.models import RecommendationHistory
 from ai.serializers import RecommendationHistorySerializer
-from authentication.models import AppUser
 from event.models import Event
 from task.models import Task
 
@@ -21,8 +20,6 @@ OPEN_AI_MODULE = 'ai.views.OpenAI'
 class AssistantTest(BaseTestCase):
     def setUp(self):
         super().setUp()
-        # self.user = AppUser.objects.create_user(email='email@email.com',username='testuser',password='test')
-        # self.another_user = AppUser.objects.create_user(email = 'anonymous@gmail.com', username='anonymous', password='test')
         self.client = APIClient()
         self.client.force_authenticate(user=self.premium_user)
         self.event_data = {
@@ -109,9 +106,6 @@ class HistoryTest(BaseTestCase):
 
     def setUp(self):
         self.client = APIClient()
-        # self.user = AppUser.objects.create_user(email='email@email.com',username='testuser',password='test')
-        # self.another_user = AppUser.objects.create_user(email = 'anonymous@gmail.com', username='anonymous', password='test')
-        
         self.client.force_authenticate(user=self.premium_user)
         self.event_data = {
             "id": UUID("9fdfb487-5101-4824-8c3b-0775732aacda"),
@@ -151,9 +145,6 @@ class HistoryTest(BaseTestCase):
 class HistoryDetailTest(BaseTestCase):
     def setUp(self):
         self.client = APIClient()
-        # self.user = AppUser.objects.create_user(email='email@email.com',username='testuser',password='test')
-        # self.another_user = AppUser.objects.create_user(email = 'anonymous@gmail.com', username='anonymous', password='test')
-        
         self.client.force_authenticate(user=self.premium_user)
         
         self.recommendation_attributes = {
@@ -182,9 +173,6 @@ class HistoryDetailTest(BaseTestCase):
 class AutofillTest(BaseTestCase):
     def setUp(self):
         self.client = APIClient()
-        # self.user = AppUser.objects.create_user(email='email@email.com',username='testuser',password='test')
-        # self.another_user = AppUser.objects.create_user(email = 'anonymous@gmail.com', username='anonymous', password='test')
-        
         self.client.force_authenticate(user=self.premium_user)
         self.mock_response = {'choices': [{'message': {'content': '{"name": "Class meet", "date" = "26/02/2024", "budget":1000000, "objective" : "Meningkatkan keakraban pertemanan antar kelas", "attendees":400, "theme" : "Valentine", "services" :  ["stand makanan", "sound system", "MC"]}'} }]}
 

@@ -9,6 +9,7 @@ from subscription.models import Subscription
 from .tokens import account_token
 from django.core.files.uploadedfile import SimpleUploadedFile
 import os
+from django.contrib.auth.models import BaseUserManager
 
 REGISTER_LINK = reverse('authentication:register')
 LOGIN_LINK = reverse('authentication:login')
@@ -19,11 +20,12 @@ class RegisterTest(TestCase):
 
     def setUp(self):
         self.client = APIClient()
+        self.password = BaseUserManager().make_random_password()
  
     def test_register_valid(self):
         data = {
                 "username":"user1",
-                "password":"pass1",
+                "password":self.password,
                 "email":"email1@email.com"
         }
         response = self.client.post(REGISTER_LINK, json.dumps(data), content_type='application/json')
@@ -33,7 +35,7 @@ class RegisterTest(TestCase):
     def test_email_format_not_valid(self):
         data ={
                 "username":"user1",
-                "password":"pass1",
+                "password":self.password,
                 "email":"emailnotvalid"
         }
         response = self.client.post(REGISTER_LINK, json.dumps(data), content_type='application/json')
@@ -54,7 +56,7 @@ class RegisterTest(TestCase):
     def test_username_is_already_exist(self):
         data = {
                 "username":"user1",
-                "password":"pass1",
+                "password":self.password,
                 "email":"email1@email.com"
         }
         response = self.client.post(REGISTER_LINK, json.dumps(data), content_type='application/json')
@@ -76,10 +78,11 @@ class RegisterTest(TestCase):
 class LoginTest(TestCase):
     def setUp(self):
         self.client = APIClient()
-        self.user = AppUser.objects.create_user(email='email@email.com',username='testuser',password='test')
+        self.password = BaseUserManager().make_random_password()
+        self.user = AppUser.objects.create_user(email='email@email.com',username='testuser',password=self.password)
 
     def test_login_successful(self):
-        data = {'username': 'testuser', 'password': 'test'}
+        data = {'username': 'testuser', 'password': self.password}
         response = self.client.post(LOGIN_LINK, json.dumps(data), content_type='application/json')
         self.assertEqual(response.status_code, 200)
 
@@ -99,7 +102,8 @@ class LoginTest(TestCase):
 class SendVerificationEmailTest(TestCase):
     def setUp(self):
         self.client = APIClient()
-        self.user = AppUser.objects.create_user(email='email@email.com',username='testuser',password='test')
+        self.password = BaseUserManager().make_random_password()
+        self.user = AppUser.objects.create_user(email='email@email.com',username='testuser',password=self.password)
         self.client.force_authenticate(user=self.user)
     
     def tearDown(self):
@@ -142,7 +146,8 @@ class SendVerificationEmailTest(TestCase):
 class SendRecoverPasswordEmailTest(TestCase):
     def setUp(self):
         self.client = APIClient()
-        self.user = AppUser.objects.create_user(email='email@email.com',username='testuser',password='test')
+        self.password = BaseUserManager().make_random_password()
+        self.user = AppUser.objects.create_user(email='email@email.com',username='testuser',password=self.password)
     
     def tearDown(self):
         UserToken.objects.all().delete()
@@ -202,7 +207,8 @@ class SendRecoverPasswordEmailTest(TestCase):
 
 class CreateShortTokenTest(TestCase):
     def setUp(self):
-        self.user = AppUser.objects.create_user(email='email@email.com',username='testuser',password='test')
+        self.password = BaseUserManager().make_random_password()
+        self.user = AppUser.objects.create_user(email='email@email.com',username='testuser',password=self.password)
 
     def tearDown(self):
         UserToken.objects.all().delete()
@@ -214,16 +220,17 @@ class CreateShortTokenTest(TestCase):
     
     def test_create_token_with_same_short_token(self):
         short_token = account_token.make_token(self.user)[-8:]
-        user2 = AppUser.objects.create_user(email='email2@email.com',username='testuser2',password='test2')
+        password2 = BaseUserManager().make_random_password()
+        user2 = AppUser.objects.create_user(email='email2@email.com',username='testuser2',password=password2)
         UserToken.objects.create(user=user2, token='faketoken', shortened_token=short_token)
         res = create_shortened_token(self.user)
-        print(UserToken.objects.all())
         self.assertNotEqual(short_token, res)
 
 class ProfileUpdateTest(TestCase):
     def setUp(self):
         self.client = APIClient()
-        self.user = AppUser.objects.create_user(email='test@example.com', username='testuser', password='test')
+        self.password = BaseUserManager().make_random_password()
+        self.user = AppUser.objects.create_user(email='test@example.com', username='testuser', password=self.password)
         self.client.force_authenticate(user=self.user)
         self.profile = Profile.objects.create(user=self.user, bio='Old bio')
 
