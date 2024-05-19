@@ -10,36 +10,30 @@ class BaseTestCase(TestCase):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
-        free_package = Package.objects.create(
-            name='Free Package',
-            price=0,
-            duration=365,  
+        cls.free_package = cls.create_package('Free Package', 0, 365, ai_assistant=False)
+        cls.premium_package = cls.create_package('Premium Package', 10000, 30, ai_assistant=True)
+
+        cls.free_user = cls.create_user('free@example.com', 'freeuser')
+        cls.premium_user = cls.create_user('premium@example.com', 'premiumuser')
+        cls.another_user = cls.create_user('anonymous@gmail.com', 'anonymous')
+
+        Subscription.objects.create(user=cls.free_user, plan=cls.free_package, end_date=timezone.now() + timedelta(days=365))
+        Subscription.objects.create(user=cls.premium_user, plan=cls.premium_package, end_date=timezone.now() + timedelta(days=30))
+
+    @staticmethod
+    def create_package(name, price, duration, **features):
+        return Package.objects.create(
+            name=name,
+            price=price,
+            duration=duration,
             event_planner=True,
             event_tracker=True,
             event_timeline=True,
             event_rundown=True,
-            ai_assistant=False
+            **features
         )
 
-        premium_package = Package.objects.create(
-            name='Premium Package',
-            price=10000,
-            duration=30,  
-            event_planner=True,
-            event_tracker=True,
-            event_timeline=True,
-            event_rundown=True,
-            ai_assistant=True
-        )
-
-        free_password = BaseUserManager().make_random_password()
-        premium_password = BaseUserManager().make_random_password()
-        anonymous_password = BaseUserManager().make_random_password()
-
-        cls.free_user = AppUser.objects.create_user(email='free@example.com', username='freeuser', password=free_password)
-        cls.premium_user = AppUser.objects.create_user(email='premium@example.com', username='premiumuser', password=premium_password)
-        cls.another_user = AppUser.objects.create_user(email='anonymous@gmail.com', username='anonymous', password=anonymous_password)
-
-        
-        Subscription.objects.create(user=cls.free_user, plan=free_package, end_date=timezone.now() + timedelta(days=365))
-        Subscription.objects.create(user=cls.premium_user, plan=premium_package, end_date=timezone.now() + timedelta(days=30))
+    @staticmethod
+    def create_user(email, username):
+        password = BaseUserManager().make_random_password()
+        return AppUser.objects.create_user(email=email, username=username, password=password)
