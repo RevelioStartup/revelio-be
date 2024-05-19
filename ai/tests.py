@@ -261,7 +261,7 @@ class RundownTest(BaseTestCase):
             attendees=150,
             theme="",
             services=""
-        ) 
+        )
         self.mock_response = {'choices': [{'message': {'content': '{"rundown_data": [{"description": "Welcome and registration", "start_time":"10:00", "end_time":"11:00"}, {"description": "Ice breaker games", "start_time":"11:00", "end_time":"12:00"}, {"description": "Lunch", "start_time":"12:00", "end_time":"12:30"}, {"description": "Magic Show", "start_time":"12:30", "end_time":"13:00"}]}'} }]}
 
     @patch(OPEN_AI_MODULE)
