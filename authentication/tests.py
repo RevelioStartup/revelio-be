@@ -220,7 +220,6 @@ class CreateShortTokenTest(TestCase):
         user2 = AppUser.objects.create_user(email='email2@email.com',username='testuser2',password=password2)
         UserToken.objects.create(user=user2, token='faketoken', shortened_token=short_token)
         res = create_shortened_token(self.user)
-        print(UserToken.objects.all())
         self.assertNotEqual(short_token, res)
 
 class ProfileUpdateTest(TestCase):

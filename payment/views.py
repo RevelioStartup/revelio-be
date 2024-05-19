@@ -74,7 +74,6 @@ class CreatePaymentView(views.APIView):
                 return Response({'message': 'Transaction successful', 'redirect_url': transaction['redirect_url']}, status=status.HTTP_200_OK)
 
         except Exception as e:
-            print(e)
             return Response({'message': 'Transaction failed'}, status=status.HTTP_400_BAD_REQUEST)
 
     @swagger_auto_schema(
@@ -107,8 +106,6 @@ class CreatePaymentView(views.APIView):
 
                 payment_status = midtrans_transaction.get("transaction_status")
                 transaction_object = get_object_or_404(Transaction, order_id=order_id)
-                print(transaction_object.status)
-                print('payment stats: ',payment_status)
                 if transaction_object.status != payment_status:
                     transaction_object.status = payment_status
                     if(transaction_object.status=='expire'):
