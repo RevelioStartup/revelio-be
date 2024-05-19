@@ -18,6 +18,10 @@ import secrets, string
 from django.core.exceptions import ObjectDoesNotExist
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
+from django.utils import timezone
+from package.models import Package
+from subscription.models import Subscription
+from datetime import datetime
 
 async def send_verification_email(user, token):
     username = user.username
@@ -164,6 +168,7 @@ class SendVerificationEmailView(APIView):
                 if account_token.check_token(user, token):
                     user.is_verified_user = True
                     user.save()
+                    Subscription.objects.create(user=user, plan=Package.objects.get(id=1), start_date=timezone.now(), end_date=timezone.make_aware(datetime(year=9999, month=12, day=31)))
                     return Response({'message': 'Email verified successfully!'}, status=200)
                 else:
                     return Response({'msg': 'Expired token!'}, status=400)
