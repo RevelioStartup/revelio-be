@@ -5,6 +5,8 @@ from django.urls import reverse
 import json
 from django.core import mail
 from rest_framework.test import APIClient
+
+from subscription.models import Subscription
 from .tokens import account_token
 from django.core.files.uploadedfile import SimpleUploadedFile
 import os
@@ -118,6 +120,7 @@ class SendVerificationEmailTest(TestCase):
         self.assertEqual(response.status_code, 200)
         user = AppUser.objects.get(pk=self.user.pk)
         self.assertTrue(user.is_verified_user)
+        self.assertTrue(Subscription.objects.filter(user=user).exists())
     
     def test_expired_verification_token(self):
         token = account_token.make_token(self.user)
@@ -125,15 +128,17 @@ class SendVerificationEmailTest(TestCase):
         self.token = UserToken.objects.create(user=self.user, token = 'expired_token', shortened_token=short_token)
         response = self.client.post((EMAIL_VERIFICATION_LINK), {'token': short_token})
         self.assertEqual(response.status_code, 400)
+        self.assertFalse(Subscription.objects.filter(user=self.user).exists())
 
     def test_invalid_verification_token(self):
         response = self.client.post((EMAIL_VERIFICATION_LINK), {'token': 'invalid token'})
         self.assertEqual(response.status_code, 400)
+        self.assertFalse(Subscription.objects.filter(user=self.user).exists())
     
     def test_missing_verification_token(self):
         response = self.client.post((EMAIL_VERIFICATION_LINK), {})
         self.assertEqual(response.status_code, 400)
-
+        self.assertFalse(Subscription.objects.filter(user=self.user).exists())
 
 class SendRecoverPasswordEmailTest(TestCase):
     def setUp(self):
