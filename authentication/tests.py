@@ -1,6 +1,6 @@
 from django.test import TestCase
 from authentication.models import AppUser, Profile, UserToken
-from authentication.views import create_shortened_token
+from authentication.views import create_shortened_token, process_user
 from django.urls import reverse
 import json
 from django.core import mail
@@ -30,7 +30,7 @@ class RegisterTest(TestCase):
         }
         response = self.client.post(REGISTER_LINK, json.dumps(data), content_type='application/json')
         self.assertEqual(response.status_code, 200)
-        self.assertTrue(AppUser.objects.filter(username='user1').exists())
+        self.assertTrue(AppUser.objects.filter(real_username='user1').exists())
     
     def test_email_format_not_valid(self):
         data ={
@@ -61,6 +61,8 @@ class RegisterTest(TestCase):
         }
         response = self.client.post(REGISTER_LINK, json.dumps(data), content_type='application/json')
         self.assertEqual(response.status_code, 200)
+        verified_user = AppUser.objects.get(real_username = "user1")
+        process_user(verified_user)
         response = self.client.post(REGISTER_LINK, json.dumps(data), content_type='application/json')
         self.assertEqual(response.status_code, 400)
         self.assertEqual(response.json()['msg'],"Username and/or email already taken!")
@@ -103,7 +105,7 @@ class SendVerificationEmailTest(TestCase):
     def setUp(self):
         self.client = APIClient()
         self.password = BaseUserManager().make_random_password()
-        self.user = AppUser.objects.create_user(email='email@email.com',username='testuser',password=self.password)
+        self.user = AppUser.objects.create_user(email='gmail@gmail.com',username='testuser',password=self.password, real_username="user", real_email = "email@email.com")
         self.client.force_authenticate(user=self.user)
     
     def tearDown(self):
@@ -147,7 +149,8 @@ class SendRecoverPasswordEmailTest(TestCase):
     def setUp(self):
         self.client = APIClient()
         self.password = BaseUserManager().make_random_password()
-        self.user = AppUser.objects.create_user(email='email@email.com',username='testuser',password=self.password)
+        self.user = AppUser.objects.create_user(email='email@gmail.com',username='testuser',password=self.password, real_username="user", real_email = "email@email.com")
+        process_user(self.user)
     
     def tearDown(self):
         UserToken.objects.all().delete()
