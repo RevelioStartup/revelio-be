@@ -1,6 +1,6 @@
 from django.test import TestCase
 from authentication.models import AppUser, Profile, UserToken
-from authentication.views import create_shortened_token, process_user
+from authentication.views import create_shortened_token
 from django.urls import reverse
 import json
 from django.core import mail
@@ -10,6 +10,7 @@ from .tokens import account_token
 from django.core.files.uploadedfile import SimpleUploadedFile
 import os
 from django.contrib.auth.models import BaseUserManager
+from authentication.utils import process_user
 
 REGISTER_LINK = reverse('authentication:register')
 LOGIN_LINK = reverse('authentication:login')
