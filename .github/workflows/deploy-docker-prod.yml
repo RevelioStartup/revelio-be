@@ -46,6 +46,7 @@ jobs:
         echo "MIDTRANS_CLIENT_KEY=${{ secrets.MIDTRANS_CLIENT_KEY }}" >> .env
         echo "MIDTRANS_IS_PRODUCTION=${{ secrets.MIDTRANS_IS_PRODUCTION }}" >> .env
         echo "REVELIO_FE_BASE_URL=${{ secrets.REVELIO_FE_BASE_URL }}" >> .env
+        echo "SENTRY_DSN=${{ secrets.SENTRY_DSN }}" >> .env
         
 
     - name: Run Tests
@@ -92,6 +93,7 @@ jobs:
           echo "MIDTRANS_CLIENT_KEY=${{ secrets.MIDTRANS_CLIENT_KEY }}" >> .env
           echo "MIDTRANS_IS_PRODUCTION=${{ secrets.MIDTRANS_IS_PRODUCTION }}" >> .env
           echo "REVELIO_FE_BASE_URL=${{ secrets.REVELIO_FE_BASE_URL }}" >> .env
+          echo "SENTRY_DSN=${{ secrets.SENTRY_DSN }}" >> .env
           
     
     - name: Build Docker Image
