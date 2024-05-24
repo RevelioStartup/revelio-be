@@ -5,7 +5,6 @@ env:
 on:
   push:
     branches:
-      - main
       - staging
   workflow_run:
     workflows: ["Build and Test"]
