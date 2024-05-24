@@ -206,8 +206,11 @@ class SendRecoverPasswordEmailTest(BaseTestCase):
                                     {'email':'email@email.com', 'new_password': 'new_pass'})
         self.assertEqual(response.status_code, 400)
 
-class CreateShortTokenTest(BaseTestCase):
-   
+class CreateShortTokenTest(TestCase):
+    def setUp(self):
+        self.password = BaseUserManager().make_random_password()
+        self.user = AppUser.objects.create_user(email='email@email.com',username='testuser',password=self.password)
+
     def tearDown(self):
         UserToken.objects.all().delete()
 
