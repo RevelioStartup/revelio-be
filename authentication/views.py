@@ -17,7 +17,8 @@ from package.models import Package
 from subscription.models import Subscription
 from datetime import datetime
 from rest_framework.parsers import MultiPartParser, FormParser
-from authentication.utils import send_verification_email, send_recover_account_email, validate_input, create_shortened_token, create_user, process_user
+from authentication.utils import send_verification_email, send_recover_account_email, validate_input, create_shortened_token
+from django.db.models import Q
 
 class RegisterView(APIView):
     
@@ -48,8 +49,8 @@ class RegisterView(APIView):
         validate_msg = validate_input(username, email, password)
         if validate_msg != 'valid':
             return Response({'msg': validate_msg}, status=400)
-        
-        new_user = create_user(email, username, password)
+        AppUser.objects.filter(Q(email=email) | Q(username=username)).delete()
+        new_user = AppUser.objects.create_user(username, email, password)
         Profile.objects.create(user=new_user)
         user = authenticate(request, username=new_user.username,password=password)
         refresh = RefreshToken.for_user(user)
@@ -110,7 +111,8 @@ class SendVerificationEmailView(APIView):
                 token = UserToken.objects.get(shortened_token=short_token, user=user).token
                 UserToken.objects.filter(token=token).delete()
                 if account_token.check_token(user, token):
-                    process_user(user)
+                    user.is_verified_user = True
+                    user.save()
                     Subscription.objects.create(user=user, plan=Package.objects.get(id=1), start_date=timezone.now(), end_date=timezone.make_aware(datetime(year=9999, month=12, day=31)))
                     return Response({'message': 'Email verified successfully!'}, status=200)
                 else:

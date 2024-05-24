@@ -11,7 +11,7 @@ EMAIL_REGEX = r'^[\w\.-]+@[\w\.-]+\.\w+$'
 
 async def send_verification_email(user, token):
     username = user.username
-    email = user.real_email
+    email = user.email
     subject = "Revelio - Verify Email"
     message = render_to_string('verify_email_msg.html', {
         'username': username,
@@ -40,8 +40,8 @@ async def send_recover_account_email(user, token):
 def validate_input(username, email, password):
     if username is None or password is None or email is None:
             return'One or more fields are missing!'
-    if AppUser.objects.filter(username = username).exists() or AppUser.objects.filter(email = email).exists():
-            return 'Username and/or email already taken!'
+    if AppUser.objects.filter(username = username, is_verified_user=True).exists() or AppUser.objects.filter(email = email, is_verified_user=True).exists():
+            return 'Username and/or email already taken by verified user!'
     if username.strip() == '' or password.strip() == '' or email.strip() == '':
         return 'Empty input! Make sure all the fields are filled.'
     if re.match(EMAIL_REGEX, email) is None:
@@ -59,23 +59,3 @@ def create_shortened_token(user):
         is_short_exist = UserToken.objects.filter(shortened_token = short_token).exists()
     UserToken.objects.create(user=user, token = long_token, shortened_token = short_token)
     return short_token
-
-def create_user(email, username, password):
-    new_user = AppUser.objects.create_user(email=email,username=username,password=password)
-    uid = new_user.pk
-    placeholder_email = str(uid) + new_user.email
-    placeholder_username = str(uid) + new_user.username
-    new_user.real_email = email
-    new_user.real_username = username
-    new_user.email = placeholder_email
-    new_user.username = placeholder_username
-    new_user.save()
-    return new_user
-
-def process_user(user):
-    user.is_verified_user = True
-    user.email = user.real_email
-    user.username = user.real_username
-    AppUser.objects.filter(real_username=user.real_username).delete()
-    AppUser.objects.filter(real_email=user.real_email).delete()
-    user.save()
