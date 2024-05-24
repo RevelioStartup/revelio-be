@@ -10,12 +10,17 @@ from .tokens import account_token
 from django.core.files.uploadedfile import SimpleUploadedFile
 import os
 from django.contrib.auth.models import BaseUserManager
-from authentication.utils import process_user
 
 REGISTER_LINK = reverse('authentication:register')
 LOGIN_LINK = reverse('authentication:login')
 EMAIL_VERIFICATION_LINK = reverse('authentication:verify_email')
 RECOVER_PASSWORD_LINK = reverse('authentication:recover_password')
+
+class BaseTestCase(TestCase):
+    def setUp(self):
+        self.client = APIClient()
+        self.password = BaseUserManager().make_random_password()
+        self.user = AppUser.objects.create_user(email='email@email.com',username='testuser',password=self.password)
 
 class RegisterTest(TestCase):
 
@@ -31,7 +36,7 @@ class RegisterTest(TestCase):
         }
         response = self.client.post(REGISTER_LINK, json.dumps(data), content_type='application/json')
         self.assertEqual(response.status_code, 200)
-        self.assertTrue(AppUser.objects.filter(real_username='user1').exists())
+        self.assertTrue(AppUser.objects.filter(username='user1').exists())
     
     def test_email_format_not_valid(self):
         data ={
@@ -62,11 +67,12 @@ class RegisterTest(TestCase):
         }
         response = self.client.post(REGISTER_LINK, json.dumps(data), content_type='application/json')
         self.assertEqual(response.status_code, 200)
-        verified_user = AppUser.objects.get(real_username = "user1")
-        process_user(verified_user)
+        user_verified = AppUser.objects.get(username = "user1")
+        user_verified.is_verified_user = True
+        user_verified.save()
         response = self.client.post(REGISTER_LINK, json.dumps(data), content_type='application/json')
         self.assertEqual(response.status_code, 400)
-        self.assertEqual(response.json()['msg'],"Username and/or email already taken!")
+        self.assertEqual(response.json()['msg'],"Username and/or email already taken by verified user!")
 
     def test_missing_fields(self):
         data = {
@@ -78,12 +84,8 @@ class RegisterTest(TestCase):
         self.assertEqual(response.json()['msg'],"One or more fields are missing!")
 
 
-class LoginTest(TestCase):
-    def setUp(self):
-        self.client = APIClient()
-        self.password = BaseUserManager().make_random_password()
-        self.user = AppUser.objects.create_user(email='email@email.com',username='testuser',password=self.password)
-
+class LoginTest(BaseTestCase):
+    
     def test_login_successful(self):
         data = {'username': 'testuser', 'password': self.password}
         response = self.client.post(LOGIN_LINK, json.dumps(data), content_type='application/json')
@@ -106,7 +108,7 @@ class SendVerificationEmailTest(TestCase):
     def setUp(self):
         self.client = APIClient()
         self.password = BaseUserManager().make_random_password()
-        self.user = AppUser.objects.create_user(email='gmail@gmail.com',username='testuser',password=self.password, real_username="user", real_email = "email@email.com")
+        self.user = AppUser.objects.create_user(email='email@email.com',username='testuser',password=self.password)
         self.client.force_authenticate(user=self.user)
     
     def tearDown(self):
@@ -146,12 +148,7 @@ class SendVerificationEmailTest(TestCase):
         self.assertEqual(response.status_code, 400)
         self.assertFalse(Subscription.objects.filter(user=self.user).exists())
 
-class SendRecoverPasswordEmailTest(TestCase):
-    def setUp(self):
-        self.client = APIClient()
-        self.password = BaseUserManager().make_random_password()
-        self.user = AppUser.objects.create_user(email='email@gmail.com',username='testuser',password=self.password, real_username="user", real_email = "email@email.com")
-        process_user(self.user)
+class SendRecoverPasswordEmailTest(BaseTestCase):
     
     def tearDown(self):
         UserToken.objects.all().delete()
@@ -209,11 +206,8 @@ class SendRecoverPasswordEmailTest(TestCase):
                                     {'email':'email@email.com', 'new_password': 'new_pass'})
         self.assertEqual(response.status_code, 400)
 
-class CreateShortTokenTest(TestCase):
-    def setUp(self):
-        self.password = BaseUserManager().make_random_password()
-        self.user = AppUser.objects.create_user(email='email@email.com',username='testuser',password=self.password)
-
+class CreateShortTokenTest(BaseTestCase):
+   
     def tearDown(self):
         UserToken.objects.all().delete()
 

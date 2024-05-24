@@ -4,8 +4,6 @@ from django.core.files.storage import default_storage
 
 class AppUser(AbstractUser):
     is_verified_user = models.BooleanField(default=False)
-    real_username = models.TextField(null=True)
-    real_email = models.EmailField(null=True)
     
     def __str__(self):
         return super().username
