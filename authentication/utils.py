@@ -7,6 +7,8 @@ from .tokens import account_token
 from django.core.mail import EmailMessage
 import secrets, string
 
+EMAIL_REGEX = r'^[\w\.-]+@[\w\.-]+\.\w+$'
+
 async def send_verification_email(user, token):
     username = user.username
     email = user.real_email
@@ -42,7 +44,7 @@ def validate_input(username, email, password):
             return 'Username and/or email already taken!'
     if username.strip() == '' or password.strip() == '' or email.strip() == '':
         return 'Empty input! Make sure all the fields are filled.'
-    if re.match(r'^[\w\.-]+@[\w\.-]+\.\w+$', email) is None:
+    if re.match(EMAIL_REGEX, email) is None:
         return 'Email format is wrong.'
     return 'valid'
 
