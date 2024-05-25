@@ -57,7 +57,7 @@ class CreatePaymentView(views.APIView):
                 ]
             },
             "callbacks": {
-                "finish": str(os.getenv('REVELIO_FE_BASE_URL'))+'payment/success/'
+                "finish": str(os.getenv('REVELIO_FE_BASE_URL'))+'payment'
             }
         }
         try:
@@ -74,7 +74,6 @@ class CreatePaymentView(views.APIView):
                 return Response({'message': 'Transaction successful', 'redirect_url': transaction['redirect_url']}, status=status.HTTP_200_OK)
 
         except Exception as e:
-            print(e)
             return Response({'message': 'Transaction failed'}, status=status.HTTP_400_BAD_REQUEST)
 
     @swagger_auto_schema(
@@ -109,8 +108,11 @@ class CreatePaymentView(views.APIView):
                 transaction_object = get_object_or_404(Transaction, order_id=order_id)
                 if transaction_object.status != payment_status:
                     transaction_object.status = payment_status
+                    if(transaction_object.status=='expire'):
+                        transaction_object.midtrans_url=None
 
                     if(payment_status=="settlement"):
+                        transaction_object.midtrans_url=None
                         start_subscription = timezone.now()
                         duration_days = transaction_object.package.duration
                         end_subscription = start_subscription + timedelta(days=duration_days)
@@ -122,14 +124,13 @@ class CreatePaymentView(views.APIView):
                         )
 
                 if not transaction_object.payment_type:
-                    transaction_object.midtrans_url=None
                     transaction_object.payment_type = midtrans_transaction.get("payment_type")
                     transaction_object.payment_merchant = midtrans_transaction.get("acquirer")
                     transaction_object.checkout_time = datetime.strptime(midtrans_transaction.get("transaction_time"), "%Y-%m-%d %H:%M:%S")
                     transaction_object.expiry_time = datetime.strptime(midtrans_transaction.get("expiry_time"), "%Y-%m-%d %H:%M:%S")
                     transaction_object.midtrans_transaction_id = midtrans_transaction.get("transaction_id")
 
-                    transaction_object.save()
+                transaction_object.save()
 
                 return Response({'message': midtrans_transaction.get("status_message"), 'transaction_detail': TransactionSerializer(transaction_object).data}, status=status.HTTP_200_OK)
         except Exception as e:

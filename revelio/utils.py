@@ -1,5 +1,3 @@
-from rest_framework.exceptions import ValidationError
-
 def get_validation_error_detail(e):
     """
     Extract and format the error message from a ValidationError.

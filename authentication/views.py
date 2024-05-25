@@ -1,71 +1,24 @@
+import sentry_sdk
 from authentication.models import AppUser, Profile, UserToken
 from django.contrib.auth import authenticate
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.permissions import IsAuthenticated
-import re
-from django.utils.encoding import force_bytes
-from django.utils.http import urlsafe_base64_encode
-from django.template.loader import render_to_string
 from .tokens import account_token
-from django.core.mail import EmailMessage
 from .serializers import ProfileSerializer
 from rest_framework import status
 import asyncio
-import secrets, string
 from django.core.exceptions import ObjectDoesNotExist
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
-
-async def send_verification_email(user, token):
-    username = user.username
-    email = user.email
-    subject = "Revelio - Verify Email"
-    message = render_to_string('verify_email_msg.html', {
-        'username': username,
-        'uid':urlsafe_base64_encode(force_bytes(user.pk)),
-        'token':token,
-    })
-    email = EmailMessage(
-        subject, message, to=[email]
-    )
-    email.content_subtype = 'html'
-    email.send()
-
-async def send_recover_account_email(user, token):
-    email = user.email
-    subject = "Revelio - Password Recovery Email"
-    message = render_to_string('change_password_email_msg.html', {
-        'token':token,
-    })
-    email = EmailMessage(
-        subject, message, to=[email]
-    )
-    email.content_subtype = 'html'
-    email.send()
-
-
-def validate_input(username, email, password):
-    if username.strip() == '' or password.strip() == '' or email.strip() == '':
-        return 'Empty input! Make sure all the fields are filled.'
-    if re.match(r'^[\w\.-]+@[\w\.-]+\.\w+$', email) is None:
-        return 'Email format is wrong.'
-    return 'valid'
-
-def create_shortened_token(user):
-    UserToken.objects.filter(user=user).delete()
-    long_token = account_token.make_token(user)
-    short_token = long_token[-8:]
-    letters = string.ascii_letters + string.digits
-    is_short_exist = UserToken.objects.filter(shortened_token = short_token).exists()
-    while is_short_exist:
-        short_token = ''.join(secrets.choice(letters) for _ in range(8))
-        is_short_exist = UserToken.objects.filter(shortened_token = short_token).exists()
-    UserToken.objects.create(user=user, token = long_token, shortened_token = short_token)
-    return short_token
-
+from django.utils import timezone
+from package.models import Package
+from subscription.models import Subscription
+from datetime import datetime
 from rest_framework.parsers import MultiPartParser, FormParser
+from authentication.utils import send_verification_email, send_recover_account_email, validate_input, create_shortened_token
+from django.db.models import Q
 
 class RegisterView(APIView):
     
@@ -92,17 +45,14 @@ class RegisterView(APIView):
         username = request.data.get('username')
         password = request.data.get('password')
         email = request.data.get('email')
-        if username is None or password is None or email is None:
-            return Response({'msg': 'One or more fields are missing!'}, status= 400)
-        if AppUser.objects.filter(username = username).exists() or AppUser.objects.filter(email = email).exists():
-            return Response({'msg': 'Username and/or email already taken!'}, status=400)
+        
         validate_msg = validate_input(username, email, password)
         if validate_msg != 'valid':
             return Response({'msg': validate_msg}, status=400)
-        new_user = AppUser.objects.create_user(email=email,username=username,password=password)
-        new_user.save()
+        AppUser.objects.filter(Q(email=email) | Q(username=username)).delete()
+        new_user = AppUser.objects.create_user(username, email, password)
         Profile.objects.create(user=new_user)
-        user = authenticate(request, username=username,password=password)
+        user = authenticate(request, username=new_user.username,password=password)
         refresh = RefreshToken.for_user(user)
         return Response({'refresh': str(refresh),
                          'access': str(refresh.access_token)})
@@ -163,6 +113,7 @@ class SendVerificationEmailView(APIView):
                 if account_token.check_token(user, token):
                     user.is_verified_user = True
                     user.save()
+                    Subscription.objects.create(user=user, plan=Package.objects.get(id=1), start_date=timezone.now(), end_date=timezone.make_aware(datetime(year=9999, month=12, day=31)))
                     return Response({'message': 'Email verified successfully!'}, status=200)
                 else:
                     return Response({'msg': 'Expired token!'}, status=400)
@@ -217,7 +168,8 @@ class SendRecoverPasswordEmailView(APIView):
                     return Response({'msg': 'Password changes successfully!'}, status=200)
                 else:
                     return Response({'msg': 'Expired token!'}, status=400)
-            except ObjectDoesNotExist:
+            except ObjectDoesNotExist as e:
+                sentry_sdk.capture_exception(e)
                 return Response({'msg': 'Invalid verification token!'}, status=400)
             except AttributeError:
                 return Response({'msg': 'Missing verification token!'}, status=400)

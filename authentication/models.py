@@ -4,6 +4,9 @@ from django.core.files.storage import default_storage
 
 class AppUser(AbstractUser):
     is_verified_user = models.BooleanField(default=False)
+    
+    def __str__(self):
+        return super().username
 
 class Profile(models.Model):
     user = models.OneToOneField(AppUser, on_delete=models.CASCADE)

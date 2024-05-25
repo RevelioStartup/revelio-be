@@ -13,4 +13,4 @@ class Subscription(models.Model):
 
     @property
     def is_active(self):
-        return self.end_date > timezone.now()
+        return self.end_date > timezone.now() and self.plan_id==2

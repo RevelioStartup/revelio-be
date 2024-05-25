@@ -1,0 +1,30 @@
+[
+{
+    "model": "package.package",
+    "pk": 1,
+    "fields": {
+        "name": "Free",
+        "price": 0,
+        "duration": 0,
+        "event_planner": true,
+        "event_tracker": true,
+        "event_timeline": true,
+        "event_rundown": true,
+        "ai_assistant": false
+    }
+},
+{
+    "model": "package.package",
+    "pk": 2,
+    "fields": {
+        "name": "Premium",
+        "price": 10000,
+        "duration": 30,
+        "event_planner": true,
+        "event_tracker": true,
+        "event_timeline": true,
+        "event_rundown": true,
+        "ai_assistant": true
+    }
+}
+]
