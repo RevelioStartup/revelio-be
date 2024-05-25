@@ -16,6 +16,12 @@ LOGIN_LINK = reverse('authentication:login')
 EMAIL_VERIFICATION_LINK = reverse('authentication:verify_email')
 RECOVER_PASSWORD_LINK = reverse('authentication:recover_password')
 
+class BaseTestCase(TestCase):
+    def setUp(self):
+        self.client = APIClient()
+        self.password = BaseUserManager().make_random_password()
+        self.user = AppUser.objects.create_user(email='email@email.com',username='testuser',password=self.password)
+
 class RegisterTest(TestCase):
 
     def setUp(self):
@@ -61,9 +67,12 @@ class RegisterTest(TestCase):
         }
         response = self.client.post(REGISTER_LINK, json.dumps(data), content_type='application/json')
         self.assertEqual(response.status_code, 200)
+        user_verified = AppUser.objects.get(username = "user1")
+        user_verified.is_verified_user = True
+        user_verified.save()
         response = self.client.post(REGISTER_LINK, json.dumps(data), content_type='application/json')
         self.assertEqual(response.status_code, 400)
-        self.assertEqual(response.json()['msg'],"Username and/or email already taken!")
+        self.assertEqual(response.json()['msg'],"Username and/or email already taken by verified user!")
 
     def test_missing_fields(self):
         data = {
@@ -75,12 +84,8 @@ class RegisterTest(TestCase):
         self.assertEqual(response.json()['msg'],"One or more fields are missing!")
 
 
-class LoginTest(TestCase):
-    def setUp(self):
-        self.client = APIClient()
-        self.password = BaseUserManager().make_random_password()
-        self.user = AppUser.objects.create_user(email='email@email.com',username='testuser',password=self.password)
-
+class LoginTest(BaseTestCase):
+    
     def test_login_successful(self):
         data = {'username': 'testuser', 'password': self.password}
         response = self.client.post(LOGIN_LINK, json.dumps(data), content_type='application/json')
@@ -143,11 +148,7 @@ class SendVerificationEmailTest(TestCase):
         self.assertEqual(response.status_code, 400)
         self.assertFalse(Subscription.objects.filter(user=self.user).exists())
 
-class SendRecoverPasswordEmailTest(TestCase):
-    def setUp(self):
-        self.client = APIClient()
-        self.password = BaseUserManager().make_random_password()
-        self.user = AppUser.objects.create_user(email='email@email.com',username='testuser',password=self.password)
+class SendRecoverPasswordEmailTest(BaseTestCase):
     
     def tearDown(self):
         UserToken.objects.all().delete()
