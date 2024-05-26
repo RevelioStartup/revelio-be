@@ -16,7 +16,6 @@ class EventTest(BaseTestCase):
         self.client.force_authenticate(user=self.free_user)
         
         self.event_attributes = {
-            "user": self.free_user,
             "name": "Revelio Onboarding",
             "date": date.today(),
             "budget": Decimal('20000000'),
@@ -25,7 +24,8 @@ class EventTest(BaseTestCase):
             "theme": "Harry Potter",
             "services": "Catering, Decorations, Music"
         }
-        self.model = Event.objects.create(**self.event_attributes)
+
+        self.model = Event.objects.create(user= self.free_user, **self.event_attributes)
         self.serializer = EventSerializer(instance = self.model)
         
         self.EVENT_DETAIL_LINK = reverse('event:detail', kwargs={'id': self.model.id})
@@ -92,6 +92,24 @@ class EventTest(BaseTestCase):
         self.assertEqual(response.status_code, 400)
         self.assertEqual(Event.objects.count(), 1)
         self.assertEqual(response.data['name'], ['This field is required.'])
+    
+    def test_post_event_limit_exceeded_free_user(self):
+        for _ in range(2):
+            Event.objects.create(user=self.free_user, **self.event_attributes)
+
+        response = self.client.post(EVENT_LIST_LINK, self.event_attributes)
+        self.assertEqual(response.status_code, 403)
+        self.assertEqual(Event.objects.filter(user=self.free_user).count(), 3)
+        self.assertIn("Non-premium users cannot have more than 3 events.", response.data['error'])
+
+    def test_post_event_limit_exceeded_premium_user(self):
+        self.client.force_authenticate(user=self.premium_user)
+        for _ in range(3):
+            Event.objects.create(user=self.premium_user, **self.event_attributes)
+
+        response = self.client.post(EVENT_LIST_LINK, self.event_attributes)
+        self.assertEqual(response.status_code, 201)
+        self.assertEqual(Event.objects.filter(user=self.premium_user).count(), 4)
     
     def test_post_unauthenticated_event(self):
         self.client.force_authenticate(user=None)

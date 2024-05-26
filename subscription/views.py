@@ -6,12 +6,11 @@ from subscription.models import Subscription
 from subscription.serializers import SubscriptionSerializer
 
 # Create your views here.
-class SubscriptionHistory(generics.RetrieveAPIView):        
+class SubscriptionHistory(generics.RetrieveAPIView):  
+    serializer_class =  SubscriptionSerializer    
     def get(self, request):
         subscription = Subscription.objects.filter(user=request.user).order_by('-start_date') # Ordering
-                
-        serializer = SubscriptionSerializer(subscription, many=True)
-        
+        serializer = self.serializer_class(subscription, many=True)
         return Response(serializer.data)
     
 class LatestSubscription(generics.RetrieveAPIView):

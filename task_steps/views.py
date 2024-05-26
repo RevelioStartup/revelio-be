@@ -124,6 +124,7 @@ class TaskStepUpdateView(generics.UpdateAPIView):
         
 class TaskStepAppendView(generics.CreateAPIView):
     permission_classes = [IsOwner, IsAuthenticated]
+    serializer_class = TaskStepSerializer
 
     def post(self, request, *args, **kwargs):
         task_id = kwargs['task_id']

@@ -9,7 +9,7 @@ from .models import Timeline
 from revelio.utils import get_validation_error_detail
 from utils.permissions import IsEventOwner, HasEventTimeline, IsTaskStepOwner, IsOwner
 from rest_framework.permissions import IsAuthenticated
-from rest_framework.exceptions import PermissionDenied
+from rest_framework.exceptions import PermissionDenied, MethodNotAllowed
 
 class TimelineCreateView(generics.CreateAPIView):
     permission_classes=[IsAuthenticated, IsTaskStepOwner, HasEventTimeline]
@@ -69,7 +69,6 @@ class TimelineDetailView(generics.RetrieveUpdateDestroyAPIView):
             404: 'Not found - Timeline does not exist'
         }
     )
-    
     def patch(self, request, *args, **kwargs):
         try:
             instance = self.get_object()
@@ -83,6 +82,15 @@ class TimelineDetailView(generics.RetrieveUpdateDestroyAPIView):
         except serializers.ValidationError as e:
             error_message = get_validation_error_detail(e)
             return Response({"error": error_message}, status=status.HTTP_404_NOT_FOUND)
+        
+    @swagger_auto_schema(auto_schema=None)
+    def put(self, request, *args, **kwargs):
+        raise MethodNotAllowed('PUT', detail='This method is not allowed.')
+    
+    @swagger_auto_schema(auto_schema=None)
+    def delete(self, request, *args, **kwargs):
+        raise MethodNotAllowed('DELETE', detail='This method is not allowed.')
+    
         
     def get_object(self):
         try:
