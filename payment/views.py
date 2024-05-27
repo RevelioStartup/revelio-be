@@ -57,7 +57,7 @@ class CreatePaymentView(views.APIView):
                 ]
             },
             "callbacks": {
-                "finish": str(os.getenv('REVELIO_FE_BASE_URL'))+'payment'
+                "finish": str(os.getenv('REVELIO_FE_BASE_URL'))+'/payment'
             }
         }
         try:
@@ -74,6 +74,7 @@ class CreatePaymentView(views.APIView):
                 return Response({'message': 'Transaction successful', 'redirect_url': transaction['redirect_url']}, status=status.HTTP_200_OK)
 
         except Exception as e:
+            print(e)
             return Response({'message': 'Transaction failed'}, status=status.HTTP_400_BAD_REQUEST)
 
     @swagger_auto_schema(
