@@ -86,8 +86,10 @@ class LoginView(APIView):
             refresh = RefreshToken.for_user(user)
             return Response({'refresh': str(refresh),
                              'access': str(refresh.access_token)})
-        else:
+        elif user is None:
             return Response({'msg': 'Wrong username/password!'}, status=400)
+        else:
+            return Response({'msg': 'You have not verified yet. Please register again and verify your account!'}, status=400)
         
 class SendVerificationEmailView(APIView):
 
