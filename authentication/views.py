@@ -82,7 +82,7 @@ class LoginView(APIView):
         username = request.data.get('username')
         password = request.data.get('password')
         user = authenticate(request, username=username,password=password)
-        if user is not None:
+        if user is not None and AppUser.objects.get(id=user.pk).is_verified_user:
             refresh = RefreshToken.for_user(user)
             return Response({'refresh': str(refresh),
                              'access': str(refresh.access_token)})
@@ -96,6 +96,10 @@ class SendVerificationEmailView(APIView):
     def get(self, request):
         if request.user.is_verified_user != True:
             user = request.user
+            if UserToken.objects.filter(user=user).exists():
+                token = UserToken.objects.get(user=user).token
+                if account_token.check_token(user, token):
+                    return Response({'msg': 'Token already delivered!'})
             token = create_shortened_token(user)
             asyncio.run(send_verification_email(user, token.upper()))
             return Response({'msg': 'Email delivered!'})
@@ -113,6 +117,7 @@ class SendVerificationEmailView(APIView):
                 if account_token.check_token(user, token):
                     user.is_verified_user = True
                     user.save()
+                    UserToken.objects.filter(user=user).delete()
                     Subscription.objects.create(user=user, plan=Package.objects.get(id=1), start_date=timezone.now(), end_date=timezone.make_aware(datetime(year=9999, month=12, day=31)))
                     return Response({'message': 'Email verified successfully!'}, status=200)
                 else:
@@ -145,6 +150,10 @@ class SendRecoverPasswordEmailView(APIView):
         is_user_exist = AppUser.objects.filter(email=email).exists()
         if is_user_exist:
             user = AppUser.objects.get(email=email)
+            if UserToken.objects.filter(user=user).exists():
+                token = UserToken.objects.get(user=user).token
+                if account_token.check_token(user, token):
+                    return Response({'msg': 'Token already delivered!'})
             token = create_shortened_token(user).upper()
             asyncio.run(send_recover_account_email(user, token))
             return Response({'msg': 'Email delivered!'})
