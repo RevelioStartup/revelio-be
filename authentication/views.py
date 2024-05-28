@@ -55,7 +55,8 @@ class RegisterView(APIView):
         user = authenticate(request, username=new_user.username,password=password)
         refresh = RefreshToken.for_user(user)
         return Response({'refresh': str(refresh),
-                         'access': str(refresh.access_token)})
+                         'access': str(refresh.access_token),
+                         'is_verified_user': new_user.is_verified_user})
 
 
 class LoginView(APIView):
@@ -82,14 +83,17 @@ class LoginView(APIView):
         username = request.data.get('username')
         password = request.data.get('password')
         user = authenticate(request, username=username,password=password)
-        if user is not None and AppUser.objects.get(id=user.pk).is_verified_user:
-            refresh = RefreshToken.for_user(user)
-            return Response({'refresh': str(refresh),
-                             'access': str(refresh.access_token)})
-        elif user is None:
-            return Response({'msg': 'Wrong username/password!'}, status=400)
+        if user is not None:
+            is_verified = AppUser.objects.get(id=user.pk).is_verified_user
+            if is_verified:
+                refresh = RefreshToken.for_user(user)
+                return Response({'refresh': str(refresh),
+                                'access': str(refresh.access_token),
+                                'is_verified_user': AppUser.objects.get(id=user.pk).is_verified_user})
+            else:
+                return Response({'msg': 'You have not verified yet. Please register again and verify your account!'}, status=400)
         else:
-            return Response({'msg': 'You have not verified yet. Please register again and verify your account!'}, status=400)
+            return Response({'msg': 'Wrong username/password!'}, status=400) 
         
 class SendVerificationEmailView(APIView):
 
@@ -121,7 +125,7 @@ class SendVerificationEmailView(APIView):
                     user.save()
                     UserToken.objects.filter(user=user).delete()
                     Subscription.objects.create(user=user, plan=Package.objects.get(id=1), start_date=timezone.now(), end_date=timezone.make_aware(datetime(year=9999, month=12, day=31)))
-                    return Response({'message': 'Email verified successfully!'}, status=200)
+                    return Response({'message': 'Email verified successfully!', 'is_verified_user': True}, status=200)
                 else:
                     return Response({'msg': 'Expired token!'}, status=400)
             except ObjectDoesNotExist:
