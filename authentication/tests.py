@@ -96,7 +96,13 @@ class LoginTest(BaseTestCase):
         data = {'username': 'testuser', 'password': 'testwrongpassword'}
         response = self.client.post(LOGIN_LINK, json.dumps(data), content_type='application/json')
         self.assertEqual(response.status_code, 400)
-        self.assertEqual(response.json()['msg'],"Wrong username/password!") 
+        self.assertEqual(response.json()['msg'],"Wrong username/password!")
+
+    def test_login_failed_not_verfied(self):
+        data = {'username': 'testuser', 'password': self.password}
+        response = self.client.post(LOGIN_LINK, json.dumps(data), content_type='application/json')
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.json()['msg'],"You have not verified yet. Please register again and verify your account!") 
 
     def test_missing_fields(self):
         data = {
