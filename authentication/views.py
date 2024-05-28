@@ -174,6 +174,7 @@ class SendRecoverPasswordEmailView(APIView):
                 if account_token.check_token(user, token):
                     user.set_password(new_password)
                     user.save()
+                    UserToken.objects.filter(user=user).delete()
                     return Response({'msg': 'Password changes successfully!'}, status=200)
                 else:
                     return Response({'msg': 'Expired token!'}, status=400)
