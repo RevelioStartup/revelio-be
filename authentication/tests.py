@@ -87,7 +87,8 @@ class RegisterTest(TestCase):
 class LoginTest(BaseTestCase):
     
     def test_login_successful(self):
-        data = {'username': 'testuser', 'password': self.password}
+        self.user2 = AppUser.objects.create_user(email='email2@email.com',username='testuser2',password=self.password, is_verified_user=True)
+        data = {'username': 'testuser2', 'password': self.password}
         response = self.client.post(LOGIN_LINK, json.dumps(data), content_type='application/json')
         self.assertEqual(response.status_code, 200)
 
@@ -119,6 +120,8 @@ class SendVerificationEmailTest(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(len(mail.outbox), 1) 
         self.assertEqual(mail.outbox[0].to, ['email@email.com'])
+        response = self.client.get(EMAIL_VERIFICATION_LINK)
+        self.assertEqual(response.status_code, 200)
     
     def test_valid_verification_token(self):
         token = account_token.make_token(self.user)
@@ -158,6 +161,8 @@ class SendRecoverPasswordEmailTest(BaseTestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(len(mail.outbox), 1) 
         self.assertEqual(mail.outbox[0].to, ['email@email.com'])
+        response = self.client.post((RECOVER_PASSWORD_LINK), {'email':'email@email.com'})
+        self.assertEqual(response.status_code, 200)
     
     def test_sent_wrong_email_recover_password(self):
         response = self.client.post((RECOVER_PASSWORD_LINK), {'email':'wrong@email.com'})

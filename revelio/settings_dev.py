@@ -179,7 +179,7 @@ EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 DEFAULT_FROM_EMAIL = os.getenv('DEFAULT_FROM_EMAIL')
 
-PASSWORD_RESET_TIMEOUT = 300
+PASSWORD_RESET_TIMEOUT = 1500
 
 # Internationalization
 # https://docs.djangoproject.com/en/5.0/topics/i18n/
